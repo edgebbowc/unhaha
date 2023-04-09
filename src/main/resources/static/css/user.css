@@ -1,0 +1,502 @@
+#header {
+    display: grid;
+    grid-template-columns:repeat(4, 1fr);
+    width: 100%;
+    margin-top: 15px
+}
+
+#header a {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    margin: 1px;
+    text-align: center;
+    border: solid 1px var(--alpha-10)
+}
+
+#header a:hover {
+    background-color: var(--sercondary-background-color)
+}
+
+#header a.selected {
+    color: var(--default-font-color)
+}
+
+@media (max-width: 950px) {
+    #header {
+        grid-template-columns:repeat(2, 1fr)
+    }
+
+    #header a {
+        font-size: .8em
+    }
+}
+
+#item {
+    width: 100%
+}
+
+#item .items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%
+}
+
+#item .item {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px;
+    border-bottom: 1px solid var(--list-line)
+}
+
+#item .item > div {
+    flex: 1
+}
+
+#item .item .main {
+    display: flex;
+    align-items: start;
+    justify-content: start
+}
+
+#item .item .main a {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center
+}
+
+#item .item .main a .images {
+    display: flex;
+    flex-direction: row;
+    flex-flow: wrap;
+    align-items: start;
+    max-width: 100%
+}
+
+#item .item .main a img {
+    max-width: 200px
+}
+
+#item .item .info {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: flex-end
+}
+
+#item .item .info div {
+    text-align: right
+}
+
+article {
+    display: flex;
+    flex-direction: column;
+    align-items: center
+}
+
+.center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center
+}
+
+article .userImage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    border-radius: 100%
+}
+
+article .userImage label {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    cursor: pointer
+}
+
+article .userImage input {
+    display: none;
+    width: 100%;
+    height: 100%
+}
+
+.icon {
+    width: 10px
+}
+
+article h2 {
+    display: flex;
+    justify-content: flex-start;
+    padding-top: 20px;
+    margin-left: 0;
+    border-top: 1px solid var(--alpha-30)
+}
+
+article form {
+    flex-direction: column;
+    width: 100%
+}
+
+#mypage form {
+    width: 400px
+}
+
+#mypage form > div {
+    width: 100%
+}
+
+
+#mypage input {
+    box-sizing: border-box;
+    width: 100%;
+    height: 50px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    font-size: 1em;
+    border: solid 1px var(--alpha-10);
+    border-radius: 8px
+}
+
+#mypage button {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 50px;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 1em;
+    background-color: var(--alpha-10);
+    border: 0;
+    border-radius: 8px
+}
+
+#mypage button:hover, #mypage button:active {
+    background-color: var(--alpha-10)
+}
+
+#mypage button.active {
+    background-color: var(--point-background-color)
+}
+
+#mypage button.active:hover, #mypage button.active:active {
+    background-color: var(--point-background-color-90)
+}
+
+#mypage .second {
+    display: flex;
+    justify-content: end;
+    margin-top: 30px
+}
+
+#mypage .second a {
+    width: 30%
+}
+
+#mypage .second button {
+    background-color: var(--alpha-30)
+}
+
+#mypage .second button:hover, #mypage .second button:active {
+    background-color: var(--alpha-20)
+}
+
+#mypage .second #withdraw {
+    font-weight: 700;
+    color: #fff !important;
+    background-color: rgb(255 0 0)
+}
+
+#mypage select {
+    width: 100%;
+    height: 50px;
+    margin-bottom: 10px
+}
+
+#mypage .permission {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px
+}
+
+#mypage .point {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px
+}
+
+#mypageEdit .items {
+    width: 500px
+}
+
+#mypageEdit .item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px
+}
+
+#mypageEdit label {
+    display: flex;
+    align-items: center;
+    width: 100px
+}
+
+#mypageEdit .phone {
+    flex: 1
+}
+
+#mypageEdit .item__inputs {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: space-between;
+    height: 40px
+}
+
+#mypageEdit input {
+    box-sizing: border-box;
+    flex: 1;
+    height: 100%;
+    padding-left: 10px;
+    margin-right: 10px;
+    font-size: 1em;
+    border: 1px solid var(--alpha-10);
+    border-radius: 20px
+}
+
+#mypageEdit .permission {
+    display: flex;
+    font-size: 1.2em;
+    font-weight: 700
+}
+
+#mypageEdit button {
+    width: 80px;
+    height: 100%;
+    font-size: 1em;
+    border: 0;
+    border-radius: 20px
+}
+
+#mypageEdit .button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 100%;
+    font-size: 1em;
+    border: 0;
+    border-radius: 20px
+}
+
+#mypageEdit .password {
+    width: 120px
+}
+
+#mypage article input {
+    box-sizing: border-box;
+    width: 100%;
+    height: 50px;
+    padding-left: 10px;
+    margin-bottom: 10px;
+    font-size: 1em;
+    border: 1px solid var(--alpha-10)
+}
+
+#mypage article button {
+    width: 100%;
+    height: 50px;
+    padding-left: 10px;
+    margin: 0;
+    margin-bottom: 10px;
+    font-size: 1em;
+    background-color: var(--alpha-10);
+    border: 0
+}
+
+#changeUserPassword form {
+    width: 400px
+}
+
+#changeUserPassword input {
+    box-sizing: border-box;
+    width: 100%;
+    height: 50px;
+    padding-left: 10px;
+    margin-bottom: 10px;
+    font-size: 1em;
+    border: 1px solid var(--alpha-10)
+}
+
+#changeUserPassword button {
+    width: 100%;
+    height: 50px;
+    padding-left: 10px;
+    margin: 0;
+    margin-bottom: 10px;
+    font-size: 1em;
+    background-color: var(--alpha-10);
+    border: 0
+}
+
+#myArticleAndComment {
+    display: flex;
+    justify-content: center;
+    width: 700px;
+    margin: 0 auto
+}
+
+#myArticleAndComment form {
+    width: 100%
+}
+
+#myArticleAndComment .items {
+    width: 100%
+}
+
+#myArticleAndComment .item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--alpha-30)
+}
+
+#myArticleAndComment .space__between {
+    display: flex;
+    justify-content: space-between
+}
+
+#myArticleAndComment .space__between button {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 100px;
+    font-size: 1em;
+    background-color: unset;
+    border: 0
+}
+
+#myArticleAndComment .space__between button span {
+    margin-right: 10px
+}
+
+#myArticleAndComment .left {
+    display: flex;
+    flex: 1
+}
+
+#myArticleAndComment .parent {
+    font-size: .8em;
+    color: var(--alpha-30)
+}
+
+#myArticleAndComment .right {
+    width: 60px;
+    font-size: .9em;
+    color: var(--alpha-30)
+}
+
+#myArticleAndComment .item {
+    display: flex;
+    border-bottom: 1px solid var(--alpha-30)
+}
+
+#myArticleAndComment .item:first-child {
+    border-top: 1px solid var(--alpha-30)
+}
+
+#myArticleAndComment .left {
+    display: flex;
+    color: var(--alpha-30)
+}
+
+#myArticleAndComment .title_and_info {
+    margin-left: 30px
+}
+
+#myArticleAndComment .title {
+    font-size: 1.1em
+}
+
+#myArticleAndComment .etc_info {
+    font-size: .9em
+}
+
+article .verifyNumber {
+    display: none
+}
+
+article .verifyNumber.active {
+    display: flex
+}
+
+article .phoneVerifyCompleteBtn {
+    display: none
+}
+
+article .phoneVerifyCompleteBtn.active {
+    display: flex
+}
+
+article .phoneNextBtn {
+    display: none
+}
+
+article .phoneNextBtn.active {
+    display: flex
+}
+
+@media (max-width: 1130px) {
+    #mypageEdit .items {
+        width: 95%
+    }
+
+    #myArticleAndComment {
+        width: 95%
+    }
+
+    article label {
+        width: 80px
+    }
+
+    article .items {
+        width: 95%
+    }
+
+    #changeUserPassword form {
+        width: 95%
+    }
+}
+
+@media (max-width: 950px) {
+    #mypage form {
+        width: 100%
+    }
+}
+
+.guide {
+    margin-bottom: 10px;
+    margin-left: 10px
+}
+
+.unblock {
+    padding: 5px;
+    background: 0 0;
+    border: 1px solid var(--alpha-10);
+    border-radius: 5px;
+    box-shadow: none
+}

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <div th:replace="~{fragment/config :: config}"></div>
+    <link rel="stylesheet" href="css/user.css">
+</head>
+<body>
+<div th:replace="~{fragment/header :: header}"></div>
+<!--동적으로 alert창 변경-->
+<section id="flash" th:classappend="${msg == '회원정보를 변경하였습니다'} ? 'trueBackground' : 'falseBackground' " th:if="${msg}">
+    <div class="message" th:text="${msg}"></div>
+    <div class="bar"></div>
+    <div class="close">
+        <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="times" class="svg-inline--fa fa-times fa-w-11" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 352 512"><path fill="currentColor" d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"></path></svg>
+    </div>
+</section>
+
+<script src="js/flash.js" defer></script>
+<main style="height: auto !important;">
+    <article id="mypage">
+        <section id="header">
+            <a href="/mypage" class="selected">회원 정보 변경</a>
+            <a href="/mypage/article">내가 쓴 글</a>
+            <a href="/mypage/comment">내가 쓴 댓글</a>
+            <a href="/mypage/article/like">좋아요 한 글</a>
+            <a href="/mypage/comment/like">좋아요 한 댓글</a>
+            <a href="/mypage/article/scrap">스크랩 한 글</a>
+            <a href="/mypage/blocked">차단한 사용자</a>
+        </section>
+
+        <section id="title">
+            <h1>
+                <div>회원 정보 변경
+                </div>
+            </h1>
+        </section>
+
+        <form name="frm" action="/mypage" th:object="${user}" method="POST" enctype="multipart/form-data">
+
+            <div class="userImage" style="width: 80px;" th:styleappend = "*{storedImageName != 'userImage'} ? 'background-image:url(' + @{/images/userImage/{imageName}(imageName = *{storedImageName})} + ');'">
+                <label for="imageUpload"></label>
+                <input type="file" name="userImage" id="imageUpload">
+            </div>
+            <div class="point">포인트: 0</div>
+
+            <div class="nickName">
+                <div onclick="alert('아이디는 수정할 수 없습니다');">
+                    <input type="text" th:field="*{email}" title="이메일 (아이디)" placeholder="이메일 (아이디)" readonly>
+                </div>
+                <div id="nickName">
+                    <input type="text" th:field="*{nickname}" title="닉네임" placeholder="닉네임" maxlength="13">
+                    <div class="guide red marginBottom10" th:errors="*{nickname}">닉네임 오류</div> <!--오류 알림 -->
+                </div>
+            </div>
+            <div>
+                <button id="submit">정보 수정</button>
+            </div>
+            <div class="second"><a href="javascript:void(0);">
+                <button type="button" id="withdraw">☠️회원 탈퇴☠️</button>
+            </a></div>
+        </form>
+    </article>
+</main>
+</body>
+</html>

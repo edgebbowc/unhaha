@@ -1,0 +1,770 @@
+#section {
+    width: 100%;
+    padding-bottom: 25px
+}
+
+#section .category {
+    box-sizing: border-box;
+    padding: 4px 6px;
+    margin-right: 8px;
+    font-size: .9em;
+    color: var(--default-font-color);
+    word-break: keep-all;
+    background-color: var(--alpha-5);
+    border: solid 1px var(--alpha-10);
+    border-radius: 6px
+}
+
+#section .category.report {
+    background-color: rgb(255 0 0/30%)
+}
+
+#section .article {
+    padding: 5px
+}
+
+#section .article:nth-child(odd) {
+    background-color: var(--alpha-5)
+}
+
+#section .index {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    font-size: 1.2em
+}
+
+#section .notice .index span {
+    display: inline-block;
+    width: 80%;
+    padding: 6px 2px;
+    font-size: .9em;
+    font-weight: 700;
+    color: var(--point-color);
+    text-align: center;
+    background: var(--point-background-color);
+    border-radius: 3px
+}
+
+#section .index span.like, #section .index span.view {
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000
+}
+
+#section .article.notice {
+    background-color: var(--point-background-color-20) !important
+}
+
+#section .titleContainer a:visited {
+    color: var(--default-visited-anchor-color)
+}
+
+#section .titleContainer a:hover, #section .titleContainer a:active {
+    color: var(--default-font-color)
+}
+
+#section .thumbnail {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 65px;
+    height: 50px
+}
+
+#section .thumbnail i {
+    font-size: 3em;
+    color: var(--alpha-40)
+}
+
+#section .thumbnail img {
+    height: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    border-radius: 8px
+}
+
+#section .commentCount {
+    display: inline-block;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 2px;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 16px;
+    color: var(--point-color);
+    text-align: center;
+    background: var(--point-background-color);
+    border-radius: 3px
+}
+
+#section .sectionTitleContainer {
+    margin-bottom: 10px
+}
+
+#section .sectionTitleContainer h2 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4em;
+    font-weight: 700
+}
+
+#section .sectionTitleContainer .content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--alpha-50);
+    text-align: center
+}
+
+#section .sectionGroups {
+    display: grid;
+    grid-template-columns:repeat(1, 1fr);
+    gap: 10px;
+    width: 100%
+}
+
+#section .sectionGroups .rowTwo {
+    display: grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap: 10px
+}
+
+#section .sectionGroups .rowOne, #section .sectionGroups .side {
+    display: grid;
+    grid-template-columns:repeat(1, 1fr);
+    gap: 10px
+}
+
+#section .sectionGroups .rowTwo .section, #section .sectionGroups .rowOne .section, #section .sectionGroups .side .section {
+    padding: 20px 25px 0;
+    border-radius: 12px
+}
+
+#section .sectionGroups .rowTwo .sectionTitleContainer, #section .sectionGroups .rowOne .sectionTitleContainer, #section .sectionGroups .side .sectionTitleContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px
+}
+
+#section .sectionGroups .rowTwo .sectionTitleContainer h3, #section .sectionGroups .rowOne .sectionTitleContainer h3, #section .sectionGroups .side .sectionTitleContainer h3 {
+    font-size: 1.2em
+}
+
+#section .sectionGroups .rowTwo .sectionTitleContainer .more, #section .sectionGroups .rowOne .sectionTitleContainer .more, #section .sectionGroups .side .sectionTitleContainer .more {
+    font-size: 14px
+}
+
+#section .sectionGroups .rowTwo .text .articles, #section .sectionGroups .rowOne .text .articles, #section .sectionGroups .side .text .articles {
+    display: flex;
+    flex-direction: column
+}
+
+#section .sectionGroups .rowTwo .text .articles .article, #section .sectionGroups .rowOne .text .articles .article, #section .sectionGroups .side .text .articles .article {
+    display: flex;
+    align-items: center;
+    justify-content: space-between
+}
+
+#section .sectionGroups .rowTwo .text .articles .article .titleContainer, #section .sectionGroups .rowOne .text .articles .article .titleContainer, #section .sectionGroups .side .text .articles .article .titleContainer {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    width: 100px;
+    margin-left: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap
+}
+
+#section .sectionGroups .rowTwo .text .articles .article .title, #section .sectionGroups .rowOne .text .articles .article .title, #section .sectionGroups .side .text .articles .article .title {
+    display: block;
+    margin-right: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap
+}
+
+#section .sectionGroups .rowTwo .text .articles .article .title:hover, #section .sectionGroups .rowTwo .text .articles .article .title:active, #section .sectionGroups .rowOne .text .articles .article .title:hover, #section .sectionGroups .rowOne .text .articles .article .title:active, #section .sectionGroups .side .text .articles .article .title:hover, #section .sectionGroups .side .text .articles .article .title:active {
+    text-decoration: underline
+}
+
+#section .sectionGroups .rowTwo .text .articles .article .datetime, #section .sectionGroups .rowOne .text .articles .article .datetime, #section .sectionGroups .side .text .articles .article .datetime {
+    display: flex;
+    justify-content: flex-end;
+    width: 50px;
+    margin-left: 10px;
+    font-size: .9em;
+    color: var(--alpha-40);
+    word-break: keep-all
+}
+
+#section .sectionGroups .rowTwo > .image .articles, #section .sectionGroups .side > .image .articles {
+    display: grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap: 10px;
+    align-items: flex-start
+}
+
+#section .sectionGroups .rowOne > .image .articles {
+    display: grid;
+    grid-template-columns:repeat(6, 1fr);
+    gap: 10px;
+    align-items: flex-start
+}
+
+#section .sectionGroups .rowTwo > .image .article, #section .sectionGroups .rowOne > .image .article, #section .sectionGroups .side > .image .article {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+    justify-content: center
+}
+
+#section .sectionGroups .rowTwo > .image .article .image img, #section .sectionGroups .rowOne > .image .article .image img, #section .sectionGroups .side > .image .article .image img {
+    width: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    border-radius: 12px
+}
+
+#section .sectionGroups .rowTwo > .image .article .title, #section .sectionGroups .rowOne > .image .article .title, #section .sectionGroups .side > .image .article .title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    font-size: .9em;
+    text-align: center;
+    text-overflow: ellipsis;
+    word-break: break-all;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical
+}
+
+#section .sectionGroups .rowTwo > .image .article .image, #section .sectionGroups .rowOne > .image .article .image, #section .sectionGroups .side > .image .article .image {
+    position: relative
+}
+
+#section .sectionGroups .rowTwo > .image .article .image .count, #section .sectionGroups .rowOne > .image .article .image .count, #section .sectionGroups .side > .image .article .image .count {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    padding: 2px 6px;
+    margin-right: 5px;
+    margin-bottom: 10px;
+    font-size: .7em;
+    background-color: var(--alpha-30);
+    border-radius: 4px
+}
+
+#section .sectionGroups .rowTwo > .image .article .title:hover, #section .sectionGroups .rowTwo > .image .article .title:active, #section .sectionGroups .rowOne > .image .article .title:hover, #section .sectionGroups .rowOne > .image .article .title:active, #section .sectionGroups .side > .image .article .title:hover, #section .sectionGroups .side > .image .article .title:active {
+}
+
+@media (max-width: 950px) {
+    #section .sectionGroups .rowTwo {
+        grid-template-columns:repeat(1, 1fr)
+    }
+
+    #section .sectionGroups .rowTwo > .image .articles, #section .sectionGroups .rowOne > .image .articles, #section .sectionGroups .side > .image .articles {
+        gap: 10px
+    }
+
+    #section .sectionGroups .rowOne > .image .articles, #section .sectionGroups .side > .image .articles {
+        grid-template-columns:repeat(3, 1fr)
+    }
+}
+
+#section .sectionGroups .tab {
+    border-radius: 12px
+}
+
+#section .sectionGroups .tab .titles {
+    display: flex;
+    align-items: center;
+    justify-content: center
+}
+
+#section .sectionGroups .tab .titles .title {
+    flex: 1
+}
+
+#section .sectionGroups .tab .titles .title label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 40px;
+    color: var(--alpha-50);
+    cursor: pointer;
+    background-color: var(--alpha-5)
+}
+
+#section .sectionGroups .tab .titles .title:first-child label {
+    border-top-left-radius: 12px
+}
+
+#section .sectionGroups .tab .titles .title:last-child label {
+    border-top-right-radius: 12px
+}
+
+#section .sectionGroups .tab .titles .title label:focus {
+    outline: none
+}
+
+#section .sectionGroups .tab .titles .title input {
+    display: none
+}
+
+#section .sectionGroups .tab .titles .title input:checked + label {
+    color: var(--default-font-color)
+}
+
+#section .sectionGroups .tab .text {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 25px
+}
+
+#section .sectionGroups .tab .text.selected {
+    display: flex
+}
+
+#section .sectionGroups .tab > .image {
+    display: none;
+    grid-template-columns:repeat(6, 1fr);
+    gap: 10px;
+    width: 100%;
+    padding: 25px
+}
+
+#section .sectionGroups .tab > .image.selected {
+    display: grid
+}
+
+#section .sectionGroups .tab .text .article {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%
+}
+
+#section .sectionGroups .tab .text .article .titleContainer {
+    display: flex;
+    flex: 1;
+    width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap
+}
+
+#section .sectionGroups .tab .text .article .title {
+    margin-right: 4px
+}
+
+#section .sectionGroups .tab .text .article .title:hover, #section .sectionGroups .tab .text .article .title:active {
+    text-decoration: underline
+}
+
+#section .sectionGroups .tab .text .article .datetime {
+    display: flex;
+    justify-content: flex-end;
+    width: 50px;
+    margin-left: 10px;
+    font-size: .9em;
+    color: var(--alpha-40);
+    word-break: keep-all
+}
+
+#section .sectionGroups .tab > .image .article .image img {
+    width: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    border-radius: 12px
+}
+
+#section .sectionGroups .tab > .image .article .title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    font-size: .9em;
+    text-align: center;
+    text-overflow: ellipsis;
+    word-break: break-all;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical
+}
+
+@media (max-width: 950px) {
+    #section .sectionGroups .tab > .image {
+        grid-template-columns:repeat(3, 1fr);
+        gap: 10px
+    }
+}
+
+#section .sectionGroups .dropdown .articles {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    width: 100%
+}
+
+#section .sectionGroups .dropdown .article {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border-radius: 12px
+}
+
+#section .sectionGroups .dropdown .article .titleContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 25px;
+    cursor: pointer
+}
+
+#section .sectionGroups .dropdown .article .titleContainer h3 {
+    display: box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-all
+}
+
+#section .sectionGroups .dropdown .article .titleContainer svg {
+    color: var(--alpha-30)
+}
+
+#section .sectionGroups .dropdown .article .content {
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 18px 25px;
+    padding-top: 0
+}
+
+#section .sectionGroups .dropdown .article .content.active {
+    display: flex
+}
+
+#section .sectionGroups .dropdown .article .content p:last-child {
+    margin: 0
+}
+
+#section .sectionGroups .dropdown .article .content img {
+    width: 100%
+}
+
+#section .sectionGroups .blog .articles {
+    display: grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap: 10px
+}
+
+#section .sectionGroups .blog .article {
+    border-radius: 12px
+}
+
+#section .sectionGroups .blog .article .image img {
+    width: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px
+}
+
+#section .sectionGroups .blog .article .info {
+    padding: 20px
+}
+
+#section .sectionGroups .blog .article .info h3 {
+    display: box;
+    margin-bottom: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-all;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical
+}
+
+#section .sectionGroups .blog .article .info .content {
+    display: box;
+    overflow: hidden;
+    color: var(--alpha-50);
+    text-overflow: ellipsis;
+    word-break: break-all;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical
+}
+
+@media (max-width: 950px) {
+    #section .sectionGroups .blog .articles {
+        grid-template-columns:repeat(2, 1fr);
+        gap: 10px
+    }
+
+    #section .sectionGroups .blog .article .info {
+        padding: 10px
+    }
+}
+
+#section .sectionGroups .sectionGroup > .contentTwo .articles {
+    display: grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap: 10px
+}
+
+#section .sectionGroups .sectionGroup > .contentOne .articles {
+    display: grid;
+    gap: 10px
+}
+
+#section .sectionGroups .sectionGroup > .contentTwo .article, #section .sectionGroups .sectionGroup > .contentOne .article {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 25px;
+    border-radius: 12px
+}
+
+#section .sectionGroups .sectionGroup > .contentTwo .article h3, #section .sectionGroups .sectionGroup > .contentOne .article h3 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2em
+}
+
+#section .sectionGroups .sectionGroup > .contentTwo .article p:last-child, #section .sectionGroups .sectionGroup > .contentOne .article p:last-child {
+    margin: 0
+}
+
+#section .sectionGroups .sectionGroup > .contentTwo .article img, #section .sectionGroups .sectionGroup > .contentOne .article img {
+    width: 100%
+}
+
+@media (max-width: 950px) {
+    #section .sectionGroups .sectionGroup > .contentTwo .articles {
+        grid-template-columns:repeat(1, 1fr)
+    }
+}
+
+#section .sectionGroups .imageAndTitle .articles {
+    display: grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap: 10px
+}
+
+#section .sectionGroups .imageAndTitle .article {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+    justify-content: center
+}
+
+#section .sectionGroups .imageAndTitle .image {
+    width: 100%
+}
+
+#section .sectionGroups .imageAndTitle .image img {
+    width: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    border-radius: 12px
+}
+
+#section .sectionGroups .imageAndTitle .title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    font-size: .9em;
+    font-weight: unset;
+    text-align: center;
+    text-overflow: ellipsis;
+    word-break: break-all;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical
+}
+
+@media (max-width: 950px) {
+    #section .sectionGroups .imageAndTitle .articles {
+        grid-template-columns:repeat(2, 1fr);
+        gap: 10px
+    }
+}
+
+#section .sectionGroups .bookmark .articles {
+    display: grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap: 10px;
+    width: 100%
+}
+
+#section .sectionGroups .bookmarkThree .articles {
+    grid-template-columns:repeat(3, 1fr)
+}
+
+#section .sectionGroups .bookmarkFour .articles {
+    grid-template-columns:repeat(4, 1fr)
+}
+
+#section .sectionGroups .bookmarkFive .articles {
+    grid-template-columns:repeat(5, 1fr)
+}
+
+#section .sectionGroups .bookmark .article {
+    border: 1px solid var(--alpha-10)
+}
+
+#section .sectionGroups .bookmark .article .image {
+    width: 100%
+}
+
+#section .sectionGroups .bookmark .article .image img {
+    width: 100%
+}
+
+#section .sectionGroups .bookmark .article .info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0;
+    text-align: center
+}
+
+#section .sectionGroups .bookmark .article .info .title {
+    font-size: 1.2em;
+    font-weight: 700
+}
+
+#section .sectionGroups .bookmark .article .buttons {
+    display: flex
+}
+
+#section .sectionGroups .bookmark .article .buttons a {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    font-size: .9em;
+    font-weight: 700
+}
+
+#section .sectionGroups .bookmark .article .buttons .detail {
+    background-color: var(--point-background-color)
+}
+
+#section .sectionGroups .bookmark .article .buttons .join {
+    background-color: var(--alpha-80)
+}
+
+#section .sectionGroups .sectionGroup > .youtube .articles {
+    display: grid;
+    gap: 10px
+}
+
+#section .sectionGroups .sectionGroup > .youtube .article {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+    justify-content: center
+}
+
+#section .sectionGroups .sectionGroup > .youtube .article .content {
+    width: 100%
+}
+
+#section .sectionGroups .sectionGroup > .youtube .article .content .youtube {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding-bottom: 56.25%;
+    margin-bottom: 30px
+}
+
+#section .sectionGroups .sectionGroup > .youtube .article .content .youtube iframe {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0
+}
+
+@media (max-width: 950px) {
+    #section {
+        padding: 10px
+    }
+
+    #section .sectionGroups .bookmark .articles {
+        grid-template-columns:repeat(2, 1fr);
+        gap: 10px
+    }
+
+    #section .sectionGroups .articles {
+        font-size: .9em
+    }
+
+    #section .sectionGroups .articles .thumbnail {
+        width: 35px;
+        margin-right: 5px
+    }
+
+    #section .index {
+        width: 40px
+    }
+
+    #section .thumbnail {
+        height: 30px
+    }
+
+    #section .thumbnail i {
+        font-size: 25px
+    }
+
+    #section .thumbnail img {
+        width: 100%;
+        height: 100%;
+        font-size: 25px
+    }
+
+    #section .index {
+        font-size: 1em
+    }
+
+    #section .sectionGroups .articles .article .board {
+        display: none
+    }
+
+    #section .sectionGroups .section.text {
+        padding: 0
+    }
+
+    #section .sectionGroups .rowTwo .text .articles .article .datetime, #section .sectionGroups .rowOne .text .articles .article .datetime {
+        width: auto;
+        margin-left: 5px
+    }
+}

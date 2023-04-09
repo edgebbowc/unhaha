@@ -1,0 +1,206 @@
+#list h1 {
+    box-sizing: border-box;
+    width: 100%;
+    font-size: 1.5em;
+    color: var(--default-font-color);
+    border-radius: 12px
+}
+
+#list .categories {
+    position: relative;
+    display: flex;
+    gap: 10px;
+    justify-content: start;
+    width: 100%;
+    height: 32px;
+    margin-bottom: 10px;
+    overflow: auto
+}
+
+#list .category {
+    font-size: .9em
+}
+
+#list .category a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background-color: var(--alpha-5);
+    border-radius: 8px
+}
+
+#list .category a span {
+    padding: 8px 10px;
+    white-space: nowrap
+}
+
+#list .category a img {
+    width: 100%;
+    min-width: 100px;
+    max-height: 35px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    border-radius: 8px
+}
+
+#list .searchAndWrite {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin: 30px 0
+}
+
+#list .searchAndWrite > div {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center
+}
+
+#list .searchAndWrite form {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    width: 440px;
+    height: 40px
+}
+
+#list .searchAndWrite .search {
+    display: flex;
+    flex: 1
+}
+
+#list .searchAndWrite .search select, #list .categories .sort select {
+    box-sizing: border-box;
+    height: 40px;
+    padding: 0 20px;
+    font-size: 1em;
+    color: var(--default-anchor-color);
+    cursor: pointer;
+    background-color: var(--sercondary-background-color);
+    border: 0;
+    border-radius: 8px;
+    appearance: none
+}
+
+#list .categories .sort {
+    position: absolute;
+    right: 10px;
+    display: none
+}
+
+#list .categories .sort select {
+    height: auto;
+    padding: 8px 15px 8px 10px;
+    font-size: .9em;
+    white-space: nowrap;
+    background-position: right .3em center;
+    background-size: .9em
+}
+
+#list .searchAndWrite .search input {
+    box-sizing: border-box;
+    flex: 1;
+    height: 40px;
+    padding: 0 16px;
+    margin: 0 14px;
+    font-size: 1em;
+    background-color: var(--sercondary-background-color);
+    border: 0;
+    border-radius: 8px
+}
+
+#list .searchAndWrite .search button {
+    box-sizing: border-box;
+    height: 40px;
+    padding: 0 20px;
+    margin: 0;
+    font-size: 1em;
+    color: var(--default-font-color);
+    background-color: var(--sercondary-background-color);
+    border: 0;
+    border-radius: 8px
+}
+
+#list .searchAndWrite .search button:hover, #list .searchAndWrite .search button:hover {
+    background-color: var(--alpha-5)
+}
+
+#list .searchAndWrite .write {
+    display: flex;
+    justify-content: flex-end
+}
+
+#list .searchAndWrite .write a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    padding: 0 20px;
+    font-size: 1em;
+    background-color: var(--alpha-5);
+    border-radius: 8px
+}
+
+#list .searchAndWrite .write a:hover, #list .searchAndWrite .write a:active {
+    background-color: var(--alpha-10)
+}
+
+@media (max-width: 950px) {
+    #list {
+        box-sizing: border-box;
+        padding: 0
+    }
+
+    #list h1 {
+        padding: 5px;
+        font-size: 1.2em
+    }
+
+    #list .categories {
+        margin-bottom: 5px
+    }
+
+    #list .category a {
+        font-size: .9em
+    }
+
+    #list .articleList {
+        margin-right: 10px;
+        margin-left: 10px
+    }
+
+    #list .articleList .item .title {
+        font-size: 1em
+    }
+
+    #list .searchAndWrite {
+        flex-direction: column;
+        margin: 15px 0;
+        font-size: .9em
+    }
+
+    #list .searchAndWrite div {
+        width: 100%
+    }
+
+    #list .searchAndWrite form {
+        width: 100%
+    }
+
+    #list .searchAndWrite .search input {
+        width: 100%
+    }
+
+    #list .searchAndWrite .write {
+        justify-content: center;
+        margin-top: 14px
+    }
+
+    #list .searchAndWrite .write a {
+        flex: 1
+    }
+}

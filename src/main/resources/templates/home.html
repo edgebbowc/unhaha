@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!--    <link rel="stylesheet" href="css/style.css">-->
+    <!--    <link rel="stylesheet" href="css/normalize.css">-->
+    <!--    <link rel="stylesheet" href="css/fontawesome/all.min.css">-->
+    <div th:replace="~{fragment/config :: config}"></div>
+</head>
+
+<body>
+
+<div th:replace="~{fragment/header :: header}"></div>
+
+<main>
+    <article id="list">
+        <section id="title">
+            <h1>
+                <div>운하하</div>
+            </h1>
+        </section>
+        <section id="boardList" class="">
+            <a class="item" href="/best/178184?page=1">
+                <div class="image">
+                    <img src="/assets/empty.png" alt="사면관련 대전러버스(대전하나시티즌 서포터),손수호 변호사 반응"
+                         style="background-image: url('https://resources.chimhaha.net/thumb/1680076644741-mn9jh59xr4.jpg'), url('https://resources.chimhaha.net/article/1680076644741-mn9jh59xr4.jpg'), url('/assets/image.png');">
+                </div>
+                <div class="info">
+                    <div class="titleContainer">
+                        <span class="category">축구</span>
+                        <span class="title">
+                            <span class="text">사면관련 대전러버스(대전하나시티즌 서포터),손수호 변호사 반응</span>
+                            <span class="commentCount">5</span>
+                        </span>
+                    </div>
+                    <div class="etc">
+                        <div class="nickName">안전한자식주호민</div>
+                        <div class="dot"></div>
+                        <div class="datetime">1시간전</div>
+                        <div class="dot"></div>
+                        <div class="viewCount"><i class="fa-regular fa-eye"></i>407</div>
+                        <div class="dot"></div>
+                        <div class="likeCount"><i class="fa-regular fa-thumbs-up"></i>19</div>
+                    </div>
+                </div>
+            </a>
+        </section>
+
+        <section class="pagination">
+            <div class="prev"></div>
+            <div class="number">
+                <a class="selected">1</a>
+                <a class="notSelected" href="?page=2">2</a>
+                <a class="notSelected" href="?page=3">3</a>
+                <a class="notSelected" href="?page=4">4</a>
+                <a class="notSelected" href="?page=5">5</a>
+            </div>
+            <div class="next">
+                <a href="?page=6">다음</a>
+            </div>
+        </section>
+
+        <div class="searchAndWrite">
+            <div></div>
+            <div>
+                <form action="/best">
+                    <div class="search">
+                        <select name="searchType">
+                            <option value="title">제목</option>
+                            <option value="titleAndContent">제목 + 내용</option>
+                            <option value="nickName">글쓴이</option>
+                        </select>
+                        <input type="text" name="keyword" maxlength="50" value="">
+                        <button>검색</button>
+                    </div>
+                </form>
+            </div>
+            <div class="write"></div>
+        </div>
+    </article>
+</main>
+</body>
+</html>

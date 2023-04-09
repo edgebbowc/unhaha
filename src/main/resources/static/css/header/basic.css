@@ -1,0 +1,789 @@
+@media (min-width: 951px) {
+    header, .shortcuts {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%
+    }
+
+    header.active {
+        margin-bottom: 80px
+    }
+
+    header #toggleBtn {
+        display: none
+    }
+
+    header #alarmBtn {
+        display: none
+    }
+
+    header #sub {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        width: 100%;
+        border-bottom: 1px solid var(--alpha-10)
+    }
+
+    header #sub ul {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: end;
+        width: 950px;
+        margin: auto
+    }
+
+    header #sub ul li a {
+        display: flex;
+        padding: 10px
+    }
+
+    header #sub {
+        position: relative
+    }
+
+    .shortcuts .boardShortcuts {
+        display: flex;
+        flex-flow: nowrap;
+        gap: 10px;
+        align-items: center;
+        justify-content: start;
+        width: 950px;
+        padding: 5px 14px;
+        overflow: auto;
+        background-color: var(--alpha-5);
+        border-top: 1px solid rgb(0 0 0/10%)
+    }
+
+    .shortcuts .boardShortcuts::-webkit-scrollbar {
+        display: none
+    }
+
+    .shortcuts .boardShortcuts > div {
+        display: flex;
+        flex-direction: row;
+        gap: 10px
+    }
+
+    .shortcuts .boardShortcuts span {
+        display: flex;
+        flex-flow: nowrap;
+        align-items: center;
+        justify-content: center;
+        overflow: visible;
+        font-size: .9em;
+        white-space: nowrap
+    }
+
+    .shortcuts .boardShortcuts span.title {
+        height: 24px;
+        font-weight: 700
+    }
+
+    .shortcuts .boardShortcuts span a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 18px;
+        color: var(--default-font-color)
+    }
+
+    .shortcuts .boardShortcuts .item {
+        display: flex;
+        gap: 3px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 3px 5px;
+        background: var(--alpha-5);
+        border-radius: 10px
+    }
+
+    .shortcuts .boardShortcuts .item i {
+        color: var(--default-font-color);
+        cursor: pointer
+    }
+
+    .shortcuts .boardShortcuts.inspection {
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5em;
+        font-weight: 700;
+        text-align: center;
+        background: red
+    }
+
+    .shortcuts .boardShortcuts.inspection a {
+        color: #ff0
+    }
+
+    header #main {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 950px;
+        padding: 0;
+        margin: 15px 0
+    }
+
+    header #main > div {
+        flex: 1
+    }
+
+    header #main .logo {
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        font-size: 3em;
+        font-weight: 700
+    }
+
+    header #main .logo img {
+        height: 40px
+    }
+
+    header #main .logo a {
+        display: flex;
+        align-items: center;
+        margin: auto;
+        font-family: GangwonEduPowerExtraBoldA, sans-serif
+    }
+
+    header #main .logo .title {
+        height: 40px
+    }
+
+    header #main .logo .beta {
+        position: relative;
+        top: 14px;
+        font-family: Arial, sans-serif;
+        font-size: .27em
+    }
+
+    header #main .search {
+        display: flex;
+        justify-content: end
+    }
+
+    header #main .search form {
+        max-width: 270px;
+        height: 40px;
+        border: 2px solid var(--point-background-color);
+        border-radius: 12px
+    }
+
+    header #main .search input {
+        flex: 1;
+        height: 100%;
+        padding: 0 14px;
+        background-color: unset;
+        border: unset
+    }
+
+    header #main .search button {
+        height: 100%;
+        padding: 0 20px;
+        color: var(--point-background-color);
+        background-color: unset;
+        border: unset
+    }
+
+    header #main .search button i {
+        font-size: 1.2em
+    }
+
+    header #nav {
+        display: flex;
+        align-items: center;
+        justify-content: center
+    }
+
+    header #nav .mypage {
+        display: none
+    }
+
+    header nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 950px
+    }
+
+    header nav .search {
+        display: none
+    }
+
+    header nav > ul {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: start
+    }
+
+    header nav > ul > li {
+        position: relative;
+        flex: 0 0 auto
+    }
+
+    header nav > ul > li > ul > hr {
+        width: 85%;
+        height: 1px;
+        margin: 0 auto;
+        background: rgb(0 0 0/20%);
+        border: 0
+    }
+
+    header nav > ul > li > ul > li:hover {
+        background-color: var(--alpha-10)
+    }
+
+    header nav .menu > a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: auto;
+        margin: 14px 10px;
+        font-weight: 700;
+        line-height: 16px;
+        white-space: nowrap
+    }
+
+    header nav > ul > li .dropdownBtn {
+        display: none
+    }
+
+    header nav > ul > li > ul {
+        position: absolute;
+        z-index: 5;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: auto;
+        text-align: center
+    }
+
+    header nav > ul > li:hover > ul {
+        display: flex
+    }
+
+    header nav > ul > li > ul > li {
+        display: flex;
+        align-items: center;
+        justify-content: start;
+        width: 100%
+    }
+
+    header nav > ul > li > ul > li > a {
+        display: flex;
+        align-items: center;
+        justify-content: start;
+        width: 100%;
+        padding: 10px 15px;
+        color: #222;
+        white-space: nowrap
+    }
+
+    header nav > ul > li > ul > li > a .drawer {
+        display: none
+    }
+
+    header nav > ul > li > ul.two {
+        flex-flow: wrap;
+        justify-content: start;
+        width: 320px
+    }
+
+    header nav > ul > li > ul.two > li {
+        max-width: 150px
+    }
+
+    header nav > ul > li > ul.two > li > a {
+        text-align: start;
+        word-break: normal;
+        white-space: normal
+    }
+
+    @supports (not (-webkit-hyphens:none)) and (not (-moz-appearance:none)) and (list-style-type:"*") {
+        header nav > ul > li > ul.two > li > a {
+            word-break: keep-all
+        }
+    }
+}
+
+@media (max-width: 950px) {
+    header {
+        width: 100%
+    }
+
+    .shortcuts {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: start;
+        width: 100%;
+        background-color: var(--point-background-color)
+    }
+
+    header #toggleBtn, header #alarmBtn {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+        width: 50px;
+        height: 50px;
+        font-size: 1.6em;
+        cursor: pointer
+    }
+
+    header #toggleBtn {
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: flex
+    }
+
+    header #alarmBtn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: flex;
+        justify-content: end
+    }
+
+    header #alarmBtn a {
+        position: relative
+    }
+
+    header #alarmBtn > a {
+        margin-right: 10px
+    }
+
+    header #toggleBtn .alarm {
+        position: absolute;
+        top: 12px;
+        right: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 10px;
+        height: 10px;
+        font-size: .4em;
+        color: var(--point-color);
+        background-color: rgb(255 0 0/90%);
+        border-radius: 50%
+    }
+
+    header #alarmBtn .favoritePopup {
+        position: absolute;
+        top: 40px;
+        right: 10px;
+        z-index: 1;
+        display: none;
+        flex-direction: column;
+        gap: 4px;
+        align-items: center;
+        justify-content: center;
+        width: max-content;
+        font-size: .6em;
+        color: var(--default-font-color);
+        word-break: keep-all;
+        background-color: var(--default-background-color);
+        border: 1px solid var(--alpha-5);
+        border-radius: 8px
+    }
+
+    header #alarmBtn .favoritePopup.active {
+        display: flex
+    }
+
+    header #alarmBtn .favoritePopup span {
+        padding: 5px;
+        font-weight: 700
+    }
+
+    header #alarmBtn .favoritePopup li {
+        padding: 5px 10px
+    }
+
+    header #alarmBtn .favoritePopup a {
+        display: flex;
+        align-items: center;
+        justify-content: start;
+        width: 100%;
+        color: var(--default-font-color)
+    }
+
+    header #alarmBtn .favoritePopup hr {
+        width: 90%;
+        height: .05em;
+        margin: 0 auto;
+        background: var(--alpha-20);
+        border: 0
+    }
+
+    header #alarmBtn .favoritePopup .visited {
+        display: flex;
+        gap: 3px;
+        align-items: center;
+        justify-content: center
+    }
+
+    header #alarmBtn .favoritePopup .visited i {
+        font-size: .8em;
+        color: var(--default-font-color);
+        cursor: pointer
+    }
+
+    header #nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 5;
+        display: none;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        width: 100%;
+        height: 100%
+    }
+
+    header #nav.active {
+        display: flex
+    }
+
+    header #nav .navWrap {
+        z-index: 5;
+        display: flex;
+        flex-direction: column;
+        width: 70%;
+        height: 100%
+    }
+
+    header #nav .navWrap > * {
+        background-color: var(--alpha-10)
+    }
+
+    header #nav .navWrap > nav .menu {
+        border-top: solid 1px var(--alpha-10)
+    }
+
+    header #nav .mypage {
+        display: grid;
+        grid-template-columns:repeat(2, 1fr);
+        gap: 10px;
+        padding: 20px;
+        font-size: .9em
+    }
+
+    header #nav .mypage li {
+        flex: 1
+    }
+
+    header #nav .mypage li a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 0;
+        text-align: center;
+        border: 1px solid var(--alpha-20)
+    }
+
+    header #nav .mypage li a:hover, header #nav .mypage li a:active {
+        background-color: var(--alpha-5);
+        border: 1px solid var(--alpha-30)
+    }
+
+    header #nav .mypage li.getAlarm {
+        font-weight: 700;
+        background-color: rgb(255 0 0/90%)
+    }
+
+    header #nav .mypage li.getAlarm a {
+        border: 1px solid rgb(0 0 0/30%)
+    }
+
+    header #nav nav {
+        height: 100%;
+        overflow: auto
+    }
+
+    header #nav .navBackground {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 3;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+        background-color: var(--alpha-50)
+    }
+
+    header nav > ul > li {
+        display: flex;
+        flex-direction: column;
+        width: 100%
+    }
+
+    header nav > ul > li > .menu {
+        display: flex
+    }
+
+    header nav > ul > li > .favorite {
+        display: none
+    }
+
+    header nav .menu > a {
+        display: flex;
+        flex: 1;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 14px 10px;
+        font-weight: 700
+    }
+
+    header nav > ul > li .dropdownBtn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 60px;
+        cursor: pointer
+    }
+
+    header nav > ul > li > ul {
+        display: none;
+        flex-direction: column
+    }
+
+    header nav > ul > li > ul.active {
+        display: flex;
+        flex-flow: wrap;
+        font-size: .9em;
+        border: 0
+    }
+
+    header nav > ul > li > ul > hr {
+        width: 90%;
+        height: .05em;
+        margin: 0 auto;
+        background: var(--alpha-20);
+        border: 0
+    }
+
+    header nav > ul > li > ul > li {
+        flex: 1 0 50%
+    }
+
+    header nav > ul > li > ul > li > a {
+        display: flex;
+        padding: 14px 10px;
+        color: var(--default-font-color);
+        word-break: keep-all
+    }
+
+    header nav > ul > li > ul > li > a .drawer {
+        font-size: 1.2em;
+        font-weight: 400;
+        color: var(--alpha-40)
+    }
+
+    header nav > ul > li > ul > li > a:hover {
+        background-color: var(--alpha-10)
+    }
+
+    header #sub {
+        display: none
+    }
+
+    header #main .logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 50px;
+        font-size: 2.3em;
+        font-weight: 700
+    }
+
+    header #main .logo img {
+        height: 30px;
+        filter: invert(100%)
+    }
+
+    header #main .logo a {
+        display: flex;
+        align-items: center;
+        margin: auto;
+        font-family: GangwonEduPowerExtraBoldA, sans-serif
+    }
+
+    header #main .logo .beta {
+        position: relative;
+        top: 8px;
+        font-family: Arial, sans-serif;
+        font-size: .3em
+    }
+
+    header #main .search {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        width: 100vw;
+        padding: 5px 10px
+    }
+
+    header #main .search.active {
+        display: flex
+    }
+
+    header #main .search form {
+        width: 100%;
+        height: 40px;
+        background-color: #fff;
+        border: 2px solid var(--point-background-color);
+        border-radius: 30px
+    }
+
+    header #main .search input {
+        flex: 1;
+        width: calc(100% - 40px);
+        height: 100%;
+        padding-left: 40px;
+        color: #000;
+        background-color: unset;
+        border: unset
+    }
+
+    header #main .search button {
+        position: absolute;
+        left: 15px;
+        padding: 0 10px;
+        color: var(--point-background-color);
+        background-color: unset;
+        border: unset
+    }
+
+    header #main .search button i {
+        font-size: 1.2em
+    }
+
+    header nav .search {
+        width: 100%;
+        border-top: solid 1px var(--alpha-10)
+    }
+
+    header nav .search form {
+        position: relative;
+        height: 40px;
+        margin: 10px;
+        background-color: var(--sercondary-background-color);
+        border: 2px solid var(--point-background-color);
+        border-radius: 20px
+    }
+
+    header nav .search input {
+        position: absolute;
+        left: 0;
+        flex: 1;
+        width: calc(100% - 40px);
+        height: 100%;
+        padding: 0 14px;
+        background-color: unset;
+        border: unset
+    }
+
+    header nav .search button {
+        position: absolute;
+        right: 0;
+        height: 100%;
+        padding: 0 20px;
+        color: var(--point-background-color);
+        background-color: unset;
+        border: unset
+    }
+
+    header nav .search button i {
+        font-size: 1.2em
+    }
+
+    .shortcuts .boardShortcuts {
+        display: flex;
+        flex-flow: nowrap;
+        gap: 3px;
+        align-items: center;
+        justify-content: start;
+        width: 100%;
+        padding: 5px;
+        overflow: auto;
+        font-size: .9em;
+        color: var(--point-color);
+        border-top: 1px solid rgb(0 0 0/10%)
+    }
+
+    .shortcuts .boardShortcuts::-webkit-scrollbar {
+        display: none
+    }
+
+    .shortcuts .boardShortcuts > div {
+        display: flex;
+        flex-direction: row;
+        gap: 10px
+    }
+
+    .shortcuts .boardShortcuts span {
+        display: flex;
+        gap: 2px;
+        align-items: center;
+        justify-content: center;
+        padding: 3px 5px;
+        white-space: nowrap
+    }
+
+    .shortcuts .boardShortcuts span.title {
+        height: 24px;
+        font-weight: 700
+    }
+
+    .shortcuts .boardShortcuts span a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 18px;
+        color: var(--point-color)
+    }
+
+    .shortcuts .boardShortcuts .item {
+        background-color: rgb(0 0 0/10%);
+        border-radius: 10px
+    }
+
+    .shortcuts .boardShortcuts.inspection {
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2em;
+        font-weight: 700;
+        text-align: center;
+        background: red
+    }
+
+    .shortcuts .boardShortcuts.inspection a {
+        color: #ff0
+    }
+
+    .ptr--text, .ptr--icon {
+        color: var(--default-anchor-color) !important
+    }
+}
+
+.getAlarm {
+    color: red
+}
+
+.getAlarm:hover {
+    color: rgb(255 0 0/70%)
+}

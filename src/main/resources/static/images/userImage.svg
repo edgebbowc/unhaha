@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="500px" height="500px" viewBox="0 0 500 500" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>userImage</title>
+    <g id="userImage" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <circle id="Oval" fill="#EEEEEE" cx="250" cy="500" r="199"></circle>
+        <circle id="Oval-Copy" fill="#EEEEEE" cx="250" cy="177" r="112"></circle>
+    </g>
+</svg>

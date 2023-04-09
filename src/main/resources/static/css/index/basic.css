@@ -1,0 +1,25 @@
+.stream {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%
+}
+
+.stream .title span {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    padding: 5px 0
+}
+
+.stream .title img {
+    width: 20px;
+    margin-right: 5px
+}
+
+@media (max-width: 950px) {
+    .stream {
+        display: none
+    }
+}

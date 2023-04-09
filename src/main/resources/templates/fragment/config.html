@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <div th:fragment="config">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="css/lib/reset.css">
+        <link rel="stylesheet" href="css/style.css">
+        <link rel="stylesheet" href="css/dark.css">
+        <link rel="stylesheet" href="css/section.css">
+        <link rel="stylesheet" href="css/board/commons.css">
+        <link rel="stylesheet" href="css/board/list.css">
+        <link rel="stylesheet" href="css/footer/basic.css">
+        <link rel="stylesheet" href="css/header/basic.css">
+        <link rel="stylesheet" href="css/index/basic.css">
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css" />
+        <style>
+
+            :root {
+                --font-family: -apple-system, BlinkMacSystemFont, Helvetica Neue, Apple SD Gothic Neo, 맑은 고딕, Malgun Gothic, 돋움, dotum, Arial, sans-serif;
+            }
+
+            :root {
+                --body-font-color: inherit;
+                --body-background-color: #ffffff;
+                --body-background-color-50: #ffffff80;
+                --header-font-color: inherit;
+                --header-background-color: inherit;
+                --point-color: #ffffff;
+                --point-background-color: #1ca8af;
+                --point-background-color-10: #1ca8af1a;
+                --point-background-color-20: #1ca8af33;
+                --point-background-color-80: #1ca8afc8;
+                --point-background-color-90: #1ca8afe6;
+            }
+
+            article .userImage {
+                background-image: url('/images/userImage.svg');
+            }
+
+            /* banner */
+            :root {
+                --site-width: 950px;
+                --banner-gap: 20px;
+                --banner-mobile-gap: 10px;
+            }
+
+            aside .banner img,
+            #banner.banner img {
+                border-radius: 0px;
+            }
+
+
+
+            #banner.banner__box__header {
+                grid-template-columns: repeat(1, 1fr);
+            }
+
+            #banner.banner__box__indexTop {
+                grid-template-columns: repeat(1, 1fr);
+            }
+
+            #banner.banner__box__indexBottom {
+                grid-template-columns: repeat(1, 1fr);
+            }
+
+            #banner.banner__box__articleTop {
+                grid-template-columns: repeat(1, 1fr);
+            }
+
+            #banner.banner__box__articleBottom {
+                grid-template-columns: repeat(1, 1fr);
+            }
+
+            #banner.banner__box__sideTop {
+                grid-template-columns: repeat(1, 1fr);
+            }
+
+            #banner.banner__box__sideBottom {
+                grid-template-columns: repeat(1, 1fr);
+            }
+
+            #banner.banner__box__custom {
+                grid-template-columns: repeat(1, 1fr);
+            }
+
+            @media (max-width: 950px) {
+                header .logo img {
+
+                }
+
+                #banner.banner__box__header {
+                    grid-template-columns: repeat(1, 1fr);
+                }
+
+                #banner.banner__box__indexTop {
+                    grid-template-columns: repeat(1, 1fr);
+                }
+
+                #banner.banner__box__indexBottom {
+                    grid-template-columns: repeat(1, 1fr);
+                }
+
+                #banner.banner__box__articleTop {
+                    grid-template-columns: repeat(1, 1fr);
+                }
+
+                #banner.banner__box__articleBottom {
+                    grid-template-columns: repeat(1, 1fr);
+                }
+
+                #banner.banner__box__sideTop {
+                    grid-template-columns: repeat(1, 1fr);
+                }
+
+                #banner.banner__box__sideBottom {
+                    grid-template-columns: repeat(1, 1fr);
+                }
+
+                #banner.banner__box__custom {
+                    grid-template-columns: repeat(1, 1fr);
+                }
+            }
+        </style>
+    </div>
+</head>
+<body>
+
+</body>
+</html>

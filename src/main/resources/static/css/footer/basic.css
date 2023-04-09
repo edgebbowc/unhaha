@@ -1,0 +1,118 @@
+footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 30px 0
+}
+
+footer .wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center
+}
+
+footer .guide {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    text-align: center
+}
+
+footer .license {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin: 3px 0;
+    text-align: center
+}
+
+footer .license a:hover, footer .license a:active {
+    color: var(--alpha-50)
+}
+
+footer .copyright {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    color: var(--alpha-10);
+    text-align: center
+}
+
+footer .count {
+    display: flex
+}
+
+footer .count div {
+    margin-top: 10px;
+    margin-right: 10px
+}
+
+footer .count div:last-child {
+    margin-right: 0
+}
+
+b, footer .bold {
+    display: inline-block;
+    font-weight: 700
+}
+
+.darkmode {
+    padding: 5px;
+    margin-bottom: 5px;
+    font-size: .8em;
+    font-weight: 700;
+    color: var(--reverse-font-color);
+    background-color: var(--alpha-80);
+    border-radius: 5px
+}
+
+.navigationButtons {
+    position: fixed;
+    right: 25px;
+    bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: center;
+    justify-content: center
+}
+
+.navigationButtons a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    color: var(--reverse-font-color);
+    background-color: var(--alpha-30);
+    border: solid 1px var(--reverse-font-color)
+}
+
+.navigationButtons .write {
+    display: none
+}
+
+@media (max-width: 950px) {
+    .navigationButtons {
+        right: 15px;
+        bottom: 45px
+    }
+
+    .navigationButtons .write {
+        display: flex;
+        width: 45px;
+        height: 45px;
+        font-size: 1.4em;
+        background-color: var(--point-background-color);
+        border: 0;
+        border-radius: 50%
+    }
+}

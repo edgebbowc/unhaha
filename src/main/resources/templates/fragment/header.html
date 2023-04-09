@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dark.css">
+    <link rel="stylesheet" href="css/section.css">
+    <link rel="stylesheet" href="css/board/commons.css">
+    <link rel="stylesheet" href="css/board/list.css">
+    <link rel="stylesheet" href="css/footer/basic.css">
+    <link rel="stylesheet" href="css/header/basic.css">
+    <link rel="stylesheet" href="css/index/basic.css">
+
+<!--    <link rel="stylesheet" href="css/normalize.css">-->
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css" />
+
+</head>
+<body>
+    <header th:fragment="header">
+        <div id="toggleBtn">
+            <i class="fa-solid fa-bars"></i>
+        </div>
+
+        <section id="sub">
+                <ul sec:authorize="isAnonymous()">
+                    <li>
+                        <a href="/join">회원가입</a>
+                    </li>
+                    <li>
+                        <a href="/login">로그인</a>
+                    </li>
+                </ul>
+
+                <ul sec:authorize="isAuthenticated()">
+                    <li><a href="/mypage">마이페이지</a></li>
+                    <li>포인트: 0</li>
+                    <li><a href="/logout">로그아웃</a></li>
+                </ul>
+        </section>
+
+        <section id="main">
+            <div class="logo">
+                <a href="/">
+                    <img src="images/logo-1.svg" alt="운하하">
+                </a>
+            </div>
+        </section>
+        <section id="nav"> <!-- 햄버거바 onclick시 class="active"로 변경  -->
+            <div class="navWrap">
+                <ul sec:authorize="isAnonymous()" class="mypage">
+                        <li>
+                            <a href="/join">회원가입</a>
+                        </li>
+                        <li>
+                            <a href="/login">로그인</a>
+                        </li>
+                </ul>
+                <ul sec:authorize="isAuthenticated()" class="mypage">
+                    <li><a href="/mypage">마이페이지</a></li>
+                    <li><a href="#">포인트: 0</a></li>
+                    <li><a href="/logout">로그아웃</a></li>
+                </ul>
+                <nav>
+                    <ul>
+                        <li style="background-color: #0B4C5F;">
+
+                            <div class="menu">
+                                <a style="font-weight: bold; color: #F7FE2E;" href="/best">👍운하하</a>
+                                <div class="dropdownBtn">
+                                    <i class="fa-solid fa-caret-up"></i>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li style="background-color: inherit;">
+                            <div class="menu">
+                                <a style="font-weight: bold; " href="/new">전체글</a>
+                            </div>
+                        </li>
+
+                        <li style="background-color: inherit;">
+                            <div class="menu">
+                                <a style="font-weight: bold; " href="/new/chim">보디빌딩</a>
+                                <div class="dropdownBtn">
+                                    <i class="fa-solid fa-caret-up"></i>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li style="background-color: inherit;">
+                            <div class="menu">
+                                <a style="font-weight: bold; " href="/new/humor">파워리프팅</a>
+                                <div class="dropdownBtn">
+                                    <i class="fa-solid fa-caret-up"></i>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li style="background-color: inherit;">
+                            <div class="menu">
+                                <a style="font-weight: bold; " href="/new/sports">크로스핏</a>
+                                <div class="dropdownBtn">
+                                    <i class="fa-solid fa-caret-up"></i>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li style="background-color: inherit;">
+                            <div class="menu">
+                                <a style="font-weight: bold; " href="/new/hobby">취미</a>
+                                <div class="dropdownBtn">
+                                    <i class="fa-solid fa-caret-up"></i>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li style="background-color: inherit;">
+                            <div class="menu">
+                                <a style="font-weight: bold; " href="/check">소원의 돌</a>
+                            </div>
+                        </li>
+
+                        <li style="background-color: inherit;">
+                            <div class="menu">
+                                <a style="font-weight: bold; " href="/recommend_goods">웃음</a>
+                                <div class="dropdownBtn">
+                                    <i class="fa-solid fa-caret-up"></i>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li style="background-color: inherit;">
+                            <div class="menu">
+                                <a style="font-weight: bold; " href="/wantnotice">행정실</a>
+                                <div class="dropdownBtn">
+                                    <i class="fa-solid fa-caret-up"></i>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li style="background-color: #0B4C5F;">
+                            <div class="menu">
+                                <a style="font-weight: bold; color: #F7FE2E;" href="/new/district">
+                                    자치령
+                                </a>
+                                <div class="dropdownBtn">
+                                    <i class="fa-solid fa-caret-up"></i>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    <div class="menu report">
+                        <a href="/report">신고/건의</a>
+                    </div>
+                </nav>
+            </div>
+            <div class="navBackground"></div>
+        </section>
+        <script src="js/basic.js" defer></script>
+    </header>
+</body>
+</html>

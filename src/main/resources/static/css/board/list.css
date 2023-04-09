@@ -1,0 +1,569 @@
+#title .favorite {
+    cursor: pointer
+}
+
+#title .description {
+    margin-top: 5px;
+    font-size: .7em;
+    font-weight: 400;
+    color: var(--alpha-50)
+}
+
+#boardList {
+    box-sizing: border-box;
+    width: 100%;
+    font-size: 1em
+}
+
+#boardList .header {
+    background-color: var(--alpha-5);
+    border-top: 1px solid var(--list-line)
+}
+
+#boardList .header, #boardList .header .etc {
+    font-size: .9em !important;
+    font-weight: 700;
+    color: var(--default-font-color) !important
+}
+
+#boardList .header .titleContainer, #boardList .header .titleContainer .title {
+    justify-content: center;
+    width: 100%
+}
+
+#boardList.notice a {
+    background-color: var(--alpha-5)
+}
+
+#boardList.popular a {
+    background-color: var(--point-background-color-20)
+}
+
+#boardList .item {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 10px;
+    border-bottom: 1px solid var(--list-line)
+}
+
+#boardList.simple .item.notice, #boardList.simple .item.current {
+    background-color: var(--point-background-color-20)
+}
+
+#boardList.simple .item {
+    padding: 5px
+}
+
+#boardList .item:visited {
+    color: var(--default-visited-anchor-color)
+}
+
+#boardList .item .info {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 3px;
+    justify-content: center;
+    width: 80%
+}
+
+#boardList.simple .item .info {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between
+}
+
+#boardList .item .titleContainer {
+    display: flex;
+    align-items: center;
+    padding: 2px 0;
+    overflow: hidden
+}
+
+#boardList.simple .item .titleContainer {
+    max-width: 70%
+}
+
+#boardList .item .category {
+    box-sizing: border-box;
+    padding: 4px 6px;
+    margin-right: 8px;
+    font-size: .9em;
+    color: var(--default-font-color);
+    word-break: keep-all;
+    white-space: nowrap;
+    background-color: var(--alpha-5);
+    border: solid 1px var(--alpha-10);
+    border-radius: 6px
+}
+
+#boardList .item .notice {
+    font-weight: 700
+}
+
+#boardList .item .primaryNotice {
+    font-weight: 700;
+    background-color: var(--alpha-10)
+}
+
+#boardList .item .popular {
+    font-weight: 700;
+    background-color: var(--point-background-color-20)
+}
+
+#boardList .item .report {
+    background-color: rgb(255 0 0/30%)
+}
+
+#boardList.notice .item .info {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between
+}
+
+#boardList .item .title {
+    display: flex;
+    align-items: center;
+    overflow: hidden
+}
+
+#boardList .item .title .text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap
+}
+
+#boardList.simple .item .title {
+    width: 100%
+}
+
+#boardList.simple .item .title .text {
+    font-size: .9em
+}
+
+#boardList .item .title .commentCount, #boardList.simple .item .commentCount, #galleryList .info .titleContainer .commentCount {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 16px;
+    margin-left: 5px;
+    font-size: .9em;
+    font-weight: 700;
+    color: var(--point-background-color);
+    text-align: center;
+    border-radius: 3px
+}
+
+#boardList .item .etc {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    padding: 2px 0;
+    font-size: .8em;
+    color: var(--alpha-40);
+    white-space: nowrap
+}
+
+#boardList .item .etc .likeCount {
+    color: var(--default-font-color)
+}
+
+#boardList .item .etc .stoneCount {
+    font-weight: 700;
+    color: red
+}
+
+#boardList.simple .item .etc {
+    width: 30%
+}
+
+#boardList.simple .item .etc > div {
+    text-align: center
+}
+
+#boardList.simple .item .etc .nickName {
+    display: inline-flex;
+    flex: 4;
+    align-items: center;
+    justify-content: center
+}
+
+#boardList.simple .item .etc .field {
+    flex: 3
+}
+
+#boardList.simple .item .etc .number {
+    flex: 2
+}
+
+#boardList.simple .item .etc .dot, #boardList.simple .item .etc i {
+    display: none
+}
+
+#boardList .item .info svg, #boardList .item .info i {
+    margin-right: 4px;
+    background-repeat: no-repeat;
+    background-position: center
+}
+
+#boardList .item .info .commentCount svg {
+    width: 14px;
+    height: 14px
+}
+
+#boardList .item .image {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 65px;
+    margin-right: 10px;
+    color: var(--alpha-40)
+}
+
+#boardList .item .image .count {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    padding: 2px 6px;
+    margin-right: 5px;
+    margin-bottom: 10px;
+    font-size: .7em;
+    background-color: var(--alpha-30);
+    border-radius: 4px
+}
+
+#boardList .item .image img {
+    max-width: 100%;
+    height: 45px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    border-radius: 8px
+}
+
+#boardList .item .image i {
+    font-size: 3em
+}
+
+#galleryList {
+    display: grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap: 20px;
+    width: 100%;
+    margin-top: 15px
+}
+
+#galleryList .item {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border-radius: 8px
+}
+
+#galleryList .item:visited {
+    color: var(--default-visited-anchor-color)
+}
+
+#galleryList .item .category, #galleryList .item .notice {
+    box-sizing: border-box;
+    padding: 4px 6px;
+    margin-right: 8px;
+    font-size: .9em;
+    color: var(--default-anchor-color);
+    word-break: keep-all;
+    background-color: var(--alpha-5);
+    border-radius: 6px
+}
+
+#galleryList .image {
+    padding: 0;
+    margin: 0;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px
+}
+
+#galleryList .image img {
+    width: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px
+}
+
+#galleryList .info {
+    padding: 10px;
+    border-bottom-right-radius: 8px;
+    border-bottom-left-radius: 8px
+}
+
+#galleryList .info .titleContainer {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px
+}
+
+#galleryList .info .titleContainer .title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-all;
+    white-space: nowrap
+}
+
+#galleryList .info .etc {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: .8em;
+    color: var(--alpha-40)
+}
+
+#galleryList .info .etc .nickName {
+    word-break: break-all
+}
+
+#bookmarkList {
+    display: flex;
+    flex-wrap: wrap;
+    grid-template-columns:repeat(3, 1fr);
+    gap: 20px;
+    align-items: center;
+    justify-content: space-around;
+    width: 100%
+}
+
+#bookmarkList.bookmarkThree {
+    grid-template-columns:repeat(3, 1fr)
+}
+
+#bookmarkList.bookmarkFour {
+    grid-template-columns:repeat(4, 1fr)
+}
+
+#bookmarkList.bookmarkFive {
+    grid-template-columns:repeat(5, 1fr)
+}
+
+#bookmarkList .item {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    font-weight: 700
+}
+
+#bookmarkList .item .image {
+    position: relative;
+    display: flex;
+    width: 200px;
+    height: 200px
+}
+
+#bookmarkList .item .image img {
+    width: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    border-radius: 20px
+}
+
+#bookmarkList .item .image .label {
+    position: absolute;
+    top: 40%;
+    width: 100%;
+    margin: auto;
+    font-size: 2.7em;
+    color: #fff;
+    text-align: center;
+    text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000
+}
+
+#bookmarkList .item .image .soldOut {
+    filter: grayscale(100%) brightness(50%)
+}
+
+#bookmarkList .item .info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%
+}
+
+#bookmarkList .item .info div {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: start;
+    width: 100%;
+    padding: 0;
+    margin: 6px 0
+}
+
+#bookmarkList .item .info .title {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: start;
+    justify-content: center;
+    width: 200px
+}
+
+#bookmarkList .item .info .title .text {
+    width: 100%;
+    margin-bottom: 0;
+    overflow: hidden;
+    font-size: 1.2em;
+    text-overflow: ellipsis;
+    white-space: nowrap
+}
+
+#bookmarkList .item .info .title .category {
+    display: inline-block;
+    margin-bottom: 0;
+    overflow: visible;
+    color: var(--alpha-50);
+    text-overflow: ellipsis;
+    white-space: nowrap
+}
+
+#bookmarkList .item .buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%
+}
+
+#bookmarkList .item .buttons a, #bookmarkList .item .buttons span {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0;
+    white-space: nowrap
+}
+
+#bookmarkList .item .buttons .detail, #bookmarkList .item .buttons .detail:hover {
+    margin-right: 6px;
+    color: #000;
+    background-color: #fff !important;
+    border: solid 1px var(--default-font-color);
+    border-radius: 5px
+}
+
+#bookmarkList .item .buttons .join, #bookmarkList .item .buttons .join:hover {
+    color: #fff;
+    background-color: #eb2357 !important;
+    border-radius: 5px
+}
+
+#bookmarkList .item .buttons .soldOut, #bookmarkList .item .buttons .soldOut:hover {
+    color: #fff;
+    background-color: #333 !important;
+    border-radius: 5px
+}
+
+.category.current {
+    font-weight: 700 !important
+}
+
+@media (max-width: 950px) {
+    #galleryList {
+        grid-template-columns:repeat(3, 1fr);
+        gap: 10px
+    }
+
+    #bookmarkList {
+        grid-template-columns:repeat(3, 1fr);
+        gap: 10px;
+        margin-right: 10px;
+        margin-left: 10px
+    }
+
+    #bookmarkList .item .image {
+        width: 150px;
+        height: 150px
+    }
+
+    #bookmarkList .item .info .title {
+        width: 150px
+    }
+
+    #bookmarkList .item .image .label {
+        font-size: 2em
+    }
+
+    #boardList {
+    }
+
+    #boardList .header {
+        display: none
+    }
+
+    #boardList .item {
+        padding: 5px 10px
+    }
+
+    #boardList .item .image {
+        width: 40px;
+        margin-right: 5px
+    }
+
+    #boardList .item .image img {
+        height: 40px
+    }
+
+    #boardList .item .info {
+        font-size: .9em !important
+    }
+
+    #boardList .item .title {
+        font-size: 1.1em
+    }
+
+    #boardList .item .title .text {
+        font-size: 1em
+    }
+
+    #boardList.notice .item .info, #boardList.simple .item .info {
+        flex-direction: column
+    }
+
+    #boardList.simple .item .titleContainer {
+        flex: auto;
+        width: 100%;
+        max-width: 100%
+    }
+
+    #boardList.simple .item .titleContainer .title {
+        display: flex;
+        width: 100%
+    }
+
+    #boardList.simple .item .etc {
+        display: inline-block;
+        width: 100%
+    }
+
+    #boardList.simple .item .etc > div {
+        display: inline-block;
+        flex: none
+    }
+
+    #boardList.simple .item .etc .dot {
+        display: inline-block;
+        width: 5px
+    }
+
+    #boardList.simple .item .etc .number i {
+        display: inline-block
+    }
+
+    #galleryList .info .etc {
+        flex-direction: column;
+        align-items: start
+    }
+}

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Title</title>
+<!--    <link rel="stylesheet" href="css/style.css">-->
+<!--    <link rel="stylesheet" href="css/normalize.css">-->
+<!--    <link rel="stylesheet" href="css/fontawesome/all.min.css">-->
+    <div th:replace="~{fragment/config :: config}"></div>
+    <link rel="stylesheet" href="css/loginAndJoin.css">
+
+
+</head>
+<body>
+
+<div th:replace="~{fragment/header :: header}"></div>
+<main>
+    <div class="smallWrap">
+        <h1>로그인</h1>
+        <form action="/login?redirectUrl=https://chimhaha.net/login" method="POST">
+            <section id="socialAuth">
+                <a href="/oauth2/authorization/naver" class="naver"><img src="/images/btnG_완성형.png"></a>
+            </section>
+            <div class="remember">
+                <label for="remember">
+                    <input type="checkbox" name="remember" id="remember" onclick="onClickRemember(this)">
+                    로그인 정보 기억
+                </label>
+            </div>
+            <div class="etc">아직 회원이 아니라면? <a href="/join">회원가입</a></div>
+
+        </form>
+    </div>
+</main>
+<!--<div class="background-dark">-->
+<!--    <h1>Login Page</h1>-->
+<!--    <a href="/oauth2/authorization/naver"><img height="50" th:src="@{/images/btnG_완성형.png}"></a>-->
+<!--</div>-->
+</body>
+</html>
