@@ -20,13 +20,12 @@ public class OAuthAttributes {
     private UploadFile profileImage;
     private String email;
     private String nickname;
+    private String accessToken;
 
     public static OAuthAttributes of(String registrationId, String userNameAttributeName, Map<String, Object> attributes) {
 
         return ofNaver("id", attributes);
     }
-
-
 
     private static OAuthAttributes ofNaver(String userNameAttributeName, Map<String, Object> attributes) {
         Map<String, Object> response = (Map<String, Object>) attributes.get("response");

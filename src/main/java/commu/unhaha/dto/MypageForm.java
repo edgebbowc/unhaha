@@ -22,4 +22,6 @@ public class MypageForm {
 
     @Pattern(regexp = "[ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]{3,13}", message = "3글자 이상 입력해주세요 특수문자 및 공백은 불가능합니다")
     private String nickname;
+
+    private String accessToken;
 }

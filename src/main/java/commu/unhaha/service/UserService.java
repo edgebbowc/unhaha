@@ -25,4 +25,9 @@ public class UserService {
         User user = userRepository.findByEmail(email).orElse(null);
         user.changeProfileImage(profileImage);
     }
+
+    public void deleteUser(String email) {
+        userRepository.deleteByEmail(email);
+    }
+
 }
