@@ -85,7 +85,9 @@
                     </div>
                 </form>
             </div>
-            <div class="write"></div>
+            <div class="write">
+                <a sec:authorize="isAuthenticated()" href="/write/new">글쓰기</a>
+            </div>
         </div>
     </article>
 </main>
