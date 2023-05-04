@@ -1,0 +1,152 @@
+@font-face {
+    font-family: nanum gothic;
+    font-weight: 400;
+    src: url("/fonts/se-nanumgothic-regular.woff2") format("woff2");
+}
+@font-face {
+    font-family: nanum gothic;
+    font-weight: 700;
+    src: url("/fonts/se-nanumgothic-bold.woff2") format("woff2");
+}
+@font-face {
+    font-family: nanum myeongjo;
+    font-weight: 400;
+    src: url("/fonts/se-nanummyeongjo-regular.woff2") format("woff2");
+}
+@font-face {
+    font-family: nanum myeongjo;
+    font-weight: 700;
+    src: url("/fonts/se-nanummyeongjo-bold.woff2") format("woff2");
+}
+@font-face {
+    font-family: SBAggro;
+    font-style: normal;
+    font-weight: 400;
+    src: url("//cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/SBAggroM.woff") format("woff");
+}
+@font-face {
+    font-family: SBAggro;
+    font-style: normal;
+    font-weight: 700;
+    src: url("//cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/SBAggroB.woff") format("woff");
+}
+@font-face {
+    font-family: MaplestoryOTF;
+    font-style: normal;
+    font-weight: 400;
+    src: url("//cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/MaplestoryOTFLight.woff") format("woff");
+}
+@font-face {
+    font-family: MaplestoryOTF;
+    font-style: normal;
+    font-weight: 700;
+    src: url("//cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/MaplestoryOTFBold.woff") format("woff");
+}
+@font-face {
+    font-family: unreal_science_orbit;
+    font-style: normal;
+    font-weight: 400;
+    src: url("//cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2205@1.0/Unreal_science_orbit.woff2") format("woff2");
+}
+@font-face {
+    font-family: sam3krfont;
+    font-style: normal;
+    font-weight: 400;
+    src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_eight@1.0/Sam3KRFont.woff") format("woff");
+}
+@font-face {
+    font-family: EBSJSKMedium;
+    font-style: normal;
+    font-weight: 400;
+    src: url("//cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/EBSJSKMedium.woff") format("woff");
+}
+.content {
+    width: 100%;
+    word-break: break-word;
+}
+.content h1,
+.content h2 {
+    padding: 0;
+    margin: 0;
+}
+.content strong {
+    font-weight: 700;
+}
+.content i {
+    font-style: italic;
+}
+.content ul {
+    padding-left: 30px;
+    list-style: inside;
+}
+.content ol {
+    padding-left: 50px;
+    list-style: decimal;
+}
+.content .image {
+    max-width: 100%;
+}
+.content img,
+.content video {
+    -webkit-touch-callout: default!important;
+    max-width: 100%;
+}
+.content video {
+    border: 1px solid var(--alpha-5);
+}
+.content blockquote {
+    padding-right: 1.5em;
+    padding-left: 1.5em;
+    margin-right: 0;
+    margin-left: 0;
+    font-style: italic;
+    border-left: 5px solid var(--alpha-30);
+}
+.content .table {
+    width: 100%;
+}
+.content table {
+    width: 100%;
+}
+.content td,
+.content th {
+    padding: 10px;
+    border: 1px solid var(--alpha-5);
+}
+.content .youtube {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding-bottom: 56.25%;
+    margin-bottom: 30px;
+}
+.content .youtube iframe {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}
+.content .vimeo {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding-bottom: 56.25%;
+    margin-bottom: 30px;
+}
+.content .vimeo iframe {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+@media(max-width:950px) {
+    .content .image img {
+        max-width: 100%;
+    }
+    .content p {}
+}

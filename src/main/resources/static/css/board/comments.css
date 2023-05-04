@@ -1,0 +1,388 @@
+.commentInput .attached {
+    display: flex;
+    flex-direction: row;
+    gap: 0
+}
+
+.commentInput .attached a {
+    position: relative;
+    margin: 0 0 5px 5px
+}
+
+.commentInput .attached img {
+    width: 50px;
+    height: 50px;
+    margin: 0;
+    border-radius: 8px
+}
+
+.commentInput .attached .close {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 13px;
+    height: 13px;
+    font-size: .6em;
+    color: var(--reverse-font-color);
+    background-color: var(--alpha-50);
+    border-radius: 50%
+}
+
+.commentAttaches {
+    display: flex;
+    flex-direction: column
+}
+
+.commentAttaches .attaches button {
+    width: 30px;
+    height: 30px;
+    margin: 0 0 5px 5px;
+    font-size: .8em;
+    font-weight: 700;
+    word-break: keep-all;
+    background-color: var(--alpha-5);
+    border: 0;
+    border-radius: 50%
+}
+
+.commentAttaches .attaches button i {
+    color: var(--default-anchor-color)
+}
+
+.commentAttaches .attaches button:hover, .commentAttaches .attaches button:active {
+    background-color: var(--alpha-5)
+}
+
+.commentAttaches .attaches button img {
+    width: 16px;
+    height: 16px
+}
+
+.commentAttaches .attaches {
+    display: flex;
+    justify-content: start
+}
+
+.commentAttaches .emoticon {
+    display: none;
+    padding: 5px
+}
+
+.commentAttaches .emoticon img {
+    width: 55px;
+    height: 55px;
+    cursor: pointer
+}
+
+.commentImageFile {
+    display: none
+}
+
+.comments .best {
+    background-color: var(--point-background-color-20)
+}
+
+.comments .bestBadge {
+    display: inline-block;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 2px;
+    margin-right: 3px;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 16px;
+    color: var(--point-color);
+    text-align: center;
+    background: var(--point-background-color);
+    border-radius: 3px
+}
+
+.comment .commentContent {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    color: var(--default-font-color);
+    word-break: break-word
+}
+
+.comment .commentContent a {
+    color: var(--point-background-color);
+    text-decoration: underline
+}
+
+.comment .commentContent div {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 100%;
+    min-height: 14px
+}
+
+.comment .commentContent img {
+    max-width: 225px;
+    max-height: 400px
+}
+
+.comment .commentContent img.emoticon {
+    width: 32px;
+    height: 32px
+}
+
+.comment .commentContent .parentNickName {
+    font-weight: 700
+}
+
+.comment .main .buttons {
+    display: flex;
+    gap: 3px;
+    justify-content: start
+}
+
+.comment .main .right {
+    display: flex;
+    flex-direction: row;
+    align-items: center
+}
+
+.comment .main .right button {
+    height: 30px;
+    font-size: .8em;
+    color: var(--default-anchor-color);
+    word-break: keep-all;
+    background-color: transparent;
+    border: 0;
+    border-radius: 6px
+}
+
+.comment .main > .info, .comment .main > .commentContent {
+    margin-bottom: 5px
+}
+
+.comment .info .left {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    justify-content: center
+}
+
+.comment .info .right svg {
+    width: 14px;
+    height: 14px
+}
+
+.comment .info .right ul {
+    display: flex;
+    flex-direction: column
+}
+
+.comment .info .right {
+    position: relative;
+    cursor: pointer
+}
+
+.comment .info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: .9em;
+    white-space: nowrap
+}
+
+.comment .isReply {
+    margin-left: 40px
+}
+
+.comment .nickName {
+    position: relative;
+    display: flex;
+    flex-flow: wrap;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--default-font-color);
+    white-space: nowrap;
+    cursor: pointer
+}
+
+.comment .nickName .text {
+    display: flex;
+    flex-flow: wrap;
+    gap: 3px;
+    align-items: center;
+    justify-content: start
+}
+
+.comment .nickName .author {
+    padding: 3px;
+    font-size: .7em;
+    color: var(--point-background-color);
+    border: 1px solid var(--point-background-color);
+    border-radius: 12px
+}
+
+.comment .nickName .userPopup {
+    font-weight: 400
+}
+
+.comment .counts {
+    display: flex;
+    align-items: center;
+    justify-content: center
+}
+
+.comment .permissionName, .comment .datetime {
+    display: flex;
+    color: var(--alpha-40)
+}
+
+.comment .likeCount, .comment .unlikeCount {
+    display: flex;
+    gap: 2px;
+    color: var(--point-background-color)
+}
+
+.comment .userImage {
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    margin-right: 3px;
+    background-color: var(--default-background-color);
+    background-position: center;
+    background-size: cover;
+    border-radius: 50%
+}
+
+.comment i {
+    width: 12px;
+    height: 12px;
+    background-repeat: no-repeat;
+    background-position: center
+}
+
+.comment {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 3px
+}
+
+.comment .main {
+    display: flex;
+    padding: 10px;
+    border-bottom: 1px solid var(--alpha-5)
+}
+
+.comment .commentWrapper {
+    width: calc(100% - 42px)
+}
+
+.comment:last-child {
+    border-bottom: 0
+}
+
+.comment .popUpBtn {
+    padding-left: 20px
+}
+
+.commentContainer .button button {
+    width: 30px;
+    height: 30px;
+    color: var(--alpha-5);
+    border-radius: 50%
+}
+
+.commentContainer .buttons {
+    display: flex;
+    flex-direction: row
+}
+
+.commentContainer .contentContainer {
+    display: flex;
+    flex-direction: column;
+    margin-top: 3px;
+    background-color: var(--alpha-5);
+    border-radius: 8px
+}
+
+.commentContainer .commentInput {
+    display: flex;
+    flex-direction: row
+}
+
+.commentContainer .commentContent {
+    flex: .9
+}
+
+.commentContainer .nonMember input {
+    flex: 1;
+    width: 100%;
+    padding: 20px;
+    background-color: var(--alpha-5);
+    border: 0;
+    border-radius: 8px
+}
+
+.commentContainer .submit button {
+    height: 60px
+}
+
+.commentContainer .submit {
+    display: flex;
+    flex: .1;
+    align-items: start;
+    justify-content: center;
+    margin: 10px;
+    font-size: 1em;
+    font-weight: 700;
+    border: 0;
+    border-radius: 15px
+}
+
+.commentContainer textarea {
+    flex: 1;
+    width: 100%;
+    height: 60px;
+    font-size: 1em;
+    color: var(--default-font-color);
+    resize: none;
+    background-color: transparent;
+    border: 0
+}
+
+.commentContainer {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 10px;
+    color: var(--default-font-color)
+}
+
+.commentsTitle {
+    font-size: 1.2em;
+    font-weight: 700;
+    color: var(--default-font-color)
+}
+
+@media (max-width: 950px) {
+    .commentContainer .submit {
+        flex: .2;
+        font-size: .8em
+    }
+
+    .comment .info .left {
+        flex-direction: column;
+        align-items: start
+    }
+
+    .comment .nickName {
+        flex-wrap: wrap;
+        justify-content: start
+    }
+}
+
+.pagination {
+    margin: 10px 0
+}

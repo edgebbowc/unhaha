@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!--    <link rel="stylesheet" href="css/style.css">-->
+    <!--    <link rel="stylesheet" href="css/normalize.css">-->
+    <!--    <link rel="stylesheet" href="css/fontawesome/all.min.css">-->
+    <div th:replace="~{fragment/config :: config}"></div>
+    <link rel="stylesheet" href="/css/board/contentClassic.css">
+    <link rel="stylesheet" href="/css/board/editorClassic.css">
+    <link rel="stylesheet" href="/css/board/read.css">
+    <link rel="stylesheet" href="/css/board/comments.css">
+    <script async charset="utf-8" src="//cdn.embedly.com/widgets/platform.js"></script>
+
+</head>
+
+<body>
+
+<div th:replace="~{fragment/header :: header}"></div>
+
+<main>
+    <article id="article" articleId="191452" boardId="266" userId="93031">
+        <input type="hidden" name="title" th:value="${article.title}" value="수행능력이 팍 떨어졌습니다">
+        <input type="hidden" name="ogContent" th:value="${article.content}" value="2주간 주3회 중량딥스를 하면서 10kg달고 7개까지 할 수 있게 되었습니다 그런데 저번주 금요일부터 맨몸으로도 8개를 겨우 하더니 오늘도 몸이 굉장히 무겁네요 원래 맨몸으로 19개해서 중량을 시작한건데 이유를 모르겠습니다 살이 한 2키로 찐거 외에는 짐작가는게 없는데">
+        <input type="hidden" name="ogImage" value="https://resources.chimhaha.net/assets/1672481307994-37shc7upssu.jpg">
+        <input type="hidden" name="url" value="https://chimhaha.net/exercise/191452">
+        <div class="sub">
+            <div class="back"><a href="/exercise?page=1">🏋️운동&amp;다이어트 ></a></div>
+        </div>
+        <div class="item">
+            <div class="info">
+                <div class="titleContainer">
+                    <span><h1 th:text="${article.title}">제목</h1></span>
+                </div>
+                <div class="etc">
+                    <div class="left">
+                        <div class="userImage" style="background-image: url('/images/userImage.svg');"></div>
+                        <div class="nickName">
+                            <th:block th:text="${article.user.nickname}">닉네임</th:block>
+                            <ul class="userPopup">
+                                <li><a th:href="@{|/user/${article.user.nickname}/articles|}">게시글 보기</a></li>
+                                <li><a th:href="@{|/user/${article.user.nickname}/comments|}">댓글 보기</a></li>
+                            </ul>
+                        </div>
+                        <div class="dot"></div>
+                        <div class="datetime">2시간전</div>
+                        <div class="dot"></div>
+                        <div class="viewCount">
+                            <svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="eye" class="svg-inline--fa fa-eye fa-w-18" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+                                <path fill="currentColor" d="M288 144a110.94 110.94 0 0 0-31.24 5 55.4 55.4 0 0 1 7.24 27 56 56 0 0 1-56 56 55.4 55.4 0 0 1-27-7.24A111.71 111.71 0 1 0 288 144zm284.52 97.4C518.29 135.59 410.93 64 288 64S57.68 135.64 3.48 241.41a32.35 32.35 0 0 0 0 29.19C57.71 376.41 165.07 448 288 448s230.32-71.64 284.52-177.41a32.35 32.35 0 0 0 0-29.19zM288 400c-98.65 0-189.09-55-237.93-144C98.91 167 189.34 112 288 112s189.09 55 237.93 144C477.1 345 386.66 400 288 400z"></path>
+                            </svg>165</div>
+                    </div>
+
+                    <div class="right">
+                        <div class="buttons">
+                            <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="ellipsis-v" class="svg-inline--fa fa-ellipsis-v fa-w-6" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 512">
+                                <path fill="#AAAAAA" d="M96 184c39.8 0 72 32.2 72 72s-32.2 72-72 72-72-32.2-72-72 32.2-72 72-72zM24 80c0 39.8 32.2 72 72 72s72-32.2 72-72S135.8 8 96 8 24 40.2 24 80zm0 352c0 39.8 32.2 72 72 72s72-32.2 72-72-32.2-72-72-72-72 32.2-72 72z"></path>
+                            </svg>
+                        </div>
+                        <ul class="popUp">
+                            <form th:action="@{|/articles/${article.id}/edit|}" method="POST">
+                                <li class="edit">
+                                    <a th:href="@{|/articles/${article.id}/edit|}">
+                                        <button type="button" name="submit" value="edit">
+                                            <i class="fa-regular fa-edit"></i>&nbsp;수정
+                                        </button>
+                                    </a>
+                                </li>
+                                <li class="delete">
+                                    <button name="submit" value="delete"><i class="fa-regular fa-trash-alt"></i>&nbsp;삭제</button>
+                                </li>
+                                <li class="share">
+                                    <button type="button" id="share"><i class="fa-solid fa-share-from-square"></i>공유</button>
+                                </li>
+                            </form>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="customHtml"></div>
+            <div class="content ck-content" th:utext="${article.content}"><p>content 내용</p></div>
+            <div class="html"></div>
+            <div class="customHtml"></div>
+
+            <div class="likeContainer">
+
+                <button id="like" class="like">
+                    <span>운하하</span>
+                    <span>😂</span>
+                </button>
+                <button id="scrap" class="scrap">
+                    <span>스크랩</span><span><i class="fa-regular fa-bookmark"></i></span>
+                </button>
+            </div>
+
+            <div class="listAndEdit">
+                <div class="left">
+                    <div class="button">
+                        <a href="/exercise/191481?page=1">
+                            &lt; 이전 글
+                        </a>
+                    </div>
+                </div>
+                <div class="center">
+                    <div class="button">
+                        <a href="/exercise?page=1">
+                            목록
+                        </a>
+                    </div>
+                </div>
+                <div class="right">
+                    <div class="button">
+                        <a href="/exercise/191383?page=1">
+                            다음 글 &gt;
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="commentsTitle">댓글</div>
+            <div class="comments" id="comments">
+                <div class="best">
+                </div>
+                <div class="comment" id="comment1184947" aid="191452" uid="2191" cid="1184947" pid="" gid="1184947">
+                    <div class="main ">
+                        <div class="userImage" style="background-image: url('https://resources.chimhaha.net/userImage/1678614431561-6htcc9b5ber.jpg');"></div>
+                        <div class="commentWrapper">
+                            <div class="info">
+                                <div class="left">
+                                    <div class="nickName">
+                                        <div class="text"><span>관악구의자랑홍은채</span></div>
+                                    </div>
+                                    <div class="counts">
+                                        <div class="datetime">2시간전</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="commentContent" id="commentContent">
+                                <div>디로딩 ㄱㄱ 하시죠 </div>
+                                <div> 한 일주일만</div>
+                            </div>
+                            <div class="commentContainer" id="commentEtc"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="comment" id="comment1184955" aid="191452" uid="93031" cid="1184955" pid="1184947" gid="1184947">
+                    <div class="main isReply">
+                        <div class="userImage" style="background-image: url('/assets/userImage.svg');"></div>
+                        <div class="commentWrapper">
+                            <div class="info">
+                                <div class="left">
+                                    <div class="nickName">
+                                        <div class="text"><span>게방장</span><span class='author'>글쓴이</span></div>
+                                    </div>
+                                    <div class="counts">
+                                        <div class="datetime">2시간전</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="commentContent" id="commentContent">
+                                <div>혹시 딥스외에 다른부위 운동해도 상관없나요?</div>
+                            </div>
+                            <div class="commentContainer" id="commentEtc"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="comment" id="comment1184964" aid="191452" uid="2191" cid="1184964" pid="1184955" gid="1184947">
+                    <div class="main isReply">
+                        <div class="userImage" style="background-image: url('https://resources.chimhaha.net/userImage/1678614431561-6htcc9b5ber.jpg');"></div>
+                        <div class="commentWrapper">
+                            <div class="info">
+                                <div class="left">
+                                    <div class="nickName">
+                                        <div class="text"><span>관악구의자랑홍은채</span></div>
+                                    </div>
+                                    <div class="counts">
+                                        <div class="datetime">2시간전</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="commentContent" id="commentContent">
+                                <span class="parentNickName">@게방장</span>
+                                <div>사실 쉬려면 아예 다 쉬어주는 게 좋긴 합니다 </div>
+                                <div> 저중량으로도 운동 안 하는 게 좋으니까요 선수 분들도 디로딩 할 땐 대체로 다들 그냥 쉬셔요</div>
+                            </div>
+                            <div class="commentContainer" id="commentEtc"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="comment" id="comment1184973" aid="191452" uid="93031" cid="1184973" pid="1184947" gid="1184947">
+                    <div class="main isReply">
+                        <div class="userImage" style="background-image: url('/assets/userImage.svg');"></div>
+                        <div class="commentWrapper">
+                            <div class="info">
+                                <div class="left">
+                                    <div class="nickName">
+                                        <div class="text"><span>게방장</span><span class='author'>글쓴이</span></div>
+                                    </div>
+                                    <div class="counts">
+                                        <div class="datetime">2시간전</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="commentContent" id="commentContent">
+                                <div>정말 디로딩을 해야할 상황일까요? 힝..</div>
+                            </div>
+                            <div class="commentContainer" id="commentEtc"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="comment" id="comment1185833" aid="191452" uid="61393" cid="1185833" pid="" gid="1185833">
+                    <div class="main ">
+                        <div class="userImage" style="background-image: url('/assets/userImage.svg');"></div>
+                        <div class="commentWrapper">
+                            <div class="info">
+                                <div class="left">
+                                    <div class="nickName">
+                                        <div class="text"><span>riderk</span></div>
+                                    </div>
+                                    <div class="counts">
+                                        <div class="datetime">17분전</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="commentContent" id="commentContent">
+                                <div>힘들다 싶을때는 쉬어주는게 길고 오래가는것 같인요.</div>
+                            </div>
+                            <div class="commentContainer" id="commentEtc"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="commentContainer" id="newComment">
+                <div class="contentContainer">
+                    <div class="commentInput">
+                        <div class="commentContent">
+                            <textarea disabled name="content" placeholder="로그인 해주세요"></textarea>
+                        </div>
+                        <div class="submit"><button type="button" onclick="login(event);">로그인</button></div>
+                    </div>
+                </div>
+            </div>
+            <div class="listAndEdit">
+                <div class="left">
+                    <div class="button">
+                        <a href="/exercise?page=1">
+                            목록
+                        </a>
+                    </div>
+                </div>
+                <div class="right">
+                </div>
+            </div>
+        </div>
+
+        <section class="pagination">
+            <div class="prev">
+            </div>
+            <div class="number">
+                <a class="selected">1</a>
+                <a class="notSelected" href="/exercise?page=2">2</a>
+                <a class="notSelected" href="/exercise?page=3">3</a>
+                <a class="notSelected" href="/exercise?page=4">4</a>
+                <a class="notSelected" href="/exercise?page=5">5</a>
+            </div>
+            <div class="next">
+                <a href="/exercise?page=6">다음</a>
+            </div>
+        </section>
+    </article>
+</main>
+<script src="/js/read.js"></script>
+<!-- CKEditor -->
+<script src="/js/ckeditor.js"></script>
+<script>
+    document.querySelectorAll( 'oembed[url]' ).forEach( element => {
+        // Create the <a href="..." class="embedly-card"></a> element that Embedly uses
+        // to discover the media.
+        const anchor = document.createElement( 'a' );
+
+        anchor.setAttribute( 'href', element.getAttribute( 'url' ) );
+        anchor.className = 'embedly-card';
+
+        element.appendChild( anchor );
+    } );
+</script>
+
+</body>
+</html>

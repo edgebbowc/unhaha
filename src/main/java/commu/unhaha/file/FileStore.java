@@ -16,10 +16,16 @@ public class FileStore {
     @Value("${file.dir}")
     private String fileDir;
 
+    @Value("${file.article}")
+    private String articleImagePath;
+
     public String getFullPath(String filename) {
         return fileDir + filename;
     }
 
+    public String getArticleImagePath(String filename){
+        return articleImagePath + filename;
+    }
     public UploadFile storeFile(MultipartFile multipartFile) throws IOException {
         if (multipartFile.isEmpty()) {
             return null;

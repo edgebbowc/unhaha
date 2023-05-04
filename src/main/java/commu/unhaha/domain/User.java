@@ -36,6 +36,13 @@ public class User extends BaseTimeEntity{
         return this.role.getKey();
     }
 
+    public User(String name, String nickname, String email, Role role, UploadFile profileImage) {
+        this.name = name;
+        this.nickname = nickname;
+        this.email = email;
+        this.role = role;
+        this.profileImage = profileImage;
+    }
 
     //==비즈니스 로직==//
     public void changeNickname(String nickname) {

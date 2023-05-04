@@ -47,8 +47,9 @@ spring:
               - nickname
 file:
   dir: C:/Users/edgeb/Spring_Study/unhaha/src/main/resources/static/images/userImage/
+  article: C:/Users/edgeb/Spring_Study/unhaha/src/main/resources/static/images/article/
   add: file:///Users/edgeb/Spring_Study/unhaha/src/main/resources/static/images/userImage/
-
+  fileArticle: file:///Users/edgeb/Spring_Study/unhaha/src/main/resources/static/images/article/
 logging:
   level:
     org.hibernate.SQL: debug

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!--    <link rel="stylesheet" href="css/style.css">-->
+    <!--    <link rel="stylesheet" href="css/normalize.css">-->
+    <!--    <link rel="stylesheet" href="css/fontawesome/all.min.css">-->
+    <div th:replace="~{fragment/config :: config}"></div>
+    <link rel="stylesheet" href="/css/board/contentClassic.css">
+    <link rel="stylesheet" href="/css/board/editorClassic.css">
+    <!--  <script src="https://cdn.ckeditor.com/ckeditor5/35.1.0/classic/ckeditor.js"></script>-->
+    <!--  <script src="https://cdn.ckeditor.com/ckeditor5/35.1.0/classic/translations/de.js"></script>-->
+    <style>
+        .ck-editor__editable {
+            min-height: 300px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div th:replace="~{fragment/header :: header}"></div>
+
+<main>
+    <article data-article-id="">
+        <h1>글 수정</h1>
+        <form th:action method="POST" enctype="multipart/form-data" th:object="${article}">
+            <div class="subContainer">
+                <div>
+                    <div class="boardContainer">
+                        <select th:field="*{board}">
+                            <option value="">게시판을 선택해 주세요</option>
+                            <option value="보디빌딩" th:selected="${article.board}=='보디빌딩'">보디빌딩</option>
+                            <option value="파워리프팅" th:selected="${article.board}=='파워리프팅'">파워리프팅</option>
+                            <option value="크로스핏" th:selected="${article.board}=='크로스핏'">크로스핏</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="guide red marginBottom10" th:errors="*{board}">게시판 오류</div>
+                <div>
+                    <div class="checkBox">
+                        <div class="notice">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="title">
+                <input type="text" th:field="*{title}" placeholder="제목" maxlength="100">
+            </div>
+            <div class="guide red marginBottom10" th:errors="*{title}">제목 오류</div>
+            <div class="content">
+                <div class="textareaContainer">
+                    <textarea th:text="*{content}" th:field="*{content}" id="editor" maxlength="10000" style="display: none;"></textarea>
+                    <div class="wordCount">내용&nbsp;:&nbsp;<span id="count"></span>/10000</div>
+                    <div class="guide red marginBottom10" th:errors="*{content}">내용 오류</div>
+                </div>
+            </div>
+            <div class="tags">
+                <input type="text" name="tags" value="" placeholder="태그" maxlength="100">
+            </div>
+            <div class="button"><button>등록</button></div>
+        </form>
+    </article>
+</main>
+<!-- CKEditor -->
+<script src="/js/ckeditor.js"></script>
+<script>
+    ClassicEditor
+        .create( document.querySelector( '#editor' ), {
+            licenseKey: '',
+            simpleUpload: {
+                uploadUrl : '/images/article',
+                withCredentials: true
+            }
+        })
+        .then( editor => {
+            window.editor = editor;
+
+        } )
+        .catch( error => {
+            console.error( 'Oops, something went wrong!' );
+            console.error( 'Please, report the following error on https://github.com/ckeditor/ckeditor5/issues with the build id and the error stack trace:' );
+            console.warn( 'Build id: mje4hayrsl2w-k67j0lmnl4au' );
+            console.error( error );
+        } );
+</script>
+</body>
+</html>

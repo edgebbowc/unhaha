@@ -1,0 +1,252 @@
+.ck.ck-toolbar {
+    border: 1px solid var(--alpha-30)!important;
+    border-bottom-width: 0!important;
+}
+.ck.ck-sticky-panel .ck-sticky-panel__content_sticky {
+    position: absolute!important;
+}
+.ck-widget__type-around__button::after,
+.ck-widget__type-around__button_after,
+.ck-widget__type-around__button_before {
+    width: 48px!important;
+    height: 48px!important;
+}
+article form {
+    gap: 15px;
+    width: 100%;
+}
+article form > div {
+    width: 100%;
+}
+article .wrap {
+    display: flex;
+    justify-content: center;
+}
+article .subContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+article .subContainer > div {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    justify-content: space-between;
+}
+article select {
+    width: 100%;
+    padding: 10px;
+    font-size: 1em;
+    color: var(--default-font-color);
+    background-color: var(--default-background-color);
+    border: 1px solid var(--alpha-30);
+    border-radius: 8px;
+}
+article select:disabled {
+    color: var(--alpha-70);
+    background: var(--alpha-5);
+}
+article .boardContainer {
+    width: 75%;
+}
+article .categoryContainer {
+    width: 25%;
+}
+article .boardContainer,
+article .categoryContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-weight: 700;
+    border-radius: 8px;
+}
+article .checkBox {
+    display: flex;
+    align-items: center;
+}
+article form .notice {
+    display: flex;
+}
+article form .notice label {
+    margin-right: 5px;
+    cursor: pointer;
+}
+article form .notice input {
+    margin-right: 10px;
+    cursor: pointer;
+}
+article .title {
+    display: flex;
+    width: 100%;
+}
+article form {
+    display: flex;
+    flex-direction: column;
+}
+article input[type=password],
+article input[type=text] {
+    box-sizing: border-box;
+    width: 100%;
+    height: 40px;
+    font-size: 1em;
+    color: var(--default-font-color);
+    background-color: var(--default-background-color);
+    border: 1px solid var(--alpha-30);
+    border-radius: 8px;
+}
+article .files {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 40px;
+    padding: 0 10px;
+    font-size: 1em;
+    border: 1px solid var(--alpha-30);
+    border-radius: 8px;
+}
+article .files > span {
+    display: flex;
+    align-items: center;
+}
+article .files input[type=file],
+article .files input[type=text] {
+    min-width: 210px;
+    height: auto;
+    padding: 0;
+    color: var(--default-font-color);
+    text-overflow: ellipsis;
+    background-color: var(--default-background-color);
+    border: 0;
+}
+article .files .remove {
+    margin-left: 5px;
+    cursor: pointer;
+}
+article .files.new {
+    display: none;
+}
+article .files.new.active {
+    display: flex;
+}
+article .files.new .remove {
+    display: none;
+}
+article .files.new .remove.active {
+    display: block;
+}
+article .files .inputs {
+    display: flex;
+    justify-content: start;
+}
+article .files .insert {
+    display: none;
+    padding: 3px;
+    color: #000;
+    cursor: pointer;
+    background-color: #eee;
+    border: solid 1px #767676;
+    border-radius: 3px;
+}
+article .files .insert.active {
+    display: block;
+}
+article .hint {
+    margin: 5px 10px;
+    color: var(--alpha-50);
+}
+article .button {
+    flex: 1;
+}
+article button {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 50px;
+    padding: 10px;
+    font-size: 1em;
+    color: var(--default-anchor-color);
+    background-color: var(--alpha-5);
+    border: 0;
+    border-radius: 8px;
+}
+article button:active,
+article button:hover {
+    background-color: var(--alpha-10);
+}
+article .content {
+    color: var(--default-font-color);
+    border-radius: 8px;
+}
+article .content .textareaContainer {
+    width: 100%;
+}
+article .content .textareaContainer .ck-content,
+article .content .textareaContainer textarea {
+    border: 1px solid var(--alpha-30)!important;
+}
+article .content .textareaContainer .wordCount {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    margin: 10px 0;
+}
+article .content a {
+    color: var(--point-background-color);
+    text-decoration: underline;
+}
+article .customFieldContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+article .html {
+    padding: 0;
+    border-radius: 8px;
+}
+.CodeMirror,
+article .html textarea {
+    width: 100%;
+    height: 500px;
+    font-size: 0.8em;
+    border: 1px solid var(--alpha-30);
+}
+article .nonMember {
+    display: flex;
+    gap: 15px;
+}
+.ck-editor__editable {
+    width: 100%;
+}
+.ce-header {
+    padding: 0;
+    margin: 0;
+    line-height: 1.6em;
+}
+.ce-paragraph {
+    padding: 0;
+    margin: 0;
+    line-height: 1.6em;
+}
+li {
+    padding: 0;
+    margin: 0;
+}
+@media(max-width:950px) {
+    .shortcuts {
+        position: static;
+    }
+    h1 {}
+    article form {}
+    article .subContainer > div {
+        flex-direction: column;
+    }
+    article .boardContainer,
+    article .categoryContainer {
+        width: 100%;
+    }
+}
