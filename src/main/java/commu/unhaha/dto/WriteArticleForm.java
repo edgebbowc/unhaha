@@ -22,4 +22,6 @@ public class WriteArticleForm {
     private String content;
 
     private User user;
+
+    private Integer viewCount;
 }

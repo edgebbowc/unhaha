@@ -5,6 +5,7 @@ import commu.unhaha.domain.Role;
 import commu.unhaha.domain.UploadFile;
 import commu.unhaha.domain.User;
 import commu.unhaha.dto.ArticleDto;
+import commu.unhaha.dto.ArticlesDto;
 import commu.unhaha.dto.SessionUser;
 import commu.unhaha.dto.WriteArticleForm;
 import commu.unhaha.file.FileStore;
@@ -12,7 +13,6 @@ import commu.unhaha.repository.ArticleRepository;
 import commu.unhaha.repository.UserRepository;
 import commu.unhaha.service.ArticleService;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -23,15 +23,14 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.*;
 
@@ -65,6 +64,7 @@ public class ArticleController {
                 .title(writeArticleForm.getTitle())
                 .content(writeArticleForm.getContent())
                 .user(writeArticleForm.getUser())
+                .viewCount(0)
                 .build();
         articleRepository.save(article);
         rttr.addAttribute("articleId", article.getId());
@@ -75,14 +75,14 @@ public class ArticleController {
     public String allArticles(Model model, @RequestParam(value = "page", defaultValue = "1") int page,
                               @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         int jpaPage = page - 1;
-        Page<ArticleDto> articles = articleService.pageList(jpaPage);
+        Page<ArticlesDto> articles = articleService.pageList(jpaPage);
         int totalPages = articles.getTotalPages();
         int maxPage = 5; //페이지 1~5, 6~10
         int start = (articles.getNumber()/maxPage)*maxPage + 1; //start = 1, 6, 11
         int end = totalPages == 0 ? 1 : (start + (maxPage - 1) < totalPages ? start + (maxPage - 1) : totalPages); //end= 5, 10, 15
-        Iterator<ArticleDto> iterator = articles.iterator();
+        Iterator<ArticlesDto> iterator = articles.iterator();
         while (iterator.hasNext()) {
-            ArticleDto articleDto = iterator.next();
+            ArticlesDto articleDto = iterator.next();
             Document doc = Jsoup.parse(articleDto.getContent());
             if (doc.selectFirst("img") != null) {
                 String src = doc.selectFirst("img").attr("src");
@@ -98,9 +98,40 @@ public class ArticleController {
     }
 
     @GetMapping("/articles/{articleId}")
-    public String article(@PathVariable Long articleId, Model model) {
-        Article article = articleRepository.findById(articleId).get();
-        model.addAttribute("article", article);
+    public String article(@PathVariable Long articleId, Model model, HttpServletRequest request,
+                          @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser) {
+        if (loginUser == null) {
+            log.info("비회원 조회");
+            String clientAddress = request.getHeader("X-Forwarded-For");
+            if (clientAddress == null) {
+                clientAddress = request.getHeader("Proxy-Client-IP");
+                log.info(">>>> Proxy-Client-IP : " + clientAddress);
+            }
+            if (clientAddress == null) {
+                clientAddress = request.getHeader("WL-Proxy-Client-IP"); // 웹로직
+                log.info(">>>> WL-Proxy-Client-IP : " + clientAddress);
+            }
+            if (clientAddress == null) {
+                clientAddress = request.getHeader("HTTP_CLIENT_IP");
+                log.info(">>>> HTTP_CLIENT_IP : " + clientAddress);
+            }
+            if (clientAddress == null) {
+                clientAddress = request.getHeader("HTTP_X_FORWARDED_FOR");
+                log.info(">>>> HTTP_X_FORWARDED_FOR : " + clientAddress);
+            }
+            if (clientAddress == null) {
+                clientAddress = request.getRemoteAddr();
+            }
+
+            log.info(">>>> Result : IP Address : "+ clientAddress);
+            ArticleDto articleDto = articleService.NoneMemberView(articleId, clientAddress);
+            model.addAttribute("article", articleDto);
+        } else {
+            log.info("회원 조회");
+//            Article article = articleRepository.findById(articleId).get();
+            ArticleDto articleDto = articleService.MemberView(articleId, loginUser.getEmail());
+            model.addAttribute("article", articleDto);
+        }
         return "article";
     }
 
@@ -112,6 +143,7 @@ public class ArticleController {
                 .title(article.getTitle())
                 .content(article.getContent())
                 .user(article.getUser())
+                .viewCount(article.getViewCount())
                 .build();
         model.addAttribute("article", writeArticleForm);
         return "editArticleForm";
@@ -170,7 +202,7 @@ public class ArticleController {
     public void init() {
         User user = userRepository.save(new User("길동", "홍길동", "222@naver.com", Role.USER, new UploadFile("userImage", "userImage")));
         for (int i = 0; i < 400; i++) {
-            articleRepository.save(new Article("보디빌딩", "오운완" + i, "오늘도 운동 완료", user));
+            articleRepository.save(new Article("보디빌딩", "오운완" + i, "오늘도 운동 완료", user, 0));
         }
 //        articleRepository.save(new Article("보디빌딩", "오운완", "오늘도 운동 완료", user));
 //        articleRepository.save(new Article("파워리프팅", "3대 500달성", "힘들다", user));

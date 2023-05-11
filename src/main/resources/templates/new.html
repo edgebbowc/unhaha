@@ -28,18 +28,18 @@
                 </div>
                 <div class="info">
                     <div class="titleContainer">
-                        <span class="category" th:text="${article.board}">축구</span>
+                        <span class="category" th:text="${article.board}">카테고리</span>
                         <span class="title">
-                            <span class="text" th:text="${article.title}">사면관련 대전러버스(대전하나시티즌 서포터),손수호 변호사 반응</span>
+                            <span class="text" th:text="${article.title}">제목</span>
                             <span class="commentCount">5</span>
                         </span>
                     </div>
                     <div class="etc">
-                        <div class="nickName" th:text="${article.user.nickname}">안전한자식주호민</div>
+                        <div class="nickName" th:text="${article.user.nickname}">닉네임</div>
                         <div class="dot"></div>
                         <div class="datetime">1시간전</div>
                         <div class="dot"></div>
-                        <div class="viewCount"><i class="fa-regular fa-eye"></i>407</div>
+                        <div class="viewCount"><i class="fa-regular fa-eye"></i><th:block th:text="${article.viewCount}"></th:block></div>
                         <div class="dot"></div>
                         <div class="likeCount"><i class="fa-regular fa-thumbs-up"></i>19</div>
                     </div>

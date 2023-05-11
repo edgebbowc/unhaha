@@ -2,10 +2,12 @@ package commu.unhaha.dto;
 
 import commu.unhaha.domain.Article;
 import commu.unhaha.domain.User;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-public class ArticleDto {
+@Getter
+@Setter
+public class ArticlesDto {
 
     private Long id;
 
@@ -17,9 +19,11 @@ public class ArticleDto {
 
     private User user;
 
+    private String thumb;
+
     private Integer viewCount;
 
-    public ArticleDto(Article article) {
+    public ArticlesDto(Article article) {
         this.id = article.getId();
         this.board = article.getBoard();
         this.title = article.getTitle();

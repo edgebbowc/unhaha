@@ -26,16 +26,22 @@ public class Article extends BaseTimeEntity{
     @JoinColumn(name = "user_id")
     private User user;
 
-    public Article(String board, String title, String content, User user) {
+    private Integer viewCount;
+
+    public Article(String board, String title, String content, User user, Integer viewCount) {
         this.board = board;
         this.title = title;
         this.content = content;
         this.user = user;
+        this.viewCount = viewCount;
     }
 
     public void changeArticle(String board, String title, String content) {
         this.board = board;
         this.title = title;
         this.content = content;
+    }
+    public void increaseViewCount() {
+        viewCount++;
     }
 }
