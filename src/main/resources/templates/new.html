@@ -37,7 +37,7 @@
                     <div class="etc">
                         <div class="nickName" th:text="${article.user.nickname}">닉네임</div>
                         <div class="dot"></div>
-                        <div class="datetime">1시간전</div>
+                        <div class="datetime" th:text="${article.dateTime}">1시간전</div>
                         <div class="dot"></div>
                         <div class="viewCount"><i class="fa-regular fa-eye"></i><th:block th:text="${article.viewCount}"></th:block></div>
                         <div class="dot"></div>

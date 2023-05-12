@@ -11,6 +11,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -42,7 +48,7 @@ public class ArticleService {
         redisService.writeClientRequest(clientAddress, article.getId());
     }
 
-    public ArticleDto NoneMemberView(Long articleId, String clientAddress) {
+    public ArticleDto noneMemberView(Long articleId, String clientAddress) {
         Article article = articleRepository.findById(articleId).orElse(null);
         if (redisService.isFirstIpRequest(clientAddress, articleId)) {
             addViewCount(article, clientAddress);
@@ -51,7 +57,7 @@ public class ArticleService {
         return articleDto;
     }
 
-    public ArticleDto MemberView(Long articleId, String email) {
+    public ArticleDto memberView(Long articleId, String email) {
         Article article = articleRepository.findById(articleId).orElse(null);
         String key = email;
         String value = articleId.toString();
@@ -61,6 +67,39 @@ public class ArticleService {
         }
         ArticleDto articleDto = new ArticleDto(article);
         return articleDto;
+    }
+
+    public String calDateTime(LocalDateTime createdDate, LocalDateTime now) {
+        Period diff = Period.between(createdDate.toLocalDate(), now.toLocalDate());
+        Duration timeDiff = Duration.between(createdDate.toLocalTime(), now.toLocalTime());
+        String datetime;
+
+        if (diff.isZero()) {
+            if (timeDiff.getSeconds() < 60) {
+                String seconds = Long.toString(timeDiff.getSeconds());
+                datetime = seconds.concat("초전");
+                return datetime;
+            } else if (timeDiff.toMinutes() < 60) {
+                String minutes = Long.toString(timeDiff.toMinutes());
+                datetime = minutes.concat("분전");
+                return datetime;
+            } else {
+                String hours = Long.toString(timeDiff.toHours());
+                datetime = hours.concat("시간전");
+                return datetime;
+            }
+        }
+
+        // 1일~7일 -> 1일전
+        if (diff.getYears() == 0 && diff.getMonths() == 0 && (0 < diff.getDays() && diff.getDays() <= 7)) {
+            String days = Integer.toString(diff.getDays());
+            datetime = days.concat("일전");
+            return datetime;
+        }
+
+        //7일이상 지나면 -> 날짜 출력 ex) 05.20
+        datetime = createdDate.format(DateTimeFormatter.ofPattern("MM.dd"));
+        return datetime;
     }
 }
 

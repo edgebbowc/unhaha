@@ -5,6 +5,8 @@ import commu.unhaha.domain.User;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 public class ArticlesDto {
@@ -23,6 +25,10 @@ public class ArticlesDto {
 
     private Integer viewCount;
 
+    private LocalDateTime createdDate;
+
+    private String dateTime;
+
     public ArticlesDto(Article article) {
         this.id = article.getId();
         this.board = article.getBoard();
@@ -30,5 +36,6 @@ public class ArticlesDto {
         this.content = article.getContent();
         this.user = article.getUser();
         this.viewCount = article.getViewCount();
+        this.createdDate = article.getCreatedDate();
     }
 }

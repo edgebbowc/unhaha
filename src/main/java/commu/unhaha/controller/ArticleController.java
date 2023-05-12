@@ -32,6 +32,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Controller
@@ -88,6 +89,10 @@ public class ArticleController {
                 String src = doc.selectFirst("img").attr("src");
                 articleDto.setThumb(src);
             }
+            LocalDateTime createdDate = articleDto.getCreatedDate();
+            LocalDateTime now = LocalDateTime.now();
+            String dateTime = articleService.calDateTime(createdDate, now);
+            articleDto.setDateTime(dateTime);
         }
 
         model.addAttribute("articles", articles);
@@ -124,12 +129,14 @@ public class ArticleController {
             }
 
             log.info(">>>> Result : IP Address : "+ clientAddress);
-            ArticleDto articleDto = articleService.NoneMemberView(articleId, clientAddress);
+            ArticleDto articleDto = articleService.noneMemberView(articleId, clientAddress);
+            setDateTime(articleDto);
             model.addAttribute("article", articleDto);
         } else {
             log.info("회원 조회");
 //            Article article = articleRepository.findById(articleId).get();
-            ArticleDto articleDto = articleService.MemberView(articleId, loginUser.getEmail());
+            ArticleDto articleDto = articleService.memberView(articleId, loginUser.getEmail());
+            setDateTime(articleDto);
             model.addAttribute("article", articleDto);
         }
         return "article";
@@ -193,6 +200,13 @@ public class ArticleController {
         paramMap.put("url", uploadPath);
 
         return paramMap;
+    }
+
+    private void setDateTime(ArticleDto articleDto) {
+        LocalDateTime createdDate = articleDto.getCreatedDate();
+        LocalDateTime now = LocalDateTime.now();
+        String dateTime = articleService.calDateTime(createdDate, now);
+        articleDto.setDateTime(dateTime);
     }
 
     /**
