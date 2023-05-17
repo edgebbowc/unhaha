@@ -123,36 +123,6 @@ if (scrapButton) {
     };
     scrapButton.addEventListener("click", listener);
 }
-const likeButton = document.querySelector("#like");
-if (likeButton) {
-    const listener = async () => {
-        const result = await like(articleId);
-        if (result.status) {
-            if (likeButton.classList.contains("stone")) {
-                if (likeButton.classList.contains("like")) {
-                    likeButton.removeEventListener("click", listener);
-                    likeButton.removeAttribute("id");
-                    likeButton.innerHTML = `<span>명중</span><span class="emoji">💥</span>`;
-                    likeButton.className = `like like-full stone`;
-                } else {
-                    likeButton.innerHTML = `<span>돌 던지기</span><span class="emoji"><img alt="돌 던지기" src="/assets/stone.png" /></span>`;
-                    likeButton.className = `like stone`;
-                }
-            } else {
-                if (likeButton.className === "like") {
-                    likeButton.innerHTML = `<span>침하하 취소</span><span>🤣</span>`;
-                    likeButton.className = `like like-full`;
-                } else {
-                    likeButton.innerHTML = `<span>침하하</span><span>😂</span>`;
-                    likeButton.className = `like`;
-                }
-            }
-        } else {
-            alert(result.message);
-        }
-    };
-    likeButton.addEventListener("click", listener);
-}
 const disabledLikeButton = document.querySelector("#disabledLike");
 if (disabledLikeButton) {
     disabledLikeButton.addEventListener("click", async () => {

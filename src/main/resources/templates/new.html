@@ -40,8 +40,10 @@
                         <div class="datetime" th:text="${article.dateTime}">1시간전</div>
                         <div class="dot"></div>
                         <div class="viewCount"><i class="fa-regular fa-eye"></i><th:block th:text="${article.viewCount}"></th:block></div>
-                        <div class="dot"></div>
-                        <div class="likeCount"><i class="fa-regular fa-thumbs-up"></i>19</div>
+                        <th:block th:if="${article.likeCount} > 0">
+                            <div class="dot"></div>
+                            <div class="likeCount"><i class="fa-regular fa-thumbs-up"></i><th:block th:text="${article.likeCount}"></th:block></div>
+                        </th:block>
                     </div>
                 </div>
             </a>

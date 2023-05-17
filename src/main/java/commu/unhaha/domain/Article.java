@@ -28,12 +28,15 @@ public class Article extends BaseTimeEntity{
 
     private Integer viewCount;
 
-    public Article(String board, String title, String content, User user, Integer viewCount) {
+    private Integer likeCount;
+
+    public Article(String board, String title, String content, User user, Integer viewCount, Integer likeCount) {
         this.board = board;
         this.title = title;
         this.content = content;
         this.user = user;
         this.viewCount = viewCount;
+        this.likeCount = likeCount;
     }
 
     public void changeArticle(String board, String title, String content) {
@@ -43,5 +46,13 @@ public class Article extends BaseTimeEntity{
     }
     public void increaseViewCount() {
         viewCount++;
+    }
+
+    public void increaseLikeCount() {
+        likeCount++;
+    }
+
+    public void decreaseLikeCount() {
+        likeCount--;
     }
 }

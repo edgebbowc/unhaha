@@ -66,6 +66,7 @@ public class ArticleController {
                 .content(writeArticleForm.getContent())
                 .user(writeArticleForm.getUser())
                 .viewCount(0)
+                .likeCount(0)
                 .build();
         articleRepository.save(article);
         rttr.addAttribute("articleId", article.getId());
@@ -105,6 +106,8 @@ public class ArticleController {
     @GetMapping("/articles/{articleId}")
     public String article(@PathVariable Long articleId, Model model, HttpServletRequest request,
                           @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser) {
+        boolean like = false;
+
         if (loginUser == null) {
             log.info("비회원 조회");
             String clientAddress = request.getHeader("X-Forwarded-For");
@@ -132,12 +135,20 @@ public class ArticleController {
             ArticleDto articleDto = articleService.noneMemberView(articleId, clientAddress);
             setDateTime(articleDto);
             model.addAttribute("article", articleDto);
+            model.addAttribute("loginUser", loginUser);
+            model.addAttribute("like", like);
         } else {
             log.info("회원 조회");
-//            Article article = articleRepository.findById(articleId).get();
+
             ArticleDto articleDto = articleService.memberView(articleId, loginUser.getEmail());
             setDateTime(articleDto);
+            String email = loginUser.getEmail();
+            Long userId = userRepository.findByEmail(email).orElse(null).getId();
+            like = articleService.findLike(articleId, userId);
+
             model.addAttribute("article", articleDto);
+            model.addAttribute("loginUser", loginUser);
+            model.addAttribute("like", like);
         }
         return "article";
     }
@@ -202,6 +213,16 @@ public class ArticleController {
         return paramMap;
     }
 
+    @PostMapping("/like/{articleId}")
+    public String like(@PathVariable Long articleId, @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser){
+
+        Long member_id = userRepository.findByEmail(loginUser.getEmail()).orElse(null).getId();
+
+        articleService.saveLike(articleId, member_id);
+
+        return "redirect:/articles/{articleId}";
+    }
+
     private void setDateTime(ArticleDto articleDto) {
         LocalDateTime createdDate = articleDto.getCreatedDate();
         LocalDateTime now = LocalDateTime.now();
@@ -216,7 +237,7 @@ public class ArticleController {
     public void init() {
         User user = userRepository.save(new User("길동", "홍길동", "222@naver.com", Role.USER, new UploadFile("userImage", "userImage")));
         for (int i = 0; i < 400; i++) {
-            articleRepository.save(new Article("보디빌딩", "오운완" + i, "오늘도 운동 완료", user, 0));
+            articleRepository.save(new Article("보디빌딩", "오운완" + i, "오늘도 운동 완료", user, 0, 0));
         }
 //        articleRepository.save(new Article("보디빌딩", "오운완", "오늘도 운동 완료", user));
 //        articleRepository.save(new Article("파워리프팅", "3대 500달성", "힘들다", user));

@@ -1,9 +1,15 @@
 package commu.unhaha.service;
 
+import commu.unhaha.controller.SessionConst;
 import commu.unhaha.domain.Article;
+import commu.unhaha.domain.User;
+import commu.unhaha.domain.UserLikeArticle;
 import commu.unhaha.dto.ArticleDto;
 import commu.unhaha.dto.ArticlesDto;
+import commu.unhaha.dto.SessionUser;
 import commu.unhaha.repository.ArticleRepository;
+import commu.unhaha.repository.UserLikeArticleRepository;
+import commu.unhaha.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -24,6 +31,8 @@ public class ArticleService {
 
     private final ArticleRepository articleRepository;
     private final RedisService redisService;
+    private final UserLikeArticleRepository userLikeArticleRepository;
+    private final UserRepository userRepository;
 
     //Article 수정
     public void editArticle(Long articleId, String board, String title, String content) {
@@ -100,6 +109,37 @@ public class ArticleService {
         //7일이상 지나면 -> 날짜 출력 ex) 05.20
         datetime = createdDate.format(DateTimeFormatter.ofPattern("MM.dd"));
         return datetime;
+    }
+
+    // 게시글 좋아요 확인
+    public boolean findLike(Long article_id, Long user_id) {
+
+        return userLikeArticleRepository.existsByArticleIdAndUserId(article_id, user_id);
+
+    }
+
+    public boolean saveLike(Long articleId, Long userId) {
+
+        /** 로그인한 유저가 해당 게시물을 좋아요 했는지 안 했는지 확인 **/
+        if(!findLike(articleId, userId)){
+            /* 좋아요 하지 않은 게시물이면 좋아요 추가, true 반환 */
+            User user = userRepository.findById(userId).orElse(null);
+            Article article = articleRepository.findById(articleId).orElse(null);
+
+            /* 좋아요 엔티티 생성 */
+            UserLikeArticle userLikeArticle = new UserLikeArticle(user, article);
+            userLikeArticleRepository.save(userLikeArticle);
+            article.increaseLikeCount();
+
+            return true;
+        } else {
+            /* 좋아요 한 게시물이면 좋아요 삭제 */
+            Article article = articleRepository.findById(articleId).orElse(null);
+            userLikeArticleRepository.deleteByArticleIdAndUserId(articleId, userId);
+            article.decreaseLikeCount();
+
+            return false;
+        }
     }
 }
 
