@@ -52,6 +52,22 @@ public class ArticleService {
         return articleDtoPage;
     }
 
+    public Page<ArticlesDto> searchPageList(int page, String keyword, String searchType) {
+        Pageable pageable = PageRequest.of(page, 20, Sort.by(Sort.Direction.DESC, "id"));
+        switch (searchType) {
+            case "title" :
+                Page<Article> articlePageT = articleRepository.findByTitleContaining(keyword, pageable);
+                Page<ArticlesDto> articleDtoPageT = articlePageT.map(article -> new ArticlesDto(article));
+                return articleDtoPageT;
+            case "titleAndContent" :
+                Page<Article> articlePageTC = articleRepository.findByTitleContainingOrContentContaining(keyword, keyword, pageable);
+                Page<ArticlesDto> articleDtoPageTC = articlePageTC.map(article -> new ArticlesDto(article));
+                return articleDtoPageTC;
+        }
+
+        return null;
+    }
+
     public void addViewCount(Article article, String clientAddress) {
         article.increaseViewCount();
         redisService.writeClientRequest(clientAddress, article.getId());

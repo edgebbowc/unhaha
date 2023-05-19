@@ -75,31 +75,57 @@ public class ArticleController {
 
     @GetMapping("/new")
     public String allArticles(Model model, @RequestParam(value = "page", defaultValue = "1") int page,
-                              @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+                              @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable, String searchType, String keyword) {
         int jpaPage = page - 1;
-        Page<ArticlesDto> articles = articleService.pageList(jpaPage);
-        int totalPages = articles.getTotalPages();
-        int maxPage = 5; //페이지 1~5, 6~10
-        int start = (articles.getNumber()/maxPage)*maxPage + 1; //start = 1, 6, 11
-        int end = totalPages == 0 ? 1 : (start + (maxPage - 1) < totalPages ? start + (maxPage - 1) : totalPages); //end= 5, 10, 15
-        Iterator<ArticlesDto> iterator = articles.iterator();
-        while (iterator.hasNext()) {
-            ArticlesDto articleDto = iterator.next();
-            Document doc = Jsoup.parse(articleDto.getContent());
-            if (doc.selectFirst("img") != null) {
-                String src = doc.selectFirst("img").attr("src");
-                articleDto.setThumb(src);
+        if (keyword == null) {
+            Page<ArticlesDto> articles = articleService.pageList(jpaPage);
+            int totalPages = articles.getTotalPages();
+            int maxPage = 5; //페이지 1~5, 6~10
+            int start = (articles.getNumber() / maxPage) * maxPage + 1; //start = 1, 6, 11
+            int end = totalPages == 0 ? 1 : (start + (maxPage - 1) < totalPages ? start + (maxPage - 1) : totalPages); //end= 5, 10, 15
+            Iterator<ArticlesDto> iterator = articles.iterator();
+            while (iterator.hasNext()) {
+                ArticlesDto articleDto = iterator.next();
+                Document doc = Jsoup.parse(articleDto.getContent());
+                if (doc.selectFirst("img") != null) {
+                    String src = doc.selectFirst("img").attr("src");
+                    articleDto.setThumb(src);
+                }
+                LocalDateTime createdDate = articleDto.getCreatedDate();
+                LocalDateTime now = LocalDateTime.now();
+                String dateTime = articleService.calDateTime(createdDate, now);
+                articleDto.setDateTime(dateTime);
             }
-            LocalDateTime createdDate = articleDto.getCreatedDate();
-            LocalDateTime now = LocalDateTime.now();
-            String dateTime = articleService.calDateTime(createdDate, now);
-            articleDto.setDateTime(dateTime);
+            model.addAttribute("articles", articles);
+            model.addAttribute("start", start);
+            model.addAttribute("end", end);
+            model.addAttribute("maxPage", maxPage);
+        } else {
+            Page<ArticlesDto> articles = articleService.searchPageList(jpaPage, keyword, searchType);
+            int totalPages = articles.getTotalPages();
+            int maxPage = 5; //페이지 1~5, 6~10
+            int start = (articles.getNumber() / maxPage) * maxPage + 1; //start = 1, 6, 11
+            int end = totalPages == 0 ? 1 : (start + (maxPage - 1) < totalPages ? start + (maxPage - 1) : totalPages); //end= 5, 10, 15
+            Iterator<ArticlesDto> iterator = articles.iterator();
+            while (iterator.hasNext()) {
+                ArticlesDto articleDto = iterator.next();
+                Document doc = Jsoup.parse(articleDto.getContent());
+                if (doc.selectFirst("img") != null) {
+                    String src = doc.selectFirst("img").attr("src");
+                    articleDto.setThumb(src);
+                }
+                LocalDateTime createdDate = articleDto.getCreatedDate();
+                LocalDateTime now = LocalDateTime.now();
+                String dateTime = articleService.calDateTime(createdDate, now);
+                articleDto.setDateTime(dateTime);
+            }
+            model.addAttribute("articles", articles);
+            model.addAttribute("start", start);
+            model.addAttribute("end", end);
+            model.addAttribute("maxPage", maxPage);
+            model.addAttribute("searchType", searchType);
+            model.addAttribute("keyword", keyword);
         }
-
-        model.addAttribute("articles", articles);
-        model.addAttribute("start", start);
-        model.addAttribute("end", end);
-        model.addAttribute("maxPage", maxPage);
         return "new";
     }
 
