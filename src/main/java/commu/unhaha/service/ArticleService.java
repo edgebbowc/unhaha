@@ -52,6 +52,7 @@ public class ArticleService {
         return articleDtoPage;
     }
 
+    // 제목, 제목+내용 검색 페이징
     public Page<ArticlesDto> searchPageList(int page, String keyword, String searchType) {
         Pageable pageable = PageRequest.of(page, 20, Sort.by(Sort.Direction.DESC, "id"));
         switch (searchType) {
@@ -63,8 +64,11 @@ public class ArticleService {
                 Page<Article> articlePageTC = articleRepository.findByTitleContainingOrContentContaining(keyword, keyword, pageable);
                 Page<ArticlesDto> articleDtoPageTC = articlePageTC.map(article -> new ArticlesDto(article));
                 return articleDtoPageTC;
+            case "nickName" :
+                Page<Article> articlePageN = articleRepository.findByNicknamePaging(keyword, pageable);
+                Page<ArticlesDto> articleDtoPageN = articlePageN.map(article -> new ArticlesDto(article));
+                return articleDtoPageN;
         }
-
         return null;
     }
 

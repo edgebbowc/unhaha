@@ -34,9 +34,16 @@ public class Article extends BaseTimeEntity{
         this.board = board;
         this.title = title;
         this.content = content;
-        this.user = user;
+        if (user != null) {
+            changeUser(user);
+        }
         this.viewCount = viewCount;
         this.likeCount = likeCount;
+    }
+
+    private void changeUser(User user) {
+        this.user = user;
+        user.getArticles().add(this);
     }
 
     public void changeArticle(String board, String title, String content) {
