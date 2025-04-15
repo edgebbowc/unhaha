@@ -11,7 +11,9 @@ spring:
     username: sa
     password:
     driver-class-name: org.h2.Driver
-
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
   devtools:
     livereload:
       enabled: true
