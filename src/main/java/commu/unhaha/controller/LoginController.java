@@ -15,6 +15,11 @@ public class LoginController {
         return "login";
     }
 
+    @GetMapping("/join")
+    public String join() {
+        return "join";
+    }
+
     @PostMapping("/logout")
     public String logout(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
