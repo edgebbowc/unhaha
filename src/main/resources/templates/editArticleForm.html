@@ -3,19 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <!--    <link rel="stylesheet" href="css/style.css">-->
-    <!--    <link rel="stylesheet" href="css/normalize.css">-->
-    <!--    <link rel="stylesheet" href="css/fontawesome/all.min.css">-->
     <div th:replace="~{fragment/config :: config}"></div>
-    <link rel="stylesheet" href="/css/board/contentClassic.css">
     <link rel="stylesheet" href="/css/board/editorClassic.css">
-    <!--  <script src="https://cdn.ckeditor.com/ckeditor5/35.1.0/classic/ckeditor.js"></script>-->
-    <!--  <script src="https://cdn.ckeditor.com/ckeditor5/35.1.0/classic/translations/de.js"></script>-->
-    <style>
-        .ck-editor__editable {
-            min-height: 300px;
-        }
-    </style>
+    <link rel="stylesheet" href="/ckeditor5/style.css">
+    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/45.0.0/ckeditor5.css" crossorigin>
 </head>
 
 <body>
@@ -63,27 +54,8 @@
         </form>
     </article>
 </main>
-<!-- CKEditor -->
-<script src="/js/ckeditor.js"></script>
-<script>
-    ClassicEditor
-        .create( document.querySelector( '#editor' ), {
-            licenseKey: '',
-            simpleUpload: {
-                uploadUrl : '/images/article',
-                withCredentials: true
-            }
-        })
-        .then( editor => {
-            window.editor = editor;
-
-        } )
-        .catch( error => {
-            console.error( 'Oops, something went wrong!' );
-            console.error( 'Please, report the following error on https://github.com/ckeditor/ckeditor5/issues with the build id and the error stack trace:' );
-            console.warn( 'Build id: mje4hayrsl2w-k67j0lmnl4au' );
-            console.error( error );
-        } );
-</script>
+<script src="https://cdn.ckeditor.com/ckeditor5/45.0.0/ckeditor5.umd.js" crossorigin></script>
+<script src="https://cdn.ckeditor.com/ckeditor5/45.0.0/translations/ko.umd.js" crossorigin></script>
+<script type="module" src="/ckeditor5/main.js"></script>
 </body>
 </html>

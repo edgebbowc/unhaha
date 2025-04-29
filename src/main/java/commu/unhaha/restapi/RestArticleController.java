@@ -1,7 +1,7 @@
 package commu.unhaha.restapi;
 
 import commu.unhaha.dto.ArticlesDto;
-import commu.unhaha.file.FileStore;
+import commu.unhaha.file.GCSFileStore;
 import commu.unhaha.repository.ArticleRepository;
 import commu.unhaha.repository.UserRepository;
 import commu.unhaha.service.ArticleService;
@@ -10,13 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,7 +24,7 @@ public class RestArticleController {
     private final ArticleService articleService;
     private final ArticleRepository articleRepository;
     private final UserRepository userRepository;
-    private final FileStore fileStore;
+    private final GCSFileStore fileStore;
 
     @GetMapping(value = "/api/new")
     public Page<ArticlesDto> allArticles(@RequestParam(value = "page", defaultValue = "1") int page,

@@ -58,7 +58,10 @@ dependencies {
 
 	// https://mvnrepository.com/artifact/org.mockito/mockito-core
 	testImplementation 'org.mockito:mockito-core'
-
+	// 구글 클라우드 스토리지 추가
+	implementation 'com.google.cloud:google-cloud-storage:2.24.0'
+	// Jsoup 추가
+	implementation 'org.jsoup:jsoup:1.17.2'
 }
 
 tasks.named('test') {

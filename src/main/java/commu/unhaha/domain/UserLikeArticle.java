@@ -11,7 +11,7 @@ import javax.persistence.*;
 public class UserLikeArticle {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Title</title>
+    <div th:replace="~{fragment/config :: config}"></div>
+    <link rel="stylesheet" href="css/loginAndJoin.css">
+
+
+</head>
+<body>
+
+<div th:replace="~{fragment/header :: header}"></div>
+<main>
+    <div class="smallWrap">
+        <h1>회원가입</h1>
+        <form action="/login?redirectUrl=https://chimhaha.net/login" method="POST">
+            <section id="socialAuth">
+                <a href="/oauth2/authorization/naver" class="naver"><img src="/images/btnG_완성형.png"></a>
+            </section>
+            <div class="etc">이미 회원이라면? <a href="/login">로그인</a></div>
+
+        </form>
+    </div>
+</main>
+<!--<div class="background-dark">-->
+<!--    <h1>Login Page</h1>-->
+<!--    <a href="/oauth2/authorization/naver"><img height="50" th:src="@{/images/btnG_완성형.png}"></a>-->
+<!--</div>-->
+</body>
+</html>
