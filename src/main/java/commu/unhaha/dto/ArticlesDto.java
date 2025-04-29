@@ -1,5 +1,6 @@
 package commu.unhaha.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import commu.unhaha.domain.Article;
 import commu.unhaha.domain.User;
 import lombok.Getter;
@@ -19,7 +20,7 @@ public class ArticlesDto {
 
     private String content;
 
-    private User user;
+    private String userNickName;
 
     private String thumb;
 
@@ -36,7 +37,7 @@ public class ArticlesDto {
         this.board = article.getBoard();
         this.title = article.getTitle();
         this.content = article.getContent();
-        this.user = article.getUser();
+        this.userNickName = article.getUser().getNickname();
         this.viewCount = article.getViewCount();
         this.likeCount = article.getLikeCount();
         this.createdDate = article.getCreatedDate();

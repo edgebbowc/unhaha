@@ -1,17 +1,19 @@
 package commu.unhaha.domain;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
 @Getter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Article extends BaseTimeEntity{
 
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "article_id")
     private Long id;
 
@@ -30,6 +32,7 @@ public class Article extends BaseTimeEntity{
 
     private Integer likeCount;
 
+    @Builder
     public Article(String board, String title, String content, User user, Integer viewCount, Integer likeCount) {
         this.board = board;
         this.title = title;
@@ -41,6 +44,7 @@ public class Article extends BaseTimeEntity{
         this.likeCount = likeCount;
     }
 
+    //연관관계 편의 메소드
     private void changeUser(User user) {
         this.user = user;
         user.getArticles().add(this);
