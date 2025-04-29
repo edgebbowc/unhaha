@@ -17,12 +17,13 @@
 
 <body>
 
+
 <div th:replace="~{fragment/header :: header}"></div>
 
 <main>
     <article id="article" articleId="191452" boardId="266" userId="93031">
-        <input type="hidden" name="title" th:value="${article.title}" value="수행능력이 팍 떨어졌습니다">
-        <input type="hidden" name="ogContent" th:value="${article.content}" value="2주간 주3회 중량딥스를 하면서 10kg달고 7개까지 할 수 있게 되었습니다 그런데 저번주 금요일부터 맨몸으로도 8개를 겨우 하더니 오늘도 몸이 굉장히 무겁네요 원래 맨몸으로 19개해서 중량을 시작한건데 이유를 모르겠습니다 살이 한 2키로 찐거 외에는 짐작가는게 없는데">
+        <input type="hidden" name="title" th:value="${article.title}">
+        <input type="hidden" name="ogContent" th:value="${article.content}">
         <input type="hidden" name="ogImage" value="https://resources.chimhaha.net/assets/1672481307994-37shc7upssu.jpg">
         <input type="hidden" name="url" value="https://chimhaha.net/exercise/191452">
         <div class="sub">
@@ -56,7 +57,7 @@
                         </th:block>
                     </div>
 
-                    <div class="right">
+                    <div class="right" th:if="${loginUser != null and article.user.email == loginUser.email}">
                         <div class="buttons">
                             <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="ellipsis-v" class="svg-inline--fa fa-ellipsis-v fa-w-6" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 512">
                                 <path fill="#AAAAAA" d="M96 184c39.8 0 72 32.2 72 72s-32.2 72-72 72-72-32.2-72-72 32.2-72 72-72zM24 80c0 39.8 32.2 72 72 72s72-32.2 72-72S135.8 8 96 8 24 40.2 24 80zm0 352c0 39.8 32.2 72 72 72s72-32.2 72-72-32.2-72-72-72-72 32.2-72 72z"></path>
@@ -71,13 +72,16 @@
                                         </button>
                                     </a>
                                 </li>
+                            </form>
+                            <form th:action="@{/articles/{id}/delete(id=${article.id})}" method="post">
                                 <li class="delete">
-                                    <button name="submit" value="delete"><i class="fa-regular fa-trash-alt"></i>&nbsp;삭제</button>
+                                    <button type="submit" name="submit" value="delete" onclick="return confirm('정말로 삭제하시겠습니까?');">
+                                        <i class="fa-regular fa-trash-alt"></i>&nbsp;삭제</button>
                                 </li>
+                            </form>
                                 <li class="share">
                                     <button type="button" id="share"><i class="fa-solid fa-share-from-square"></i>공유</button>
                                 </li>
-                            </form>
                         </ul>
                     </div>
                 </div>
@@ -166,7 +170,7 @@
                 </div>
                 <div class="comment" id="comment1184955" aid="191452" uid="93031" cid="1184955" pid="1184947" gid="1184947">
                     <div class="main isReply">
-                        <div class="userImage" style="background-image: url('/assets/userImage.svg');"></div>
+                        <div class="userImage" style="background-image: url('/images/userImage.svg');"></div>
                         <div class="commentWrapper">
                             <div class="info">
                                 <div class="left">
@@ -210,7 +214,7 @@
                 </div>
                 <div class="comment" id="comment1184973" aid="191452" uid="93031" cid="1184973" pid="1184947" gid="1184947">
                     <div class="main isReply">
-                        <div class="userImage" style="background-image: url('/assets/userImage.svg');"></div>
+                        <div class="userImage" style="background-image: url('/images/userImage.svg');"></div>
                         <div class="commentWrapper">
                             <div class="info">
                                 <div class="left">
@@ -231,7 +235,7 @@
                 </div>
                 <div class="comment" id="comment1185833" aid="191452" uid="61393" cid="1185833" pid="" gid="1185833">
                     <div class="main ">
-                        <div class="userImage" style="background-image: url('/assets/userImage.svg');"></div>
+                        <div class="userImage" style="background-image: url('/images/userImage.svg');"></div>
                         <div class="commentWrapper">
                             <div class="info">
                                 <div class="left">
@@ -264,7 +268,7 @@
             <div class="listAndEdit">
                 <div class="left">
                     <div class="button">
-                        <a href="/exercise?page=1">
+                        <a href="/new?page=1">
                             목록
                         </a>
                     </div>
@@ -291,8 +295,7 @@
     </article>
 </main>
 <script src="/js/read.js"></script>
-<!-- CKEditor -->
-<script src="/js/ckeditor.js"></script>
+
 <script>
     document.querySelectorAll( 'oembed[url]' ).forEach( element => {
         // Create the <a href="..." class="embedly-card"></a> element that Embedly uses

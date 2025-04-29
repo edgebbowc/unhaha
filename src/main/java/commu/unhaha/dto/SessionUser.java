@@ -23,7 +23,7 @@ public class SessionUser implements Serializable {
     public SessionUser(User user, String accessToken) {
         this.email = user.getEmail();
         this.nickname = user.getNickname();
-        this.storedImageName = user.getProfileImage().getStoreFileName();
+        this.storedImageName = user.getProfileImage().getStoreFileUrl();
         this.accessToken = accessToken;
     }
 

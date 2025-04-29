@@ -2,15 +2,24 @@ package commu.unhaha.service;
 
 import commu.unhaha.controller.SessionConst;
 import commu.unhaha.domain.Article;
+import commu.unhaha.domain.ArticleImage;
 import commu.unhaha.domain.User;
 import commu.unhaha.domain.UserLikeArticle;
 import commu.unhaha.dto.ArticleDto;
 import commu.unhaha.dto.ArticlesDto;
 import commu.unhaha.dto.SessionUser;
+import commu.unhaha.dto.WriteArticleForm;
+import commu.unhaha.file.GCSFileStore;
+import commu.unhaha.repository.ArticleImageRepository;
 import commu.unhaha.repository.ArticleRepository;
 import commu.unhaha.repository.UserLikeArticleRepository;
 import commu.unhaha.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,24 +32,89 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
     private final RedisService redisService;
     private final UserLikeArticleRepository userLikeArticleRepository;
     private final UserRepository userRepository;
+    private final ArticleImageRepository articleImageRepository;
+    private final GCSFileStore gcsFileStore;
 
+    //Article 작성
+    public Long createArticle(WriteArticleForm form, User user) {
+        Article article = Article.builder()
+                .board(form.getBoard())
+                .title(form.getTitle())
+                .content(form.getContent())
+                .user(user)
+                .viewCount(0)
+                .likeCount(0)
+                .build();
+
+        articleRepository.save(article);
+
+        // 이미지 연결
+        Set<String> imageUrls = extractImageUrls(form.getContent());
+        List<ArticleImage> images = articleImageRepository.findByUrlIn(imageUrls);
+
+        for (ArticleImage image : images) {
+            image.attachToArticle(article);
+        }
+        articleImageRepository.saveAll(images);
+
+        return article.getId();
+    }
     //Article 수정
-    public void editArticle(Long articleId, String board, String title, String content) {
-        Article article = articleRepository.findById(articleId).orElse(null);
-        article.changeArticle(board, title, content);
+    public void editArticle(Long articleId, WriteArticleForm form) {
+        validateArticle(articleId);
+        Article article = articleRepository.findById(articleId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+
+        // 기존 이미지 정리
+        Set<String> newImageUrls = extractImageUrls(form.getContent());
+        List<ArticleImage> oldImages = articleImageRepository.findByArticleId(articleId);
+
+        Set<String> oldImageUrls = oldImages.stream()
+                .map(ArticleImage::getUrl)
+                .collect(Collectors.toSet());
+
+        Set<String> toUnlink = new HashSet<>(oldImageUrls);
+        toUnlink.removeAll(newImageUrls);
+
+        for (ArticleImage image : oldImages) {
+            if (toUnlink.contains(image.getUrl())) {
+                image.markAsTemp();
+            }
+        }
+
+        article.changeArticle(form.getBoard(), form.getTitle(), form.getContent());
     }
 
+    //Article 삭제
     public void deleteArticle(Long articleId) {
+        validateArticle(articleId);
+        List<ArticleImage> relatedImages = articleImageRepository.findByArticleId(articleId);
+
+        for (ArticleImage image : relatedImages) {
+            try {
+                gcsFileStore.deleteFile(image.getUrl());
+            } catch (Exception e) {
+                log.warn("GCS 이미지 삭제 실패: {}", image.getUrl(), e);
+
+            }
+        }
+
+        articleImageRepository.deleteAll(relatedImages);
         articleRepository.deleteById(articleId);
     }
 
@@ -52,7 +126,7 @@ public class ArticleService {
         return articleDtoPage;
     }
 
-    // 제목, 제목+내용 검색 페이징
+    // 제목, 제목+내용 닉네임 검색 페이징
     public Page<ArticlesDto> searchPageList(int page, String keyword, String searchType) {
         Pageable pageable = PageRequest.of(page, 20, Sort.by(Sort.Direction.DESC, "id"));
         switch (searchType) {
@@ -160,6 +234,27 @@ public class ArticleService {
 
             return false;
         }
+    }
+
+    public void validateArticle(Long articleId) {
+        if (!articleRepository.existsById(articleId)) {
+            throw new IllegalArgumentException("해당 게시글이 존재하지 않습니다.");
+        }
+    }
+
+    private Set<String> extractImageUrls(String content) {
+        Set<String> urls = new HashSet<>();
+        Document doc = Jsoup.parse(content); // HTML 파싱
+        Elements imgTags = doc.select("img"); // 모든 <img> 태그 선택
+
+        for (Element img : imgTags) {
+            String src = img.attr("src"); // src 속성값 가져오기
+            if (!src.isEmpty()) {
+                urls.add(src);
+            }
+        }
+
+        return urls;
     }
 }
 

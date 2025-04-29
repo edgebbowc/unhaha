@@ -1,10 +1,23 @@
 spring:
+  servlet:
+    multipart:
+      max-file-size: 2MB #파일 하나의 최대 크기
+      max-request-size: 30MB # 한 번에 최대 업로드 가능 용량
+
   profiles:
     active: local
 
   redis:
     port: 6379
     host: localhost
+
+  cloud:
+    gcp:
+      storage:
+        credentials:
+          location: classpath:gcp-key.json
+        project-id: alert-outlet-456907-b9
+        bucket: unhaha-imagestorage
 
   datasource:
     url: jdbc:h2:tcp://localhost/~/unhaha
@@ -51,11 +64,6 @@ spring:
               - name
               - email
               - nickname
-file:
-  dir: C:/Users/edgeb/Spring_Study/unhaha/src/main/resources/static/images/userImage/
-  article: C:/Users/edgeb/Spring_Study/unhaha/src/main/resources/static/images/article/
-  add: file:///Users/edgeb/Spring_Study/unhaha/src/main/resources/static/images/userImage/
-  fileArticle: file:///Users/edgeb/Spring_Study/unhaha/src/main/resources/static/images/article/
 
 logging:
   level:

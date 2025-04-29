@@ -8,6 +8,7 @@
 </head>
 <body>
 <div th:replace="~{fragment/header :: header}"></div>
+
 <!--동적으로 alert창 변경-->
 <section id="flash" th:classappend="${msg == '회원정보를 변경하였습니다'} ? 'trueBackground' : 'falseBackground' " th:if="${msg}">
     <div class="message" th:text="${msg}"></div>
@@ -39,9 +40,9 @@
 
         <form name="frm" action="/mypage" th:object="${user}" method="POST" enctype="multipart/form-data">
 
-            <div class="userImage" style="width: 80px;" th:styleappend = "*{storedImageName != 'userImage'} ? 'background-image:url(' + @{/images/userImage/{imageName}(imageName = *{storedImageName})} + ');'">
+            <div class="userImage" id="profileImageContainer" style="width: 80px;" th:styleappend = "*{storedImageName != 'userImage'} ? 'background-image:url(' + @{{imageName}(imageName = *{storedImageName})} + ');'">
                 <label for="imageUpload"></label>
-                <input type="file" name="userImage" id="imageUpload">
+                <input type="file" name="userImage" id="imageUpload" accept="image/*">
             </div>
             <div class="point">포인트: 0</div>
 
@@ -64,5 +65,28 @@
         </form>
     </article>
 </main>
+<script>
+    document.getElementById("imageUpload").addEventListener("change", function (event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("image", file);
+
+        fetch("/mypage/upload-profile-image", {
+            method: "POST",
+            body: formData,
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById("profileImageContainer").style.backgroundImage = `url(${data.imageUrl})`;
+                } else {
+                    alert("이미지 업로드 실패");
+                }
+            })
+            .catch(() => alert("에러 발생"));
+    });
+</script>
 </body>
 </html>

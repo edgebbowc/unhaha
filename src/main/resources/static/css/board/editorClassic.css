@@ -1,3 +1,6 @@
+.ck-editor__editable {
+    min-height: 300px;
+}
 .ck.ck-toolbar {
     border: 1px solid var(--alpha-30)!important;
     border-bottom-width: 0!important;

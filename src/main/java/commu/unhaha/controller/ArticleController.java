@@ -1,14 +1,12 @@
 package commu.unhaha.controller;
 
-import commu.unhaha.domain.Article;
-import commu.unhaha.domain.Role;
-import commu.unhaha.domain.UploadFile;
-import commu.unhaha.domain.User;
+import commu.unhaha.domain.*;
 import commu.unhaha.dto.ArticleDto;
 import commu.unhaha.dto.ArticlesDto;
 import commu.unhaha.dto.SessionUser;
 import commu.unhaha.dto.WriteArticleForm;
-import commu.unhaha.file.FileStore;
+import commu.unhaha.file.GCSFileStore;
+import commu.unhaha.repository.ArticleImageRepository;
 import commu.unhaha.repository.ArticleRepository;
 import commu.unhaha.repository.UserRepository;
 import commu.unhaha.service.ArticleService;
@@ -16,10 +14,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -27,11 +30,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -39,11 +44,11 @@ import java.util.*;
 @RequiredArgsConstructor
 @Slf4j
 public class ArticleController {
-
     private final ArticleService articleService;
     private final ArticleRepository articleRepository;
+    private final ArticleImageRepository articleImageRepository;
     private final UserRepository userRepository;
-    private final FileStore fileStore;
+    private final GCSFileStore gcsFileStore;
 
     @GetMapping("/write/new")
     public String writeArticle(@ModelAttribute("article") WriteArticleForm writeArticleForm) {
@@ -51,25 +56,19 @@ public class ArticleController {
     }
 
     @PostMapping("/write/new")
-    public String saveArticle(@Validated @ModelAttribute("article") WriteArticleForm writeArticleForm, BindingResult bindingResult,
+    public String saveArticle(@Validated @ModelAttribute("article") WriteArticleForm form, BindingResult bindingResult,
                               @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser,
                               RedirectAttributes rttr) {
-        User findUser = userRepository.findByEmail(loginUser.getEmail()).orElse(null);
-        writeArticleForm.setUser(findUser);
+
         if (bindingResult.hasErrors()) {
             log.info("errors={}", bindingResult);
             return "writeArticleForm";
         }
-        Article article = Article.builder()
-                .board(writeArticleForm.getBoard())
-                .title(writeArticleForm.getTitle())
-                .content(writeArticleForm.getContent())
-                .user(writeArticleForm.getUser())
-                .viewCount(0)
-                .likeCount(0)
-                .build();
-        articleRepository.save(article);
-        rttr.addAttribute("articleId", article.getId());
+        User user = userRepository.findByEmail(loginUser.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        Long articleId = articleService.createArticle(form, user);
+        rttr.addAttribute("articleId", articleId);
         return "redirect:/articles/{articleId}";
     }
 
@@ -78,7 +77,7 @@ public class ArticleController {
                               @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable, String searchType, String keyword) {
         int jpaPage = page - 1;
         if (keyword == null) {
-            Page<ArticlesDto> articles = articleService.pageList(jpaPage);
+            Page<ArticlesDto> articles = articleService.pageList(jpaPage); //페이징
             int totalPages = articles.getTotalPages();
             int maxPage = 5; //페이지 1~5, 6~10
             int start = (articles.getNumber() / maxPage) * maxPage + 1; //start = 1, 6, 11
@@ -101,7 +100,7 @@ public class ArticleController {
             model.addAttribute("end", end);
             model.addAttribute("maxPage", maxPage);
         } else {
-            Page<ArticlesDto> articles = articleService.searchPageList(jpaPage, keyword, searchType);
+            Page<ArticlesDto> articles = articleService.searchPageList(jpaPage, keyword, searchType); //제목, 제목+내용 검색 페이징
             int totalPages = articles.getTotalPages();
             int maxPage = 5; //페이지 1~5, 6~10
             int start = (articles.getNumber() / maxPage) * maxPage + 1; //start = 1, 6, 11
@@ -132,115 +131,127 @@ public class ArticleController {
     @GetMapping("/articles/{articleId}")
     public String article(@PathVariable Long articleId, Model model, HttpServletRequest request,
                           @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser) {
+
+        ArticleDto articleDto;
         boolean like = false;
 
         if (loginUser == null) {
             log.info("비회원 조회");
-            String clientAddress = request.getHeader("X-Forwarded-For");
-            if (clientAddress == null) {
-                clientAddress = request.getHeader("Proxy-Client-IP");
-                log.info(">>>> Proxy-Client-IP : " + clientAddress);
-            }
-            if (clientAddress == null) {
-                clientAddress = request.getHeader("WL-Proxy-Client-IP"); // 웹로직
-                log.info(">>>> WL-Proxy-Client-IP : " + clientAddress);
-            }
-            if (clientAddress == null) {
-                clientAddress = request.getHeader("HTTP_CLIENT_IP");
-                log.info(">>>> HTTP_CLIENT_IP : " + clientAddress);
-            }
-            if (clientAddress == null) {
-                clientAddress = request.getHeader("HTTP_X_FORWARDED_FOR");
-                log.info(">>>> HTTP_X_FORWARDED_FOR : " + clientAddress);
-            }
-            if (clientAddress == null) {
-                clientAddress = request.getRemoteAddr();
-            }
+            String clientIp = extractClientIp(request);
+            log.info(">>>> Result : IP Address : " + clientIp);
 
-            log.info(">>>> Result : IP Address : "+ clientAddress);
-            ArticleDto articleDto = articleService.noneMemberView(articleId, clientAddress);
-            setDateTime(articleDto);
-            model.addAttribute("article", articleDto);
-            model.addAttribute("loginUser", loginUser);
-            model.addAttribute("like", like);
+            articleDto = articleService.noneMemberView(articleId, clientIp);
         } else {
             log.info("회원 조회");
-
-            ArticleDto articleDto = articleService.memberView(articleId, loginUser.getEmail());
-            setDateTime(articleDto);
             String email = loginUser.getEmail();
-            Long userId = userRepository.findByEmail(email).orElse(null).getId();
-            like = articleService.findLike(articleId, userId);
+            Long userId = getUserIdByEmail(email);
 
-            model.addAttribute("article", articleDto);
-            model.addAttribute("loginUser", loginUser);
-            model.addAttribute("like", like);
+            articleDto = articleService.memberView(articleId, email);
+            like = articleService.findLike(articleId, userId);
         }
+
+        setDateTime(articleDto);
+        model.addAttribute("article", articleDto);
+        model.addAttribute("loginUser", loginUser);
+        model.addAttribute("like", like);
+
         return "article";
+    }
+
+    private String extractClientIp(HttpServletRequest request) {
+        String ip = null;
+        String[] headers = {
+                "X-Forwarded-For", "Proxy-Client-IP", "WL-Proxy-Client-IP",
+                "HTTP_CLIENT_IP", "HTTP_X_FORWARDED_FOR"
+        };
+
+        for (String header : headers) {
+            ip = request.getHeader(header);
+            if (ip != null && ip.length() != 0 && !"unknown".equalsIgnoreCase(ip)) {
+                if (ip.contains(",")) {
+                    ip = ip.split(",")[0].trim(); // 첫 번째 IP 추출
+                }
+                log.info(">>>> {} : {}", header, ip);
+                return ip;
+            }
+        }
+
+        ip = request.getRemoteAddr();
+        log.info(">>>> RemoteAddr : {}", ip);
+        return ip;
+    }
+
+    private Long getUserIdByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "해당 이메일로 사용자를 찾을 수 없습니다."
+                )).getId();
     }
 
     @GetMapping("/articles/{articleId}/edit")
     public String editForm(@PathVariable Long articleId, Model model) {
-        Article article = articleRepository.findById(articleId).orElse(null);
+        Article article = articleRepository.findById(articleId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
+
         WriteArticleForm writeArticleForm = WriteArticleForm.builder()
                 .board(article.getBoard())
                 .title(article.getTitle())
                 .content(article.getContent())
-                .user(article.getUser())
-                .viewCount(article.getViewCount())
                 .build();
         model.addAttribute("article", writeArticleForm);
         return "editArticleForm";
-
     }
 
+    /** 게시글 수정 */
     @PostMapping("/articles/{articleId}/edit")
-    public String edit(@PathVariable Long articleId, @Validated @ModelAttribute("article") WriteArticleForm writeArticleForm, BindingResult bindingResult) {
+    public String edit(@PathVariable Long articleId, @Validated @ModelAttribute("article") WriteArticleForm form, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             log.info("errors={}", bindingResult);
             return "editArticleForm";
         }
-        articleService.editArticle(articleId, writeArticleForm.getBoard(), writeArticleForm.getTitle(), writeArticleForm.getContent());
+        articleService.editArticle(articleId, form);
         return "redirect:/articles/{articleId}";
     }
 
-    @ResponseBody
-    @PostMapping("/images/article")
-    public Map<String, Object> image(@RequestParam Map<String, Object> paramMap, MultipartHttpServletRequest request) throws Exception {
-
-
-        // ckeditor 에서 파일을 보낼 때 upload : [파일] 형식으로 해서 넘어오기 때문에 upload라는 키의 밸류를 받아서 uploadFile에 저장함
-        MultipartFile uploadFile = request.getFile("upload");
-
-        // 파일의 오리지널 네임
-        String originalFileName = uploadFile.getOriginalFilename();
-
-        // 파일의 확장자
-        String ext = originalFileName.substring(originalFileName.indexOf("."));
-
-        // 서버에 저장될 때 중복된 파일 이름인 경우를 방지하기 위해 UUID에 확장자를 붙여 새로운 파일 이름을 생성
-        String newFileName = UUID.randomUUID() + ext;
-
-        // 현재경로/upload/파일명이 저장 경로
-        String savePath = fileStore.getArticleImagePath(newFileName);
-
-        // 브라우저에서 이미지 불러올 때 절대 경로로 불러오면 보안의 위험 있어 상대경로를 쓰거나 이미지 불러오는 jsp 또는 클래스 파일을 만들어 가져오는 식으로 우회해야 함
-        // 때문에 savePath와 별개로 상대 경로인 uploadPath 만들어줌
-        String uploadPath = "/images/article/" + newFileName;
-
-        // 저장 경로로 파일 객체 생성
-        File file = new File(savePath);
-
-        // 파일 업로드
-        uploadFile.transferTo(file);
-
-        paramMap.put("url", uploadPath);
-
-        return paramMap;
+    /** 게시글 삭제 */
+    @PostMapping("/articles/{articleId}/delete")
+    public String deleteArticle(@PathVariable Long articleId, RedirectAttributes redirectAttributes) {
+        try {
+            articleService.deleteArticle(articleId);
+            List<ArticleImage> relatedImages = articleImageRepository.findByArticleId(articleId);
+            redirectAttributes.addFlashAttribute("message", "게시글이 성공적으로 삭제되었습니다.");
+            return "redirect:/new"; // 게시글 목록 페이지로 리다이렉트
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", "해당 게시글을 찾을 수 없습니다.");
+            return "redirect:/new";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "게시글 삭제 중 오류가 발생했습니다.");
+            return "redirect:/new";
+        }
     }
 
+    /** ckeditor 이미지 업로드 */
+    @ResponseBody
+    @PostMapping("/images/article")
+    public Map<String, Object> uploadArticleImage(MultipartHttpServletRequest request) throws IOException {
+        Map<String, Object> response = new HashMap<>();
+
+        MultipartFile uploadFile = request.getFile("upload");
+
+        UploadFile uploaded = gcsFileStore.storeArticleImage(uploadFile);
+        //ArticleImage에 임시파일로 저장
+        ArticleImage articleImage = ArticleImage.createTemp(uploaded.getStoreFileUrl());
+        articleImageRepository.save(articleImage);
+
+        response.put("uploaded", true);
+        response.put("url", uploaded.getStoreFileUrl()); // 이게 GCS URL
+
+        return response;
+    }
+
+
     @PostMapping("/like/{articleId}")
-    public String like(@PathVariable Long articleId, @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser){
+    public String like(@PathVariable Long articleId, @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser) {
 
         Long member_id = userRepository.findByEmail(loginUser.getEmail()).orElse(null).getId();
 

@@ -1,36 +1,28 @@
 package commu.unhaha.controller;
 
 import commu.unhaha.domain.UploadFile;
-import commu.unhaha.domain.User;
 import commu.unhaha.dto.MypageForm;
 import commu.unhaha.dto.SessionUser;
-import commu.unhaha.file.FileStore;
+import commu.unhaha.file.GCSFileStore;
 import commu.unhaha.repository.UserRepository;
 import commu.unhaha.service.UserService;
 import commu.unhaha.validation.NicknameValidator;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Repository;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -40,7 +32,7 @@ public class UserController {
     private final UserService userService;
     private final UserRepository userRepository;
     private final NicknameValidator nicknameValidator;
-    private final FileStore fileStore;
+    private final GCSFileStore gcsFileStore;
 
     @GetMapping("/mypage")
     public String Profile(@SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser, Model model) {
@@ -99,6 +91,34 @@ public class UserController {
         return "redirect:/mypage";
     }
 
+    // 프로필 이미지 저장
+    @PostMapping("/mypage/upload-profile-image")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> uploadProfileImage(
+            @RequestParam("image") MultipartFile image,
+            @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser,
+            HttpSession session) throws IOException {
+
+        if (image.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("success", false));
+        }
+
+        gcsFileStore.deleteFile(loginUser.getStoredImageName()); // 기존 이미지 삭제
+        UploadFile uploadFile = gcsFileStore.storeProfileImage(image);   // GCS에 새 이미지 업로드
+
+        // DB 반영
+        userService.editProfileImage(loginUser.getEmail(), uploadFile);
+
+        // 세션 업데이트
+        loginUser.setStoredImageName(uploadFile.getStoreFileUrl());
+        session.setAttribute(SessionConst.LOGIN_USER, loginUser);
+
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "imageUrl", uploadFile.getStoreFileUrl()
+        ));
+    }
+
     @GetMapping("/mypage/withdraw")
     public String withDraw(@SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser,
                            RedirectAttributes rttr, HttpSession session) throws IOException {
@@ -131,11 +151,11 @@ public class UserController {
         return result;
 
     }
-
+    /** 프로필 이미지 변경 */
     private void editProfileImage(MypageForm mypageForm, SessionUser loginUser) throws IOException {
-        fileStore.deleteFile(loginUser.getStoredImageName());
-        UploadFile uploadFile = fileStore.storeFile(mypageForm.getUserImage());
-        mypageForm.setStoredImageName(uploadFile.getStoreFileName());
+        gcsFileStore.deleteFile(loginUser.getStoredImageName());
+        UploadFile uploadFile = gcsFileStore.storeProfileImage(mypageForm.getUserImage());
+        mypageForm.setStoredImageName(uploadFile.getStoreFileUrl());
         userService.editProfileImage(mypageForm.getEmail(), uploadFile);
     }
 
