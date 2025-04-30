@@ -76,9 +76,7 @@ public class ArticleService {
     }
     //Article 수정
     public void editArticle(Long articleId, WriteArticleForm form) {
-        validateArticle(articleId);
-        Article article = articleRepository.findById(articleId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+        Article article = validateAndGetArticle(articleId);
 
         // 기존 이미지 정리
         Set<String> newImageUrls = extractImageUrls(form.getContent());
@@ -146,30 +144,28 @@ public class ArticleService {
         return null;
     }
 
-    public void addViewCount(Article article, String clientAddress) {
-        article.increaseViewCount();
-        redisService.writeClientRequest(clientAddress, article.getId());
+    public void addViewCount(Long articleId) {
+        articleRepository.increaseViews(articleId);
     }
 
     public ArticleDto noneMemberView(Long articleId, String clientAddress) {
-        Article article = articleRepository.findById(articleId).orElse(null);
+        Article article = validateAndGetArticle(articleId);
+
         if (redisService.isFirstIpRequest(clientAddress, articleId)) {
-            addViewCount(article, clientAddress);
+            addViewCount(articleId);
         }
-        ArticleDto articleDto = new ArticleDto(article);
-        return articleDto;
+
+        return new ArticleDto(article);
     }
 
     public ArticleDto memberView(Long articleId, String email) {
-        Article article = articleRepository.findById(articleId).orElse(null);
-        String key = email;
-        String value = articleId.toString();
-        if (!redisService.getValuesList(key).contains(value)) {
-            redisService.setValuesList(key, value);
-            article.increaseViewCount();
+        Article article = validateAndGetArticle(articleId);
+
+        if (redisService.isFirstMemberRequest(email, articleId)) {
+            addViewCount(articleId);
         }
-        ArticleDto articleDto = new ArticleDto(article);
-        return articleDto;
+
+        return new ArticleDto(article);
     }
 
     public String calDateTime(LocalDateTime createdDate, LocalDateTime now) {
@@ -218,7 +214,7 @@ public class ArticleService {
         if(!findLike(articleId, userId)){
             /* 좋아요 하지 않은 게시물이면 좋아요 추가, true 반환 */
             User user = userRepository.findById(userId).orElse(null);
-            Article article = articleRepository.findById(articleId).orElse(null);
+            Article article = validateAndGetArticle(articleId);
 
             /* 좋아요 엔티티 생성 */
             UserLikeArticle userLikeArticle = new UserLikeArticle(user, article);
@@ -228,7 +224,7 @@ public class ArticleService {
             return true;
         } else {
             /* 좋아요 한 게시물이면 좋아요 삭제 */
-            Article article = articleRepository.findById(articleId).orElse(null);
+            Article article = validateAndGetArticle(articleId);
             userLikeArticleRepository.deleteByArticleIdAndUserId(articleId, userId);
             article.decreaseLikeCount();
 
@@ -240,6 +236,11 @@ public class ArticleService {
         if (!articleRepository.existsById(articleId)) {
             throw new IllegalArgumentException("해당 게시글이 존재하지 않습니다.");
         }
+    }
+
+    public Article validateAndGetArticle(Long articleId) {
+        return articleRepository.findById(articleId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
     }
 
     private Set<String> extractImageUrls(String content) {

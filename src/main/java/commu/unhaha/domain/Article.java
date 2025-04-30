@@ -55,9 +55,6 @@ public class Article extends BaseTimeEntity{
         this.title = title;
         this.content = content;
     }
-    public void increaseViewCount() {
-        viewCount++;
-    }
 
     public void increaseLikeCount() {
         likeCount++;
