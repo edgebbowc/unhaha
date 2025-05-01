@@ -1,10 +1,11 @@
-package commu.unhaha.service;
+package commu.unhaha.unit.service;
 
 import commu.unhaha.domain.*;
 import commu.unhaha.dto.ArticlesDto;
 import commu.unhaha.file.GCSFileStore;
 import commu.unhaha.repository.ArticleImageRepository;
 import commu.unhaha.repository.ArticleRepository;
+import commu.unhaha.service.ArticleService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
