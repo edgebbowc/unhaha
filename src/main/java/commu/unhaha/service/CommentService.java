@@ -1,13 +1,23 @@
 package commu.unhaha.service;
 
 import commu.unhaha.domain.*;
+import commu.unhaha.dto.ArticlesDto;
+import commu.unhaha.dto.CommentDto;
 import commu.unhaha.repository.ArticleRepository;
 import commu.unhaha.repository.CommentRepository;
 import commu.unhaha.repository.UserLikeCommentRepository;
 import commu.unhaha.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -38,6 +48,14 @@ public class CommentService {
     public void deleteComment(Long commentId) {
         Comment comment = commentRepository.findById(commentId).orElseThrow();
         commentRepository.delete(comment);
+    }
+
+    // 댓글 페이징
+    public Page<CommentDto> commentPageList(Long articleId, int page) {
+        Pageable pageable = PageRequest.of(page, 30, Sort.by(Sort.Direction.ASC, "id"));
+        Page<Comment> commentPage = commentRepository.findByArticleIdOrderByCreatedDateAsc(articleId, pageable);
+        Page<CommentDto> commentDtoPage = commentPage.map(comment -> new CommentDto(comment));
+        return commentDtoPage;
     }
 
     // 댓글 좋아요 확인
