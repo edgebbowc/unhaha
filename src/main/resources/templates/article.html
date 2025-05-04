@@ -146,28 +146,11 @@
             <div class="comments" id="comments">
                 <div class="best">
                 </div>
-                <div class="comment" id="comment1184947" aid="191452" uid="2191" cid="1184947" pid="" gid="1184947">
-                    <div class="main ">
-                        <div class="userImage" style="background-image: url('https://resources.chimhaha.net/userImage/1678614431561-6htcc9b5ber.jpg');"></div>
-                        <div class="commentWrapper">
-                            <div class="info">
-                                <div class="left">
-                                    <div class="nickName">
-                                        <div class="text"><span>관악구의자랑홍은채</span></div>
-                                    </div>
-                                    <div class="counts">
-                                        <div class="datetime">2시간전</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="commentContent" id="commentContent">
-                                <div>디로딩 ㄱㄱ 하시죠 </div>
-                                <div> 한 일주일만</div>
-                            </div>
-                            <div class="commentContainer" id="commentEtc"></div>
-                        </div>
-                    </div>
+                <!-- 루트 댓글 리스트 -->
+                <div th:each="comment : ${comments}">
+                    <div th:replace="~{fragment/commentFragment::commentFragment(comment=${comment})}"></div>
                 </div>
+
                 <div class="comment" id="comment1184955" aid="191452" uid="93031" cid="1184955" pid="1184947" gid="1184947">
                     <div class="main isReply">
                         <div class="userImage" style="background-image: url('/images/userImage.svg');"></div>

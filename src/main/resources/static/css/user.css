@@ -150,7 +150,8 @@ article form {
 }
 
 #mypage form {
-    width: 400px
+    width: 400px;
+    display: flex;
 }
 
 #mypage form > div {
