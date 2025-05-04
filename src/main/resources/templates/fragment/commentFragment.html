@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div th:fragment="commentFragment(comment)">
+    <div class="comment" th:attr="id='comment' + ${comment.id}">
+        <div class="main" th:classappend="${comment.isReply} ? ' isReply'">
+            <div class="userImage"
+                 th:style="*{comment.storeFileUrl != 'userImage'} ? 'background-image:url(' + @{{imageName}(imageName = *{comment.storeFileUrl})} + ');' : ''"></div>
+            <div class="commentWrapper">
+                <div class="info">
+                    <div class="left">
+                        <div class="nickName">
+                            <div class="text" th:text="${comment.nickname}"><span>닉네임</span></div>
+                        </div>
+                        <div class="counts">
+                            <div class="datetime" th:text="${comment.dateTime}">시간</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="commentContent" id="commentContent" th:text="${comment.content}">내용</div>
+                <div class="commentContainer" id="commentEtc"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 자식 댓글 재귀 출력 -->
+    <div th:if="${comment.children}">
+        <div th:each="child : ${comment.children}">
+            <div th:replace="~{::commentFragment(comment=${child})}"></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
