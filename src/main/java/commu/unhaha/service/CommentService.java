@@ -8,15 +8,13 @@ import commu.unhaha.repository.CommentRepository;
 import commu.unhaha.repository.UserLikeCommentRepository;
 import commu.unhaha.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,10 +50,34 @@ public class CommentService {
 
     // 댓글 페이징
     public Page<CommentDto> commentPageList(Long articleId, int page) {
-        Pageable pageable = PageRequest.of(page, 30, Sort.by(Sort.Direction.ASC, "id"));
-        Page<Comment> commentPage = commentRepository.findByArticleIdOrderByCreatedDateAsc(articleId, pageable);
-        Page<CommentDto> commentDtoPage = commentPage.map(comment -> new CommentDto(comment));
-        return commentDtoPage;
+        Pageable pageable = PageRequest.of(page, 30, Sort.by("createdDate").ascending());
+        // 루트 댓글(부모 없는 댓글) 페이징 조회
+        Page<Comment> rootComments  = commentRepository.findByArticleIdAndParentIsNullOrderByCreatedDateAsc(articleId, pageable);
+
+        // 대댓글 일괄 조회
+        List<Comment> replies = commentRepository.findByParentInOrderByCreatedDateAsc(rootComments.getContent());
+
+        // 대댓글을 Map<부모ID, List<대댓글>> 구조로 정리
+        Map<Long, List<Comment>> replyMap = replies.stream()
+                .collect(Collectors.groupingBy(c -> c.getParent().getId()));
+
+        // 루트 + 자식 트리 구조로 DTO 변환
+        List<CommentDto> commentTrees = rootComments.getContent().stream()
+                .map(parent -> toTreeDto(parent, replyMap.get(parent.getId())))
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(commentTrees, pageable, rootComments.getTotalElements());
+    }
+
+    private CommentDto toTreeDto(Comment parent, List<Comment> children) {
+        CommentDto dto = new CommentDto(parent);
+        if (children != null) {
+            List<CommentDto> childDtos = children.stream()
+                    .map(CommentDto::new)
+                    .collect(Collectors.toList());
+            dto.setChildren(childDtos); // children 필드 추가 필요
+        }
+        return dto;
     }
 
     // 댓글 좋아요 확인

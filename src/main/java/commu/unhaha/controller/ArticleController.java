@@ -156,11 +156,10 @@ public class ArticleController {
         setDateTime(articleDto);
         // 댓글 페이징 처리
         Page<CommentDto> commentPages = commentService.commentPageList(articleId, jpaPage);
-        for (CommentDto commentDto : commentPages){
-            String dateTime = TimeAgoFormatter.format(commentDto.getCreatedDate(), LocalDateTime.now());
-            commentDto.setDateTime(dateTime);
-        }
         PageInfo pageInfo = extractPageInfo(commentPages);
+        for (CommentDto commentDto : commentPages){
+            setDateTimeRecursively(commentDto);
+        }
 
 
         model.addAttribute("article", articleDto);
@@ -172,6 +171,15 @@ public class ArticleController {
         model.addAttribute("like", like);
 
         return "article";
+    }
+
+    private void setDateTimeRecursively(CommentDto commentDto) {
+        String dateTime = TimeAgoFormatter.format(commentDto.getCreatedDate(), LocalDateTime.now());
+        commentDto.setDateTime(dateTime);
+
+        for (CommentDto child : commentDto.getChildren()) {
+            setDateTimeRecursively(child);
+        }
     }
 
     private String extractClientIp(HttpServletRequest request) {
@@ -293,6 +301,8 @@ public class ArticleController {
         for (int i = 0; i < 400; i++) {
             articleRepository.save(new Article("보디빌딩", "오운완" + i, "오늘도 운동 완료", user, 0, 0));
         }
+        commentService.createComment(user2, 400L, "Light Weight BABY!", null);
+        commentService.createComment(user2, 400L, "Easy Weight BABY!", 1L);
 //        articleRepository.save(new Article("보디빌딩", "오운완", "오늘도 운동 완료", user));
 //        articleRepository.save(new Article("파워리프팅", "3대 500달성", "힘들다", user));
 //        articleRepository.save(new Article("파워리프팅", "3대 500달성", "힘들다", user));

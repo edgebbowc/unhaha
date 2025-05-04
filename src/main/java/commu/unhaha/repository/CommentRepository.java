@@ -10,5 +10,6 @@ import java.util.Optional;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-    Page<Comment> findByArticleIdOrderByCreatedDateAsc(Long articleId, Pageable pageable);
+    Page<Comment> findByArticleIdAndParentIsNullOrderByCreatedDateAsc(Long articleId, Pageable pageable);
+    List<Comment> findByParentInOrderByCreatedDateAsc(List<Comment> parents);
 }
