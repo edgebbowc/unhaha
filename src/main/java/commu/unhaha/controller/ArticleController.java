@@ -38,6 +38,8 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Controller
 @RequiredArgsConstructor
@@ -115,28 +117,36 @@ public class ArticleController {
         int totalPages = page.getTotalPages();
         int start = (page.getNumber() / maxPage) * maxPage + 1;
         int end = (totalPages == 0) ? 1 : Math.min(start + maxPage - 1, totalPages);
-        return new PageInfo(start, end, maxPage);
+        int currentPage = page.getNumber() + 1;
+
+        return new PageInfo(start, end, maxPage, totalPages, currentPage);
     }
 
     private static class PageInfo {
         int start;
         int end;
         int maxPage;
+        int totalPages;
+        int currentPage; // 현재 페이지 추가
 
-        PageInfo(int start, int end, int maxPage) {
+        PageInfo(int start, int end, int maxPage, int totalPages, int currentPage) {
             this.start = start;
             this.end = end;
             this.maxPage = maxPage;
+            this.totalPages = totalPages;
+            this.currentPage = currentPage;
         }
     }
 
+    // 게시글 조회
     @GetMapping("/articles/{articleId}")
     public String article(@PathVariable Long articleId, Model model, HttpServletRequest request,
-                          @RequestParam(value = "page", defaultValue = "1") int page,
+                          @RequestParam(value = "page", required = false) Integer page,
                           @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser) {
-        int jpaPage = page - 1;
+
         ArticleDto articleDto;
-        boolean like = false;
+        boolean articleLike = false;
+        List<Long> likedCommentIds = null;
 
         if (loginUser == null) {
             log.info("비회원 조회");
@@ -150,27 +160,77 @@ public class ArticleController {
             Long userId = getUserIdByEmail(email);
 
             articleDto = articleService.memberView(articleId, email);
-            like = articleService.findLike(articleId, userId);
+            articleLike = articleService.findLike(articleId, userId);
+            // 사용자가 좋아요한 댓글 ID 목록 조회
+            likedCommentIds = commentService.findLikedCommentsByUser(userId);
         }
 
         setDateTime(articleDto);
+
         // 댓글 페이징 처리
+
+//        int jpaPage = (page == null) ? 0 : Math.max(page - 1, 0);
+        int jpaPage = commentService.calculatePageIndex(articleId, page);
+
+        // 실제 댓글 조회
         Page<CommentDto> commentPages = commentService.commentPageList(articleId, jpaPage);
-        PageInfo pageInfo = extractPageInfo(commentPages);
-        for (CommentDto commentDto : commentPages){
+
+        // 페이지 사이즈 조회( 한 페이지당 보여줄 루트 댓글 개수)
+        int pageSize = commentPages.getSize();
+
+        // 루트 댓글 수만 별도로 가져오기
+        long rootCommentCount = commentService.countRootComments(articleId);
+
+        // 페이지네이션 표시 여부 결정 (페이지당 루트 댓글 기준)
+        boolean shouldShowPagination = rootCommentCount > pageSize;
+
+        log.info("commentPages.getContent : {}, commentPages.getTotalElements : {}", commentPages.getContent(), commentPages.getTotalElements());
+        // 댓글 DTO 후처리: 이미지 URL, dateTime 재귀 설정
+        for (CommentDto commentDto : commentPages) {
+            setCommentImageUrls(commentDto);
             setDateTimeRecursively(commentDto);
         }
-
+        // 페이지블록 계산 (1–5, 6–10)
+        PageInfo pageInfo = extractPageInfo(commentPages);
 
         model.addAttribute("article", articleDto);
         model.addAttribute("comments", commentPages);
         model.addAttribute("start", pageInfo.start);
         model.addAttribute("end", pageInfo.end);
         model.addAttribute("maxPage", pageInfo.maxPage);
+        model.addAttribute("totalPages", pageInfo.totalPages);
+        model.addAttribute("currentPage", pageInfo.currentPage);
+        model.addAttribute("shouldShowPagination", shouldShowPagination);
         model.addAttribute("loginUser", loginUser);
-        model.addAttribute("like", like);
+        model.addAttribute("like", articleLike);
+        model.addAttribute("likedCommentIds", likedCommentIds);
 
         return "article";
+    }
+    // 컨트롤러 또는 서비스 레이어에서
+    private void setCommentImageUrls(CommentDto commentDto) {
+        // 이미지 URL 추출 (마크다운 형식: ![이미지](URL) 에서 URL 부분 추출)
+        List<String> imageUrls = new ArrayList<>();
+        String content = commentDto.getContent();
+
+        // 마크다운 이미지 패턴 매칭
+        Pattern pattern = Pattern.compile("!\\[이미지\\]\\((.*?)\\)");
+        Matcher matcher = pattern.matcher(content);
+
+        // 이미지 URL 추출 및 원본 내용에서 제거
+        StringBuffer cleanContent = new StringBuffer();
+        while (matcher.find()) {
+            imageUrls.add(matcher.group(1));
+            matcher.appendReplacement(cleanContent, ""); // 이미지 마크다운 제거
+        }
+        matcher.appendTail(cleanContent);
+
+        commentDto.setContent(cleanContent.toString().trim());
+        commentDto.setImageUrls(imageUrls);
+
+        for (CommentDto child : commentDto.getChildren()) {
+            setCommentImageUrls(child);
+        }
     }
 
     private void setDateTimeRecursively(CommentDto commentDto) {
@@ -212,6 +272,7 @@ public class ArticleController {
                 )).getId();
     }
 
+    /** 게시글 수정폼 조회 */
     @GetMapping("/articles/{articleId}/edit")
     public String editForm(@PathVariable Long articleId, Model model) {
         Article article = articleRepository.findById(articleId)
@@ -256,7 +317,7 @@ public class ArticleController {
 
     /** ckeditor 이미지 업로드 */
     @ResponseBody
-    @PostMapping("/images/article")
+    @PostMapping("/articles/images")
     public Map<String, Object> uploadArticleImage(MultipartHttpServletRequest request) throws IOException {
         Map<String, Object> response = new HashMap<>();
 
@@ -273,7 +334,7 @@ public class ArticleController {
         return response;
     }
 
-
+    /** 게시글 좋아요 */
     @PostMapping("/like/{articleId}")
     public String like(@PathVariable Long articleId, @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser) {
 
@@ -301,8 +362,8 @@ public class ArticleController {
         for (int i = 0; i < 400; i++) {
             articleRepository.save(new Article("보디빌딩", "오운완" + i, "오늘도 운동 완료", user, 0, 0));
         }
-        commentService.createComment(user2, 400L, "Light Weight BABY!", null);
-        commentService.createComment(user2, 400L, "Easy Weight BABY!", 1L);
+        commentService.createComment(user2, 400L, "Light Weight BABY!", null,null);
+        commentService.createComment(user2, 400L, "Easy Weight BABY!", null,1L);
 //        articleRepository.save(new Article("보디빌딩", "오운완", "오늘도 운동 완료", user));
 //        articleRepository.save(new Article("파워리프팅", "3대 500달성", "힘들다", user));
 //        articleRepository.save(new Article("파워리프팅", "3대 500달성", "힘들다", user));
