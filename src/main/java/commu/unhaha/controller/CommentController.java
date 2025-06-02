@@ -1,27 +1,43 @@
 package commu.unhaha.controller;
 
+import commu.unhaha.domain.Comment;
+import commu.unhaha.domain.CommentImage;
+import commu.unhaha.domain.UploadFile;
 import commu.unhaha.domain.User;
 import commu.unhaha.dto.SessionUser;
+import commu.unhaha.file.GCSFileStore;
+import commu.unhaha.repository.CommentImageRepository;
 import commu.unhaha.repository.UserRepository;
 import commu.unhaha.service.CommentService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.List;
+import java.util.Map;
 
 
 @Controller
 @RequiredArgsConstructor
+@Slf4j
 public class CommentController {
     private final CommentService commentService;
     private final UserRepository userRepository;
+    private final GCSFileStore gcsFileStore;
+    private final CommentImageRepository commentImageRepository;
 
-    // 댓글 작성
+    /**
+     * 댓글 작성
+     */
     @PostMapping("/articles/{articleId}/comments")
     public String createComment(@PathVariable Long articleId,
                                 @RequestParam String content,
+                                @RequestParam(required = false) List<String> imageUrl,
                                 @RequestParam(required = false) Long parentId,
                                 @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser) {
 
@@ -31,36 +47,153 @@ public class CommentController {
 
         User user = userRepository.findByEmail(loginUser.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-        commentService.createComment(user, articleId, content, parentId);
 
-        return "redirect:/articles/" + articleId;
+        // 단일 메서드로 통합 - 이미지 유무와 관계없이 동일한 메서드 사용
+        Comment savedComment = commentService.createComment(user, articleId, content, imageUrl, parentId);
+
+        // 작성된 댓글이 있는 페이지 계산
+        int targetPage = commentService.calculateCommentRedirectPage(savedComment, articleId);
+
+        // UriComponentsBuilder 사용
+        String redirectUrl = UriComponentsBuilder
+                .fromPath("/articles/{articleId}")
+                .queryParam("page", targetPage)
+                .fragment("comment" + savedComment.getId())
+                .buildAndExpand(articleId)
+                .toUriString(); // toString() 대신 toUriString() 사용
+        log.info("댓글 작성 완료 - 리다이렉트: page={}, commentId={}", targetPage, savedComment.getId());
+        return "redirect:" + redirectUrl;
     }
 
-    // 댓글 수정
-    @PostMapping("/{commentId}/edit")
-    public String editComment(@PathVariable Long commentId,
+
+    /**
+     * 댓글 이미지 전송
+     */
+    @ResponseBody
+    @PostMapping("/comments/images")
+    public ResponseEntity<Map<String, Object>> uploadCommentImage(@RequestParam("file") MultipartFile file,
+                                                                  @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser){
+        if (loginUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        try {
+            // 파일 유효성 검사
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "파일이 비어있습니다."));
+            }
+
+            // 이미지 파일인지 확인
+            String contentType = file.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                return ResponseEntity.badRequest().body(Map.of("error", "이미지 파일만 업로드 가능합니다."));
+            }
+
+            // 파일 크기 제한 (예: 5MB)
+            if (file.getSize() > 5 * 1024 * 1024) {
+                return ResponseEntity.badRequest().body(Map.of("error", "파일 크기는 5MB를 초과할 수 없습니다."));
+            }
+
+            // GCS에 업로드
+            UploadFile uploadFile = gcsFileStore.storeCommentImage(file);
+
+            //CommentImage에 임시파일로 저장
+            CommentImage commentImage = CommentImage.createTemp(uploadFile.getStoreFileUrl());
+            commentImageRepository.save(commentImage);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "imageUrl", uploadFile.getStoreFileUrl()
+            ));
+
+        } catch (Exception e) {
+            log.error("이미지 업로드 실패", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "이미지 업로드에 실패했습니다."));
+        }
+    }
+
+    /**
+     * 댓글 수정
+     */
+    @PostMapping("/articles/{articleId}/comments/{commentId}")
+    public String editComment(@PathVariable Long articleId,
+                              @PathVariable Long commentId,
                               @RequestParam String content,
-                              @RequestParam Long articleId) {
-        commentService.updateComment(commentId, content);
-        return "redirect:/articles/" + articleId;
+                              @RequestParam(required = false) List<String> imageUrl,
+                              @RequestParam(value = "currentPage") Integer currentPage,
+                              @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser) {
+        if (loginUser == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            // 댓글 수정
+            commentService.updateComment(commentId, content, imageUrl);
+
+            // 리다이렉트 URL 생성
+            String redirectUrl = UriComponentsBuilder
+                    .fromPath("/articles/{articleId}")
+                    .queryParam("page", currentPage)
+                    .fragment("comment" + commentId)
+                    .buildAndExpand(articleId)
+                    .toUriString();
+
+            return "redirect:" + redirectUrl;
+
+        } catch (Exception e) {
+            log.error("댓글 수정 중 오류 발생: commentId={}", commentId, e);
+            return "redirect:/articles/" + articleId;
+        }
     }
 
-    // 댓글 삭제
-    @PostMapping("/{commentId}/delete")
+    /**
+     * 댓글 삭제
+     */
+    @DeleteMapping("/articles/{articleId}/comments/{commentId}")
     public String deleteComment(@PathVariable Long commentId,
-                                @RequestParam Long articleId) {
-        commentService.deleteComment(commentId);
-        return "redirect:/articles/" + articleId;
+                                @PathVariable Long articleId,
+                                @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser) {
+        if (loginUser == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            commentService.deleteComment(commentId);
+            return "redirect:/articles/" + articleId;
+        } catch (Exception e) {
+            log.error("댓글 삭제 중 오류 발생: commentId={}", commentId, e);
+            return "redirect:/articles/" + articleId;
+        }
     }
 
-    // 댓글 좋아요
-    @PostMapping("/{commentId}/like")
+    /**
+     * 댓글 좋아요
+     */
+    @PostMapping("/articles/{articleId}/comments/{commentId}/like")
     public String toggleLike(@PathVariable Long commentId,
-                             @RequestParam Long articleId,
+                             @PathVariable Long articleId,
+                             @RequestParam(value = "currentPage") Integer currentPage,
                              @SessionAttribute(name = SessionConst.LOGIN_USER) SessionUser loginUser) {
-        Long loginUserId = userRepository.findByEmail(loginUser.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다.")).getId();
-        commentService.saveLike(commentId, loginUserId);
-        return "redirect:/articles/" + articleId;
+        try {
+            Long loginUserId = userRepository.findByEmail(loginUser.getEmail())
+                    .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다.")).getId();
+
+            commentService.saveLike(commentId, loginUserId);
+
+            // 현재 페이지로 리다이렉트
+            String redirectUrl = UriComponentsBuilder
+                    .fromPath("/articles/{articleId}")
+                    .queryParam("page", currentPage)
+                    .fragment("comment" + commentId) // 해당 댓글로 스크롤
+                    .buildAndExpand(articleId)
+                    .toUriString();
+
+            log.info("댓글 좋아요 처리 완료 - 리다이렉트: page={}, commentId={}", currentPage, commentId);
+            return "redirect:" + redirectUrl;
+
+        } catch (Exception e) {
+            log.error("댓글 좋아요 처리 중 오류 발생: commentId={}", commentId, e);
+            return "redirect:/articles/" + articleId + "?page=" + currentPage;
+        }
     }
 }
