@@ -34,6 +34,11 @@ public class GCSFileStore {
         return storeImage(multipartFile, "article");
     }
 
+    /** 댓글 이미지 저장 */
+    public UploadFile storeCommentImage(MultipartFile multipartFile) throws IOException {
+        return storeImage(multipartFile, "comment");
+    }
+
 
     private UploadFile storeImage(MultipartFile multipartFile, String folderName) throws IOException {
         if (multipartFile.isEmpty()) {
