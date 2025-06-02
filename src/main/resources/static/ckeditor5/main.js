@@ -226,7 +226,7 @@ class CustomUploadAdapter  {
 			const data = new FormData();
 			data.append('upload', file);
 
-			return fetch('/images/article', {
+			return fetch('/articles/images', {
 				method: 'POST',
 				body: data,
 				credentials: 'include'
