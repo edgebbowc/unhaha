@@ -38,6 +38,10 @@ public class Comment extends BaseTimeEntity {
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> children = new ArrayList<>();
 
+    // 댓글 이미지 목록
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentImage> commentImages = new ArrayList<>();
+
     private Integer likeCount = 0;
 
     @Builder
