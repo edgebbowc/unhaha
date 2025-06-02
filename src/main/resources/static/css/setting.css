@@ -1,0 +1,54 @@
+:root {
+    --font-family: "pretendard variable", pretendard, "sf pro kr", "sf pro text", "sf pro icons","apple sd gothic neo", -apple-system, blinkmacsystemfont, roboto, "noto sans kr", "segoe ui", "malgun gothic", "apple color emoji", "segoe ui emoji", "segoe ui symbol", sans-serif;
+    --font-family-content: "sf pro kr", "sf pro text", "sf pro icons", "apple sd gothic neo", -apple-system, blinkmacsystemfont, system-ui, roboto, "helvetica neue", "segoe ui", "noto sans kr", "malgun gothic", "apple color emoji", "segoe ui emoji", "segoe ui symbol", sans-serif;
+    --body-font-color: var(--default-font-color);
+    --body-background-color: var(--default-background-color);
+    --body-background-color-50: #FFFFFF80;
+    --header-font-color: #FFF;
+    --header-background-color: var(--point-color);
+    --point-color: #1CA8AF;
+    --point-background-color: #1CA8AF;
+    --point-background-color-0: #1CA8AF00;
+    --point-background-color-10: #1CA8AF1a;
+    --point-background-color-20: #1CA8AF33;
+    --point-background-color-30: #1CA8AF4d;
+    --point-background-color-40: #1CA8AF64;
+    --point-background-color-80: #1CA8AFc8;
+    --point-background-color-90: #1CA8AFe6;
+    --point-shadow-color: #0E7A80;
+    --point-shadow-color-30: #0E7A8033;
+    --point-shadow-color-50: #0E7A8080;
+    --blue-background-color: #8B9BA3;
+    --blue-background-color-0: rgb(139 155 163 / 0%);  /* 0% 불투명도 */
+    --blue-background-color-10: rgb(139 155 163 / 10%);  /* 10% 불투명도 */
+    --blue-background-color-20: rgb(139 155 163 / 20%);  /* 20% 불투명도 */
+    --blue-background-color-30: rgb(139 155 163 / 30%);  /* 30% 불투명도 */
+    --blue-background-color-40: rgb(139 155 163 / 40%);  /* 40% 불투명도 */
+    --blue-background-color-80: rgb(139 155 163 / 80%);  /* 80% 불투명도 */
+    --blue-background-color-90: rgb(139 155 163 / 90%);  /* 90% 불투명도 */
+    --red-background-color: #F99;
+    --red-background-color-0: #F990;
+    --red-background-color-10: #Ff99991a;
+    --red-background-color-20: #F993;
+    --red-background-color-30: #Ff99994d;
+    --red-background-color-40: #Ff999964;
+    --red-background-color-60: #Ff999996;
+    --red-background-color-80: #Ff9999c8;
+    --red-background-color-90: #Ff9999e6;
+    --sky-background-color: #96DCF8;
+    --sky-background-color-0: #96DCF800;
+    --sky-background-color-10: #96DCF81a;
+    --sky-background-color-20: #96DCF833;
+    --sky-background-color-30: #96DCF84d;
+    --sky-background-color-40: #96DCF864;
+    --sky-background-color-60: #96DCF896;
+    --sky-background-color-80: #96DCF8c8;
+    --sky-background-color-90: #96DCF8e6;
+}
+
+/* banner */
+:root {
+    --site-width: 1060px;
+    --banner-gap: 24px;
+    --banner-mobile-gap: 16px;
+}
