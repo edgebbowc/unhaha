@@ -1,9 +1,6 @@
 package commu.unhaha.domain;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -51,6 +48,16 @@ public class CommentImage extends BaseTimeEntity {
     public void markAsTemp() {
         this.status = ImageStatus.TEMP;
         this.comment = null;
+    }
+
+    /**
+     * 테스트용 빌더
+     */
+    @Builder
+    public CommentImage(String url, ImageStatus status, Comment comment) {
+        this.url = url;
+        this.status = status;
+        this.comment = comment;
     }
 }
 
