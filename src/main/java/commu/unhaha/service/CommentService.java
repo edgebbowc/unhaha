@@ -120,6 +120,7 @@ public class CommentService {
             CommentImage image = imageMap.get(url);
             if (image != null) {
                 image.attachToComment(comment);
+                commentImageRepository.save(image);
                 log.debug("새 이미지를 댓글에 연결: {}", url);
             }
         }
@@ -182,6 +183,7 @@ public class CommentService {
                     if (tempImage != null) {
                         // 댓글에 연결하고 ACTIVE 상태로 변경
                         tempImage.attachToComment(comment);
+                        commentImageRepository.save(tempImage);
                         log.debug("새 이미지를 댓글에 연결: {}", newUrl);
                     } else {
                         log.warn("요청한 이미지를 찾을 수 없음: {}", newUrl);
@@ -291,18 +293,6 @@ public class CommentService {
                 .collect(Collectors.toSet());
 
         // 3) 이 루트 댓글들에 딸린 모든 자식 댓글(깊이 무관)을 시간순으로 한 번에 조회
-//        List<Comment> allReplies = commentRepository
-//                .findByArticleIdAndParentIsNotNullOrderByCreatedDateAsc(articleId)
-//                .stream()
-//                // 자신의 최상위 루트가 이 페이지의 루트 중 하나인지 필터
-//                .filter(c -> {
-//                    Comment cur = c;
-//                    while (cur.getParent() != null) {
-//                        cur = cur.getParent();
-//                    }
-//                    return rootIds.contains(cur.getId());
-//                })
-//                .collect(Collectors.toList());
         List<Comment> allReplies = commentRepository
                 .findRepliesWithUserByArticleId(articleId)
                 .stream()
@@ -395,12 +385,6 @@ public class CommentService {
             current = current.getParent();
         }
         return current.getId();
-    }
-
-    // 편의를 위한 ID→DTO 맵 생성
-    private Map<Long, CommentDto> dtoById(List<CommentDto> roots, List<CommentDto> replies) {
-        return Stream.concat(roots.stream(), replies.stream())
-                .collect(Collectors.toMap(CommentDto::getId, Function.identity()));
     }
 
     /**
@@ -508,7 +492,7 @@ public class CommentService {
         /** 로그인한 유저가 해당 게시물을 좋아요 했는지 안 했는지 확인 **/
         if (!findLike(commentId, userId)) {
             /* 좋아요 하지 않은 댓글이면 좋아요 추가, true 반환 */
-            User user = userRepository.findById(userId).orElse(null);
+            User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("유저를 찾을 수 없습니다."));
             Comment comment = findById(commentId);
 
             /* UserLikeComment 엔티티 생성 */
