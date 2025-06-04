@@ -15,22 +15,25 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class SessionUser implements Serializable {
 
+    private Long id;
     private String storedImageName;
     private String email;
     private String nickname;
     private String accessToken;
 
     public SessionUser(User user, String accessToken) {
+        this.id =  user.getId();
         this.email = user.getEmail();
         this.nickname = user.getNickname();
         this.storedImageName = user.getProfileImage().getStoreFileUrl();
         this.accessToken = accessToken;
     }
 
-    public SessionUser(MypageForm mypageForm, String accessToken) {
+    public SessionUser(MypageForm mypageForm, SessionUser sessionUser) {
+        this.id = sessionUser.getId();
         this.email = mypageForm.getEmail();
         this.nickname = mypageForm.getNickname();
         this.storedImageName = mypageForm.getStoredImageName();
-        this.accessToken = accessToken;
+        this.accessToken = sessionUser.getAccessToken();
     }
 }
