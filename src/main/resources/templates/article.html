@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
@@ -146,125 +146,81 @@
             <div class="comments" id="comments">
                 <div class="best">
                 </div>
-                <div class="comment" id="comment1184947" aid="191452" uid="2191" cid="1184947" pid="" gid="1184947">
-                    <div class="main ">
-                        <div class="userImage" style="background-image: url('https://resources.chimhaha.net/userImage/1678614431561-6htcc9b5ber.jpg');"></div>
-                        <div class="commentWrapper">
-                            <div class="info">
-                                <div class="left">
-                                    <div class="nickName">
-                                        <div class="text"><span>관악구의자랑홍은채</span></div>
-                                    </div>
-                                    <div class="counts">
-                                        <div class="datetime">2시간전</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="commentContent" id="commentContent">
-                                <div>디로딩 ㄱㄱ 하시죠 </div>
-                                <div> 한 일주일만</div>
-                            </div>
-                            <div class="commentContainer" id="commentEtc"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="comment" id="comment1184955" aid="191452" uid="93031" cid="1184955" pid="1184947" gid="1184947">
-                    <div class="main isReply">
-                        <div class="userImage" style="background-image: url('/images/userImage.svg');"></div>
-                        <div class="commentWrapper">
-                            <div class="info">
-                                <div class="left">
-                                    <div class="nickName">
-                                        <div class="text"><span>게방장</span><span class='author'>글쓴이</span></div>
-                                    </div>
-                                    <div class="counts">
-                                        <div class="datetime">2시간전</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="commentContent" id="commentContent">
-                                <div>혹시 딥스외에 다른부위 운동해도 상관없나요?</div>
-                            </div>
-                            <div class="commentContainer" id="commentEtc"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="comment" id="comment1184964" aid="191452" uid="2191" cid="1184964" pid="1184955" gid="1184947">
-                    <div class="main isReply">
-                        <div class="userImage" style="background-image: url('https://resources.chimhaha.net/userImage/1678614431561-6htcc9b5ber.jpg');"></div>
-                        <div class="commentWrapper">
-                            <div class="info">
-                                <div class="left">
-                                    <div class="nickName">
-                                        <div class="text"><span>관악구의자랑홍은채</span></div>
-                                    </div>
-                                    <div class="counts">
-                                        <div class="datetime">2시간전</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="commentContent" id="commentContent">
-                                <span class="parentNickName">@게방장</span>
-                                <div>사실 쉬려면 아예 다 쉬어주는 게 좋긴 합니다 </div>
-                                <div> 저중량으로도 운동 안 하는 게 좋으니까요 선수 분들도 디로딩 할 땐 대체로 다들 그냥 쉬셔요</div>
-                            </div>
-                            <div class="commentContainer" id="commentEtc"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="comment" id="comment1184973" aid="191452" uid="93031" cid="1184973" pid="1184947" gid="1184947">
-                    <div class="main isReply">
-                        <div class="userImage" style="background-image: url('/images/userImage.svg');"></div>
-                        <div class="commentWrapper">
-                            <div class="info">
-                                <div class="left">
-                                    <div class="nickName">
-                                        <div class="text"><span>게방장</span><span class='author'>글쓴이</span></div>
-                                    </div>
-                                    <div class="counts">
-                                        <div class="datetime">2시간전</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="commentContent" id="commentContent">
-                                <div>정말 디로딩을 해야할 상황일까요? 힝..</div>
-                            </div>
-                            <div class="commentContainer" id="commentEtc"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="comment" id="comment1185833" aid="191452" uid="61393" cid="1185833" pid="" gid="1185833">
-                    <div class="main ">
-                        <div class="userImage" style="background-image: url('/images/userImage.svg');"></div>
-                        <div class="commentWrapper">
-                            <div class="info">
-                                <div class="left">
-                                    <div class="nickName">
-                                        <div class="text"><span>riderk</span></div>
-                                    </div>
-                                    <div class="counts">
-                                        <div class="datetime">17분전</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="commentContent" id="commentContent">
-                                <div>힘들다 싶을때는 쉬어주는게 길고 오래가는것 같인요.</div>
-                            </div>
-                            <div class="commentContainer" id="commentEtc"></div>
-                        </div>
-                    </div>
+                <!-- 루트 댓글 리스트 -->
+                <div th:each="comment : ${comments}">
+                    <div th:replace="~{fragment/commentFragment::commentFragment(comment=${comment})}"></div>
                 </div>
             </div>
-            <div class="commentContainer" id="newComment">
+
+            <!-- 댓글 목록 다음에 추가 -->
+            <div class="bottom-btn-area" th:if="${shouldShowPagination}">
+                <section class="pagination">
+                    <a th:if="${start > 1}" th:href="@{|?page=${start - 1}|}">
+                        <div class="large secondary prev">이전</div>
+                    </a>
+                    <div class="number">
+                        <a th:each="page: ${#numbers.sequence(start, end)}"
+                           th:classappend="${page == currentPage} ? 'selected' : 'notSelected'"th:text="${page}" th:href="@{|?page=${page}|}"></a>
+                    </div>
+                        <a th:if="${end < totalPages}" th:href="@{|?page=${end + 1}|}">
+                            <div class="large secondary next">다음</div>
+                        </a>
+                </section>
+            </div>
+
+            <!-- 로그인한 사용자만 댓글 입력 가능 -->
+            <div class="commentContainer" id="newComment" sec:authorize="isAuthenticated()">
                 <div class="contentContainer">
-                    <div class="commentInput">
-                        <div class="commentContent">
-                            <textarea disabled name="content" placeholder="로그인 해주세요"></textarea>
+                    <form id="commentUpload" th:action="@{'/articles/' + ${article.id} + '/comments'}" method="post"
+                          enctype="multipart/form-data">
+                        <div class="commentInput">
+                            <div class="commentContent">
+                                <textarea id="content" name="content" placeholder="댓글을 작성해주세요" maxlength="400"></textarea>
+                                <div class="attached" id="attached"></div>
+                            </div>
                         </div>
-                        <div class="submit"><button type="button" onclick="login(event);">로그인</button></div>
+
+                        <div class="commentAttaches">
+                            <div class="btn-area">
+                                <div class="attaches">
+                                    <button type="button" id="commentImageButton" class="commentImageButton">
+                                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                  d="M10.8476 1.61328H1.15236C0.801242 1.61328 0.516602 1.90425 0.516602 2.26317V9.73683C0.516602 10.0958 0.801242 10.3867 1.15236 10.3867H10.8476C11.1988 10.3867 11.4834 10.0958 11.4834 9.73683V2.26317C11.4834 1.90425 11.1988 1.61328 10.8476 1.61328ZM4.69141 4.13301C4.69141 4.75433 4.18773 5.25801 3.56641 5.25801C2.94509 5.25801 2.44141 4.75433 2.44141 4.13301C2.44141 3.51169 2.94509 3.00801 3.56641 3.00801C4.18773 3.00801 4.69141 3.51169 4.69141 4.13301ZM3.91287 9.72654L3.91288 9.72652H1.00293L3.06215 6.80075C3.12264 6.71432 3.20201 6.64284 3.29424 6.59163C3.38641 6.54037 3.48907 6.51077 3.59442 6.50506C3.69972 6.49936 3.80498 6.51763 3.90217 6.5586C3.9994 6.59951 4.08606 6.66204 4.15555 6.74137L5.11109 8.02409L6.63979 5.85209C6.71989 5.73765 6.825 5.64298 6.94713 5.57516C7.06919 5.50728 7.20514 5.46809 7.34465 5.46053C7.48409 5.45297 7.62348 5.47718 7.75218 5.53142C7.88094 5.5856 7.99569 5.66841 8.08771 5.77346L11.1212 9.72654H3.91287Z"></path>
+                                        </svg>
+                                    </button>
+                                    <input class="commentImageFile" type="file" accept="image/*">
+
+                                </div>
+                                <button type="submit" class="large primary" id="addCommentClick"
+                                        style="width: 74px; background-color: #1CA8AF;">
+                                    <i class="fa-solid fa-comment"></i>
+                                    등록
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 로그인하지 않은 사용자만 보임 -->
+            <div class="commentContainer" id="newComment" sec:authorize="isAnonymous()">
+                <div class="contentContainer">
+                    <div class="commentInput" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                        <div class="commentContent">
+                            <textarea name="content" readonly style="text-align: center; overflow: hidden; height: 28px;">로그인 후 댓글을 달 수 있습니다.</textarea>
+                        </div>
+                        <div class="sign" style="margin-top: 10px;">
+                            <button class="large primary" type="button" onclick="login(event);" style="background-color: #1CA8AF;">
+                                <img src="/images/icon_login.svg">
+                                로그인
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
+
             <div class="listAndEdit">
                 <div class="left">
                     <div class="button">
@@ -306,7 +262,34 @@
         anchor.className = 'embedly-card';
 
         element.appendChild( anchor );
-    } );
+    });
+
 </script>
+<script>
+    function login(event) {
+        event.preventDefault();
+        const currentUrl = window.location.href;
+        // 현재 페이지 URL을 로컬 스토리지에 저장
+        localStorage.setItem("redirectAfterLogin", currentUrl);
+        // 네이버 OAuth 로그인 페이지로 이동
+        window.location.href = "/login";
+    }
+</script>
+<script th:inline="javascript">
+    const articleId = [[${article.id}]];
+    const currentPage = [[${currentPage}]];
+    // 이미지 업로드 설정을 위한 옵션 객체
+    const imageUploadConfig = {
+        uploadUrl: '/comments/images',
+        mainImageButtonId: 'commentImageButton',
+        mainFileInputClass: '.commentImageFile',
+        mainAttachedDivId: 'attached',
+        mainFormId: 'commentUpload',
+        mainTextareaId: 'content'
+    };
+</script>
+<script src="/js/comment-image-upload.js"></script>
+<script th:src="@{/js/comment-replies.js}"></script>
+<script src="/js/comment-popup.js"></script>
 </body>
 </html>

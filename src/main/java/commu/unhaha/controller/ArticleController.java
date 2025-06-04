@@ -1,15 +1,14 @@
 package commu.unhaha.controller;
 
 import commu.unhaha.domain.*;
-import commu.unhaha.dto.ArticleDto;
-import commu.unhaha.dto.ArticlesDto;
-import commu.unhaha.dto.SessionUser;
-import commu.unhaha.dto.WriteArticleForm;
+import commu.unhaha.dto.*;
 import commu.unhaha.file.GCSFileStore;
 import commu.unhaha.repository.ArticleImageRepository;
 import commu.unhaha.repository.ArticleRepository;
 import commu.unhaha.repository.UserRepository;
 import commu.unhaha.service.ArticleService;
+import commu.unhaha.service.CommentService;
+import commu.unhaha.util.TimeAgoFormatter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -39,6 +38,8 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Controller
 @RequiredArgsConstructor
@@ -49,6 +50,7 @@ public class ArticleController {
     private final ArticleImageRepository articleImageRepository;
     private final UserRepository userRepository;
     private final GCSFileStore gcsFileStore;
+    private final CommentService commentService;
 
     @GetMapping("/write/new")
     public String writeArticle(@ModelAttribute("article") WriteArticleForm writeArticleForm) {
@@ -74,66 +76,77 @@ public class ArticleController {
 
     @GetMapping("/new")
     public String allArticles(Model model, @RequestParam(value = "page", defaultValue = "1") int page,
-                              @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable, String searchType, String keyword) {
+                               String searchType, String keyword) {
         int jpaPage = page - 1;
-        if (keyword == null) {
-            Page<ArticlesDto> articles = articleService.pageList(jpaPage); //페이징
-            int totalPages = articles.getTotalPages();
-            int maxPage = 5; //페이지 1~5, 6~10
-            int start = (articles.getNumber() / maxPage) * maxPage + 1; //start = 1, 6, 11
-            int end = totalPages == 0 ? 1 : (start + (maxPage - 1) < totalPages ? start + (maxPage - 1) : totalPages); //end= 5, 10, 15
-            Iterator<ArticlesDto> iterator = articles.iterator();
-            while (iterator.hasNext()) {
-                ArticlesDto articleDto = iterator.next();
-                Document doc = Jsoup.parse(articleDto.getContent());
-                if (doc.selectFirst("img") != null) {
-                    String src = doc.selectFirst("img").attr("src");
-                    articleDto.setThumb(src);
-                }
-                LocalDateTime createdDate = articleDto.getCreatedDate();
-                LocalDateTime now = LocalDateTime.now();
-                String dateTime = articleService.calDateTime(createdDate, now);
-                articleDto.setDateTime(dateTime);
-            }
-            model.addAttribute("articles", articles);
-            model.addAttribute("start", start);
-            model.addAttribute("end", end);
-            model.addAttribute("maxPage", maxPage);
-        } else {
-            Page<ArticlesDto> articles = articleService.searchPageList(jpaPage, keyword, searchType); //제목, 제목+내용 검색 페이징
-            int totalPages = articles.getTotalPages();
-            int maxPage = 5; //페이지 1~5, 6~10
-            int start = (articles.getNumber() / maxPage) * maxPage + 1; //start = 1, 6, 11
-            int end = totalPages == 0 ? 1 : (start + (maxPage - 1) < totalPages ? start + (maxPage - 1) : totalPages); //end= 5, 10, 15
-            Iterator<ArticlesDto> iterator = articles.iterator();
-            while (iterator.hasNext()) {
-                ArticlesDto articleDto = iterator.next();
-                Document doc = Jsoup.parse(articleDto.getContent());
-                if (doc.selectFirst("img") != null) {
-                    String src = doc.selectFirst("img").attr("src");
-                    articleDto.setThumb(src);
-                }
-                LocalDateTime createdDate = articleDto.getCreatedDate();
-                LocalDateTime now = LocalDateTime.now();
-                String dateTime = articleService.calDateTime(createdDate, now);
-                articleDto.setDateTime(dateTime);
-            }
-            model.addAttribute("articles", articles);
-            model.addAttribute("start", start);
-            model.addAttribute("end", end);
-            model.addAttribute("maxPage", maxPage);
+        Page<ArticlesDto> articles = (keyword == null)
+                ? articleService.pageList(jpaPage)
+                : articleService.searchPageList(jpaPage, keyword, searchType);
+
+        processArticles(articles);
+
+        PageInfo pageInfo = extractPageInfo(articles);
+
+        model.addAttribute("articles", articles);
+        model.addAttribute("start", pageInfo.start);
+        model.addAttribute("end", pageInfo.end);
+        model.addAttribute("maxPage", pageInfo.maxPage);
+
+        if (keyword != null) {
             model.addAttribute("searchType", searchType);
             model.addAttribute("keyword", keyword);
         }
+
         return "new";
     }
 
+    private void processArticles(Page<ArticlesDto> articles) {
+        for (ArticlesDto articleDto : articles) {
+            Document doc = Jsoup.parse(articleDto.getContent());
+            Element img = doc.selectFirst("img");
+            if (img != null) {
+                articleDto.setThumb(img.attr("src"));
+            }
+
+            String dateTime = TimeAgoFormatter.format((articleDto.getCreatedDate()), LocalDateTime.now());
+            articleDto.setDateTime(dateTime);
+        }
+    }
+
+    private <T> PageInfo extractPageInfo(Page<T> page) {
+        int maxPage = 5;
+        int totalPages = page.getTotalPages();
+        int start = (page.getNumber() / maxPage) * maxPage + 1;
+        int end = (totalPages == 0) ? 1 : Math.min(start + maxPage - 1, totalPages);
+        int currentPage = page.getNumber() + 1;
+
+        return new PageInfo(start, end, maxPage, totalPages, currentPage);
+    }
+
+    private static class PageInfo {
+        int start;
+        int end;
+        int maxPage;
+        int totalPages;
+        int currentPage; // 현재 페이지 추가
+
+        PageInfo(int start, int end, int maxPage, int totalPages, int currentPage) {
+            this.start = start;
+            this.end = end;
+            this.maxPage = maxPage;
+            this.totalPages = totalPages;
+            this.currentPage = currentPage;
+        }
+    }
+
+    // 게시글 조회
     @GetMapping("/articles/{articleId}")
     public String article(@PathVariable Long articleId, Model model, HttpServletRequest request,
+                          @RequestParam(value = "page", required = false) Integer page,
                           @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser) {
 
         ArticleDto articleDto;
-        boolean like = false;
+        boolean articleLike = false;
+        List<Long> likedCommentIds = null;
 
         if (loginUser == null) {
             log.info("비회원 조회");
@@ -147,15 +160,86 @@ public class ArticleController {
             Long userId = getUserIdByEmail(email);
 
             articleDto = articleService.memberView(articleId, email);
-            like = articleService.findLike(articleId, userId);
+            articleLike = articleService.findLike(articleId, userId);
+            // 사용자가 좋아요한 댓글 ID 목록 조회
+            likedCommentIds = commentService.findLikedCommentsByUser(userId);
         }
 
         setDateTime(articleDto);
+
+        // 댓글 페이징 처리
+
+//        int jpaPage = (page == null) ? 0 : Math.max(page - 1, 0);
+        int jpaPage = commentService.calculatePageIndex(articleId, page);
+
+        // 실제 댓글 조회
+        Page<CommentDto> commentPages = commentService.commentPageList(articleId, jpaPage);
+
+        // 페이지 사이즈 조회( 한 페이지당 보여줄 루트 댓글 개수)
+        int pageSize = commentPages.getSize();
+
+        // 루트 댓글 수만 별도로 가져오기
+        long rootCommentCount = commentService.countRootComments(articleId);
+
+        // 페이지네이션 표시 여부 결정 (페이지당 루트 댓글 기준)
+        boolean shouldShowPagination = rootCommentCount > pageSize;
+
+        log.info("commentPages.getContent : {}, commentPages.getTotalElements : {}", commentPages.getContent(), commentPages.getTotalElements());
+        // 댓글 DTO 후처리: 이미지 URL, dateTime 재귀 설정
+        for (CommentDto commentDto : commentPages) {
+            setCommentImageUrls(commentDto);
+            setDateTimeRecursively(commentDto);
+        }
+        // 페이지블록 계산 (1–5, 6–10)
+        PageInfo pageInfo = extractPageInfo(commentPages);
+
         model.addAttribute("article", articleDto);
+        model.addAttribute("comments", commentPages);
+        model.addAttribute("start", pageInfo.start);
+        model.addAttribute("end", pageInfo.end);
+        model.addAttribute("maxPage", pageInfo.maxPage);
+        model.addAttribute("totalPages", pageInfo.totalPages);
+        model.addAttribute("currentPage", pageInfo.currentPage);
+        model.addAttribute("shouldShowPagination", shouldShowPagination);
         model.addAttribute("loginUser", loginUser);
-        model.addAttribute("like", like);
+        model.addAttribute("like", articleLike);
+        model.addAttribute("likedCommentIds", likedCommentIds);
 
         return "article";
+    }
+    // 컨트롤러 또는 서비스 레이어에서
+    private void setCommentImageUrls(CommentDto commentDto) {
+        // 이미지 URL 추출 (마크다운 형식: ![이미지](URL) 에서 URL 부분 추출)
+        List<String> imageUrls = new ArrayList<>();
+        String content = commentDto.getContent();
+
+        // 마크다운 이미지 패턴 매칭
+        Pattern pattern = Pattern.compile("!\\[이미지\\]\\((.*?)\\)");
+        Matcher matcher = pattern.matcher(content);
+
+        // 이미지 URL 추출 및 원본 내용에서 제거
+        StringBuffer cleanContent = new StringBuffer();
+        while (matcher.find()) {
+            imageUrls.add(matcher.group(1));
+            matcher.appendReplacement(cleanContent, ""); // 이미지 마크다운 제거
+        }
+        matcher.appendTail(cleanContent);
+
+        commentDto.setContent(cleanContent.toString().trim());
+        commentDto.setImageUrls(imageUrls);
+
+        for (CommentDto child : commentDto.getChildren()) {
+            setCommentImageUrls(child);
+        }
+    }
+
+    private void setDateTimeRecursively(CommentDto commentDto) {
+        String dateTime = TimeAgoFormatter.format(commentDto.getCreatedDate(), LocalDateTime.now());
+        commentDto.setDateTime(dateTime);
+
+        for (CommentDto child : commentDto.getChildren()) {
+            setDateTimeRecursively(child);
+        }
     }
 
     private String extractClientIp(HttpServletRequest request) {
@@ -188,6 +272,7 @@ public class ArticleController {
                 )).getId();
     }
 
+    /** 게시글 수정폼 조회 */
     @GetMapping("/articles/{articleId}/edit")
     public String editForm(@PathVariable Long articleId, Model model) {
         Article article = articleRepository.findById(articleId)
@@ -232,7 +317,7 @@ public class ArticleController {
 
     /** ckeditor 이미지 업로드 */
     @ResponseBody
-    @PostMapping("/images/article")
+    @PostMapping("/articles/images")
     public Map<String, Object> uploadArticleImage(MultipartHttpServletRequest request) throws IOException {
         Map<String, Object> response = new HashMap<>();
 
@@ -249,7 +334,7 @@ public class ArticleController {
         return response;
     }
 
-
+    /** 게시글 좋아요 */
     @PostMapping("/like/{articleId}")
     public String like(@PathVariable Long articleId, @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser) {
 
@@ -273,9 +358,12 @@ public class ArticleController {
     @PostConstruct
     public void init() {
         User user = userRepository.save(new User("길동", "홍길동", "222@naver.com", Role.USER, new UploadFile("userImage", "userImage")));
+        User user2 = userRepository.save(new User("로니콜먼", "로니콜먼", "333@naver.com", Role.USER, new UploadFile("userImage", "userImage")));
         for (int i = 0; i < 400; i++) {
             articleRepository.save(new Article("보디빌딩", "오운완" + i, "오늘도 운동 완료", user, 0, 0));
         }
+        commentService.createComment(user2, 400L, "Light Weight BABY!", null,null);
+        commentService.createComment(user2, 400L, "Easy Weight BABY!", null,1L);
 //        articleRepository.save(new Article("보디빌딩", "오운완", "오늘도 운동 완료", user));
 //        articleRepository.save(new Article("파워리프팅", "3대 500달성", "힘들다", user));
 //        articleRepository.save(new Article("파워리프팅", "3대 500달성", "힘들다", user));

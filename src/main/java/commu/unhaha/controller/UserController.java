@@ -160,7 +160,7 @@ public class UserController {
     }
 
     private void setSession(MypageForm mypageForm, SessionUser loginUser, HttpSession session) {
-        SessionUser sessionUser = new SessionUser(mypageForm, loginUser.getAccessToken());
+        SessionUser sessionUser = new SessionUser(mypageForm, loginUser);
         session.setAttribute(SessionConst.LOGIN_USER, sessionUser);
     }
 

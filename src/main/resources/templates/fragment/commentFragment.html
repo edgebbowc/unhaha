@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div th:fragment="commentFragment(comment)">
+    <div class="comment" th:id="'comment' + ${comment.id}"
+         th:data-author-id="${comment.userId}"
+         th:data-current-user-id="${loginUser != null ? loginUser.id : 0}">
+
+        <div class="main" th:classappend="${comment.isReply} ? ' isReply'">
+            <div class="userImage"
+                 th:style="*{comment.storeFileUrl != 'userImage'} ? 'background-image:url(' + @{{imageName}(imageName = *{comment.storeFileUrl})} + ');' : ''"></div>
+            <div class="commentWrapper">
+                <div class="info" style="display: flex; align-items: center;">
+                    <div class="nickName">
+                        <div class="text">
+                            <span class="author-me" th:if="${loginUser?.id == comment.userId}"> 내 댓글 </span>
+                            <span class="name" th:text="${comment.nickname}">닉네임</span>
+                            <span class="author" th:if="${article.user.id == comment.userId}"> 글쓴이 </span>
+                        </div>
+                    </div>
+                    <div class="datetime" th:text="${comment.dateTime}">시간</div>
+                </div>
+                <div>
+                    <div class="commentContent" id="commentContent" th:text="${comment.content}">내용</div>
+                    <div class="commentContent" id="commentContent">
+                        <div class="parentNickName" th:if="${comment.nestedReply}">
+                            <span th:text="'@' + ${comment.parentNickname}">@부모닉네임</span>
+                            <!-- 부모 댓글 작성자가 게시글 작성자인 경우 작성자 표시 -->
+                            <span class="author" th:if="${comment.parentAuthor}">！</span>
+                        </div>
+                        <th:block th:if="${comment.imageUrls != null and !comment.imageUrls.isEmpty()}">
+                            <div>
+                                <th:block th:each="imageUrl : ${comment.imageUrls}">
+                                    <a th:href="${imageUrl}" target="_blank">
+                                        <img th:alt="${imageUrl}" th:src="${imageUrl}" class="comment-image">
+                                    </a>
+                                </th:block>
+                            </div>
+                        </th:block>
+                    </div>
+                    <div class="commentContainer" id="commentEtc"></div>
+                </div>
+
+                <div class="btn-area" sec:authorize="isAuthenticated()">
+                    <div class="likeBtn">
+                        <div class="commentLike">
+                            <div class="commentLike">
+                                <form th:action="@{'/articles/' + ${article.id} + '/comments/' + ${comment.id} + '/like'}" method="post" th:onsubmit="|return handleCommentLike(event, ${comment.id}, ${comment.userId}, ${loginUser?.id ?: 0})|">
+                                    <input type="hidden" name="currentPage" th:value="${currentPage}">
+                                    <button id="commentLike" th:classappend="${likedCommentIds != null and likedCommentIds.contains(comment.id)} ? 'activated' : ''">
+                                        <svg width="12" height="12" viewBox="0 0 512 512" fill="none"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm130.7 57.9c-4.2-13.6 7.1-25.9 21.3-25.9l212.5 0c14.2 0 25.5 12.4 21.3 25.9C369 368.4 318.2 408 258.2 408s-110.8-39.6-127.5-94.1zm2.8-183.3l89.9 47.9c10.7 5.7 10.7 21.1 0 26.8l-89.9 47.9c-7.9 4.2-17.5-1.5-17.5-10.5c0-2.8 1-5.5 2.8-7.6l36-43.2-36-43.2c-1.8-2.1-2.8-4.8-2.8-7.6c0-9 9.6-14.7 17.5-10.5zM396 141.1c0 2.8-1 5.5-2.8 7.6l-36 43.2 36 43.2c1.8 2.1 2.8 4.8 2.8 7.6c0 9-9.6 14.7-17.5 10.5l-89.9-47.9c-10.7-5.7-10.7-21.1 0-26.8l89.9-47.9c7.9-4.2 17.5 1.5 17.5 10.5z"/>
+                                        </svg>
+                                        <span> 운하하 </span>&nbsp;
+                                        <span th:if="${comment.likeCount > 0}" th:text="${comment.likeCount}"></span>
+                                    </button>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="commentReply">
+                        <button id="commentReply">
+                            <svg width="12" height="12" viewBox="0 0 512 512" fill="none"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path d="M123.6 391.3c12.9-9.4 29.6-11.8 44.6-6.4c26.5 9.6 56.2 15.1 87.8 15.1c124.7 0 208-80.5 208-160s-83.3-160-208-160S48 160.5 48 240c0 32 12.4 62.8 35.7 89.2c8.6 9.7 12.8 22.5 11.8 35.5c-1.4 18.1-5.7 34.7-11.3 49.4c17-7.9 31.1-16.7 39.4-22.7zM21.2 431.9c1.8-2.7 3.5-5.4 5.1-8.1c10-16.6 19.5-38.4 21.4-62.9C17.7 326.8 0 285.1 0 240C0 125.1 114.6 32 256 32s256 93.1 256 208s-114.6 208-256 208c-37.1 0-72.3-6.4-104.1-17.9c-11.9 8.7-31.3 20.6-54.3 30.6c-15.1 6.6-32.3 12.6-50.1 16.1c-.8 .2-1.6 .3-2.4 .5c-4.4 .8-8.7 1.5-13.2 1.9c-.2 0-.5 .1-.7 .1c-5.1 .5-10.2 .8-15.3 .8c-6.5 0-12.3-3.9-14.8-9.9c-2.5-6-1.1-12.8 3.4-17.4c4.1-4.2 7.8-8.7 11.3-13.5c1.7-2.3 3.3-4.6 4.8-6.9l.3-.5z"/>
+                            </svg>
+                            댓글쓰기
+                        </button>
+                    </div>
+
+
+                    <div class="popUpBtn" onclick="toggleCommentOptions(this)">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                  d="M17.5 13C16.6716 13 16 12.3284 16 11.5C16 10.6716 16.6716 10 17.5 10C18.3284 10 19 10.6716 19 11.5C19 12.3284 18.3284 13 17.5 13ZM11.5 13C10.6716 13 10 12.3284 10 11.5C10 10.6716 10.6716 10 11.5 10C12.3284 10 13 10.6716 13 11.5C13 12.3284 12.3284 13 11.5 13ZM4 11.5C4 12.3284 4.67157 13 5.5 13C6.32843 13 7 12.3284 7 11.5C7 10.6716 6.32843 10 5.5 10C4.67157 10 4 10.6716 4 11.5Z">
+                            </path>
+                        </svg>
+                    </div>
+
+                    <!-- 타임리프 조건부 렌더링으로 두 가지 다른 팝업 메뉴 중 하나만 표시 -->
+                    <!-- 본인 댓글일 경우 -->
+                    <ul id="popUp" th:if="${comment.userId == (loginUser?.id ?: 0)}" class=""
+                        style="top: 30px; left: 130px; width: 70px;">
+                        <li class="commentEdit">
+                            <button id="commentEdit">
+                                수정
+                            </button>
+                        </li>
+                        <li class="commentDelete">
+                            <form th:action="@{'/articles/' + ${article.id} + '/comments/' + ${comment.id}}" th:method="delete">
+                                <button id="commentDelete" onclick="return confirm('정말 삭제하시겠습니까?')">
+                                    삭제
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+
+                    <!-- 타인 댓글일 경우 -->
+                    <ul id="popUp" th:unless="${comment.userId == (loginUser?.id ?: 0)}" class=""
+                        style="top: 30px; left: 130px; width: 70px;">
+                        <li class="report">
+                            <button type="button">
+                                신고
+                            </button>
+                        </li>
+                        <li class="block">
+                            <button type="button">
+                                차단
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

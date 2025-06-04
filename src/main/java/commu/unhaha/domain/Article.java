@@ -8,7 +8,6 @@ import javax.persistence.*;
 
 @Entity
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Article extends BaseTimeEntity{
 
