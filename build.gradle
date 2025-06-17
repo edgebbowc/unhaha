@@ -25,6 +25,11 @@ repositories {
 	mavenCentral()
 }
 
+configurations.all {
+	resolutionStrategy.dependencySubstitution {
+		substitute module("com.google.guava:listenablefuture") using module("com.google.guava:guava:32.1.1-jre")
+	}
+}
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
