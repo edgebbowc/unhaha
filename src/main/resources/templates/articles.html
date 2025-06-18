@@ -11,11 +11,17 @@
 
 <body>
 <!--동적으로 alert창 변경-->
-<section id="flash" th:classappend="${message} ? 'trueBackground' : (${error} ? 'falseBackground' : '')" th:if="${message} or ${error}">
+<section id="flash" th:classappend="${message} ? 'trueBackground' : (${error} ? 'falseBackground' : '')"
+         th:if="${message} or ${error}">
     <div class="message" th:text="${message} ?: ${error}"></div>
     <div class="bar"></div>
     <div class="close">
-        <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="times" class="svg-inline--fa fa-times fa-w-11" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 352 512"><path fill="currentColor" d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"></path></svg>
+        <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="times"
+             class="svg-inline--fa fa-times fa-w-11" role="img" xmlns="http://www.w3.org/2000/svg"
+             viewBox="0 0 352 512">
+            <path fill="currentColor"
+                  d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"></path>
+        </svg>
     </div>
 </section>
 
@@ -26,11 +32,11 @@
     <article id="list">
         <section id="title">
             <h1>
-                <div>전체게시글</div>
+                <div th:text="${boardTitle}">게시판 제목</div>
             </h1>
         </section>
         <section id="boardList" class="">
-            <a class="item" th:each="article : ${articles}" th:href="@{/articles/{articleId}(articleId=${article.id})}">
+            <a class="item" th:each="article : ${articles}" th:href="@{/{boardType}/{articleId}(boardType=${boardType},articleId=${article.id}, page=${currentPage})}">
                 <div class="image">
                     <img th:if="${article.thumb}" th:src="${article.thumb}" style="width: 57.38px">
                     <i class="fa-regular fa-file-lines" th:unless="${article.thumb}"></i>
@@ -40,7 +46,10 @@
                         <span class="category" th:text="${article.board}">카테고리</span>
                         <span class="title">
                             <span class="text" th:text="${article.title}">제목</span>
-                            <span class="commentCount">5</span>
+                            <span class="commentCount" th:if="${article.commentCount > 0}">
+                                <i class="fa-regular fa-comment-dots"></i>
+                                <span th:text="${article.commentCount}">0</span>
+                            </span>
                         </span>
                     </div>
                     <div class="etc">
@@ -48,46 +57,57 @@
                         <div class="dot"></div>
                         <div class="datetime" th:text="${article.dateTime}">1시간전</div>
                         <div class="dot"></div>
-                        <div class="viewCount"><i class="fa-regular fa-eye"></i><th:block th:text="${article.viewCount}"></th:block></div>
+                        <div class="viewCount"><i class="fa-regular fa-eye"></i>
+                            <th:block th:text="${article.viewCount}"></th:block>
+                        </div>
                         <th:block th:if="${article.likeCount} > 0">
                             <div class="dot"></div>
-                            <div class="likeCount"><i class="fa-regular fa-thumbs-up"></i><th:block th:text="${article.likeCount}"></th:block></div>
+                            <div class="likeCount"><i class="fa-regular fa-thumbs-up"></i>
+                                <th:block th:text="${article.likeCount}"></th:block>
+                            </div>
                         </th:block>
                     </div>
                 </div>
             </a>
         </section>
 
+        <!-- 공통 페이지네이션 -->
         <section class="pagination" th:unless="${keyword}">
             <div class="prev">
                 <a th:if="${start > 1}" th:href="@{|?page=${start - 1}|}">이전</a>
             </div>
             <div class="number">
                 <a th:each="page: ${#numbers.sequence(start, end)}"
-                   th:classappend="${page == articles.number+1} ? 'selected' : 'notSelected'"th:text="${page}" th:href="@{|?page=${page}|}"></a>
+                   th:classappend="${page == articles.number+1} ? 'selected' : 'notSelected'" th:text="${page}"
+                   th:href="@{|?page=${page}|}"></a>
             </div>
             <div class="next">
                 <a th:if="${end < articles.totalPages}" th:href="@{|?page=${start + maxPage}|}">다음</a>
             </div>
         </section>
 
+        <!-- 검색된 상태의 페이지네이션 -->
         <section class="pagination" th:if="${keyword}">
             <div class="prev">
-                <a th:if="${start > 1}" th:href="@{|?searchType=${searchType}&keyword=${keyword}&page=${start - 1}|}">이전</a>
+                <a th:if="${start > 1}"
+                   th:href="@{|?searchType=${searchType}&keyword=${keyword}&page=${start - 1}|}">이전</a>
             </div>
             <div class="number">
                 <a th:each="page: ${#numbers.sequence(start, end)}"
-                   th:classappend="${page == articles.number+1} ? 'selected' : 'notSelected'"th:text="${page}" th:href="@{|?searchType=${searchType}&keyword=${keyword}&page=${page}|}"></a>
+                   th:classappend="${page == articles.number+1} ? 'selected' : 'notSelected'" th:text="${page}"
+                   th:href="@{|?searchType=${searchType}&keyword=${keyword}&page=${page}|}"></a>
             </div>
             <div class="next">
-                <a th:if="${end < articles.totalPages}" th:href="@{|?searchType=${searchType}&keyword=${keyword}&page=${start + maxPage}|}">다음</a>
+                <a th:if="${end < articles.totalPages}"
+                   th:href="@{|?searchType=${searchType}&keyword=${keyword}&page=${start + maxPage}|}">다음</a>
             </div>
         </section>
 
+        <!-- 검색 및 글쓰기 -->
         <div class="searchAndWrite">
             <div></div>
             <div>
-                <form action="/new">
+                <form th:action="@{'/' + ${boardType}}">
                     <div class="search">
                         <select name="searchType">
                             <option value="title">제목</option>
@@ -100,7 +120,7 @@
                 </form>
             </div>
             <div class="write">
-                <a sec:authorize="isAuthenticated()" th:href="@{/write/new}">글쓰기</a>
+                <a sec:authorize="isAuthenticated()" th:href="${boardType == 'best'} ? @{/write/new} : @{'/write/' + ${boardType}}">글쓰기</a>
             </div>
         </div>
     </article>
