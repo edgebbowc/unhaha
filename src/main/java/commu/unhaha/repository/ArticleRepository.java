@@ -8,9 +8,21 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
+
 public interface ArticleRepository extends JpaRepository<Article, Long>, ArticleRepositoryCustom {
-    Page<Article> findByTitleContaining(String keyword, Pageable pageable);
-    Page<Article> findByTitleContainingOrContentContaining(String keyword, String keyword2, Pageable pageable);
+
+    // 전체글 이전글/다음글 (기존과 동일)
+    Article findTopByIdLessThanOrderByIdDesc(Long id);
+    Article findTopByIdGreaterThanOrderByIdAsc(Long id);
+
+    // 인기글 이전글/다음글 (likeAchievedAt 기준으로 변경)
+    Article findTopByLikeAchievedAtLessThanOrderByLikeAchievedAtDesc(LocalDateTime likeAchievedAt);
+    Article findTopByLikeAchievedAtGreaterThanOrderByLikeAchievedAtAsc(LocalDateTime likeAchievedAt);
+
+    // 보디빌딩 게시글 이전글/다음글
+    Article findTopByIdLessThanAndBoardOrderByIdDesc(Long id, String board);
+    Article findTopByIdGreaterThanAndBoardOrderByIdAsc(Long id, String board);
 
     @Modifying
     @Query("UPDATE Article a SET a.viewCount = a.viewCount + 1 WHERE a.id = :articleId")
