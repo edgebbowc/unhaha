@@ -27,7 +27,7 @@
         <input type="hidden" name="ogImage" value="https://resources.chimhaha.net/assets/1672481307994-37shc7upssu.jpg">
         <input type="hidden" name="url" value="https://chimhaha.net/exercise/191452">
         <div class="sub">
-            <div class="back"><a href="/exercise?page=1">🏋️운동&amp;다이어트 ></a></div>
+            <div class="back"><a th:href="@{|${basePath}|}" th:text="'💪🏼' + ${article.board} + ' >'">게시판 이름</a></div>
         </div>
         <div class="item">
             <div class="info">
@@ -39,10 +39,6 @@
                         <div class="userImage" style="background-image: url('/images/userImage.svg');"></div>
                         <div class="nickName">
                             <th:block th:text="${article.user.nickname}">닉네임</th:block>
-                            <ul class="userPopup">
-                                <li><a th:href="@{|/user/${article.user.nickname}/articles|}">게시글 보기</a></li>
-                                <li><a th:href="@{|/user/${article.user.nickname}/comments|}">댓글 보기</a></li>
-                            </ul>
                         </div>
                         <div class="dot"></div>
                         <div class="datetime" th:text="${article.dateTime}">2시간전</div>
@@ -64,16 +60,16 @@
                             </svg>
                         </div>
                         <ul class="popUp">
-                            <form th:action="@{|/articles/${article.id}/edit|}" method="POST">
+                            <form th:action="@{|${basePath}/${article.id}/edit|}" method="POST">
                                 <li class="edit">
-                                    <a th:href="@{|/articles/${article.id}/edit|}">
+                                    <a th:href="@{|${basePath}/${article.id}/edit|}">
                                         <button type="button" name="submit" value="edit">
                                             <i class="fa-regular fa-edit"></i>&nbsp;수정
                                         </button>
                                     </a>
                                 </li>
                             </form>
-                            <form th:action="@{/articles/{id}/delete(id=${article.id})}" method="post">
+                            <form th:action="@{{basePath}/{id}/delete(id=${article.id}, basePath=${basePath})}" method="post">
                                 <li class="delete">
                                     <button type="submit" name="submit" value="delete" onclick="return confirm('정말로 삭제하시겠습니까?');">
                                         <i class="fa-regular fa-trash-alt"></i>&nbsp;삭제</button>
@@ -102,7 +98,7 @@
                     <span>😂</span>
                 </button>
 
-                <form method="POST" th:action="@{/like/{articleId}(articleId=${article.id})}" th:if="${loginUser} != null and ${not #strings.equals(article.user.email, loginUser.email)}">
+                <form method="POST" th:action="@{{basePath}/like/{articleId}(basePath=${basePath}, articleId=${article.id})}" th:if="${loginUser} != null and ${not #strings.equals(article.user.email, loginUser.email)}">
                     <button id="like" class="like" th:if="${like}==false">
                         <span>운하하</span>
                         <span>😂</span>
@@ -120,23 +116,24 @@
 
             <div class="listAndEdit">
                 <div class="left">
-                    <div class="button">
-                        <a href="/exercise/191481?page=1">
-                            &lt; 이전 글
+                    <div class="button" th:if="${prevArticle != null}">
+                        <a th:href="@{${basePath + '/' + prevArticle.id}(page=${param.page})}">
+                            <i class="fa-solid fa-arrow-left"></i> 이전 글
                         </a>
                     </div>
                 </div>
                 <div class="center">
                     <div class="button">
-                        <a href="/exercise?page=1">
+                        <!-- 인기글은 /best로, 전체글은 /new로 이동 -->
+                        <a th:href="@{${basePath}(page=${param.page})}">
                             목록
                         </a>
                     </div>
                 </div>
                 <div class="right">
-                    <div class="button">
-                        <a href="/exercise/191383?page=1">
-                            다음 글 &gt;
+                    <div class="button" th:if="${nextArticle != null}">
+                        <a th:href="@{${basePath + '/' + nextArticle.id}(page=${param.page})}">
+                            다음 글 <i class="fa-solid fa-arrow-right"></i>
                         </a>
                     </div>
                 </div>
@@ -171,7 +168,7 @@
             <!-- 로그인한 사용자만 댓글 입력 가능 -->
             <div class="commentContainer" id="newComment" sec:authorize="isAuthenticated()">
                 <div class="contentContainer">
-                    <form id="commentUpload" th:action="@{'/articles/' + ${article.id} + '/comments'}" method="post"
+                    <form id="commentUpload" th:action="@{${basePath} + '/' + ${article.id} + '/comments'}" method="post"
                           enctype="multipart/form-data">
                         <div class="commentInput">
                             <div class="commentContent">
@@ -233,21 +230,6 @@
                 </div>
             </div>
         </div>
-
-        <section class="pagination">
-            <div class="prev">
-            </div>
-            <div class="number">
-                <a class="selected">1</a>
-                <a class="notSelected" href="/exercise?page=2">2</a>
-                <a class="notSelected" href="/exercise?page=3">3</a>
-                <a class="notSelected" href="/exercise?page=4">4</a>
-                <a class="notSelected" href="/exercise?page=5">5</a>
-            </div>
-            <div class="next">
-                <a href="/exercise?page=6">다음</a>
-            </div>
-        </section>
     </article>
 </main>
 <script src="/js/read.js"></script>
@@ -278,6 +260,7 @@
 <script th:inline="javascript">
     const articleId = [[${article.id}]];
     const currentPage = [[${currentPage}]];
+    const basePath = [[${basePath}]];
     // 이미지 업로드 설정을 위한 옵션 객체
     const imageUploadConfig = {
         uploadUrl: '/comments/images',
