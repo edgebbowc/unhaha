@@ -17,6 +17,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -52,15 +53,78 @@ public class ArticleController {
     private final GCSFileStore gcsFileStore;
     private final CommentService commentService;
 
-    @GetMapping("/write/new")
-    public String writeArticle(@ModelAttribute("article") WriteArticleForm writeArticleForm) {
+    /**
+     * 홈페이지 (인기글 목록)
+     */
+    @GetMapping("/")
+    public String home(Model model,
+                       @RequestParam(required = false) String result,
+                       @RequestParam(value = "page", defaultValue = "1") int page,
+                       @RequestParam(value = "searchType", required = false) String searchType,
+                       @RequestParam(value = "keyword", required = false) String keyword) {
+
+        Page<ArticlesDto> articles = articleService.findPopularArticles(page - 1, searchType, keyword);
+        
+        processArticles(articles);
+
+        PageInfo pageInfo = extractPageInfo(articles);
+
+        model.addAttribute("articles", articles);
+        model.addAttribute("start", pageInfo.start);
+        model.addAttribute("end", pageInfo.end);
+        model.addAttribute("maxPage", pageInfo.maxPage);
+        model.addAttribute("currentPage", pageInfo.currentPage);
+        model.addAttribute("result", result);
+        if (keyword != null) {
+            model.addAttribute("searchType", searchType);
+            model.addAttribute("keyword", keyword);
+        }
+        return "home";
+    }
+
+    /**
+     * 게시글 작성 폼
+     */
+    @GetMapping("/write/{boardType}")
+    public String writeArticle(@PathVariable String boardType,
+                               @ModelAttribute("article") WriteArticleForm writeArticleForm,
+                               Model model) {
+        // 유효한 게시판 타입인지 검증
+        if (!isValidBoardType(boardType)) {
+            throw new IllegalArgumentException("Invalid board type: " + boardType);
+        }
+
+        String defaultBoard = mapBoardTypeToKorean(boardType);
+
+        // URL에 따라 board 필드 자동 설정
+        writeArticleForm.setBoard(defaultBoard);
+
         return "writeArticleForm";
     }
 
-    @PostMapping("/write/new")
-    public String saveArticle(@Validated @ModelAttribute("article") WriteArticleForm form, BindingResult bindingResult,
+    private String mapBoardTypeToKorean(String boardType) {
+        switch (boardType.toLowerCase()) {
+            case "bodybuilding": return "보디빌딩";
+            case "powerlifting": return "파워리프팅";
+            case "crossfit": return "크로스핏";
+            case "new":
+            default: return ""; // 빈 값 = "게시판을 선택해 주세요"
+        }
+    }
+
+
+    /**
+     * 게시글 작성 저장
+     */
+    @PostMapping("/write/{boardType}")
+    public String saveArticle(@PathVariable String boardType,
+                              @Validated @ModelAttribute("article") WriteArticleForm form, BindingResult bindingResult,
                               @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser,
                               RedirectAttributes rttr) {
+        // 유효한 게시판 타입인지 검증
+        if (!isValidBoardType(boardType)) {
+            throw new IllegalArgumentException("Invalid board type: " + boardType);
+        }
 
         if (bindingResult.hasErrors()) {
             log.info("errors={}", bindingResult);
@@ -71,142 +135,267 @@ public class ArticleController {
 
         Long articleId = articleService.createArticle(form, user);
         rttr.addAttribute("articleId", articleId);
-        return "redirect:/articles/{articleId}";
+        return "redirect:/{boardType}/{articleId}";
     }
 
-    @GetMapping("/new")
-    public String allArticles(Model model, @RequestParam(value = "page", defaultValue = "1") int page,
-                               String searchType, String keyword) {
+    /** 게시글 수정폼 조회 */
+    @GetMapping("/{boardType}/{articleId}/edit")
+    public String editForm(@PathVariable String boardType,
+                           @PathVariable Long articleId, Model model) {
+        // 유효한 게시판 타입인지 검증
+        if (!isValidBoardType(boardType)) {
+            throw new IllegalArgumentException("Invalid board type: " + boardType);
+        }
+
+        Article article = articleRepository.findById(articleId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
+
+        WriteArticleForm writeArticleForm = WriteArticleForm.builder()
+                .board(article.getBoard())
+                .title(article.getTitle())
+                .content(article.getContent())
+                .build();
+        model.addAttribute("article", writeArticleForm);
+        return "editArticleForm";
+    }
+
+    /** 게시글 수정 */
+    @PostMapping("/{boardType}/{articleId}/edit")
+    public String edit(@PathVariable String boardType,
+                       @PathVariable Long articleId, @Validated @ModelAttribute("article") WriteArticleForm form, BindingResult bindingResult) {
+        // 유효한 게시판 타입인지 검증
+        if (!isValidBoardType(boardType)) {
+            throw new IllegalArgumentException("Invalid board type: " + boardType);
+        }
+
+        if (bindingResult.hasErrors()) {
+            log.info("errors={}", bindingResult);
+            return "editArticleForm";
+        }
+        articleService.editArticle(articleId, form);
+        return "redirect:/{boardType}/{articleId}";
+    }
+
+    /** 게시글 삭제 */
+    @PostMapping("/{boardType}/{articleId}/delete")
+    public String deleteArticle(@PathVariable String boardType,
+                                @PathVariable Long articleId,
+                                RedirectAttributes redirectAttributes) {
+        // 유효한 게시판 타입인지 검증
+        if (!isValidBoardType(boardType)) {
+            throw new IllegalArgumentException("Invalid board type: " + boardType);
+        }
+
+        try {
+            articleService.deleteArticle(articleId);
+            redirectAttributes.addFlashAttribute("message", "게시글이 성공적으로 삭제되었습니다.");
+            return "redirect:/" + boardType; // 게시글 목록 페이지로 리다이렉트
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", "해당 게시글을 찾을 수 없습니다.");
+            return "redirect:/" + boardType;
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "게시글 삭제 중 오류가 발생했습니다.");
+            return "redirect:/" + boardType;
+        }
+    }
+
+    /** ckeditor 이미지 업로드 */
+    @ResponseBody
+    @PostMapping("/articles/images")
+    public Map<String, Object> uploadArticleImage(MultipartHttpServletRequest request) throws IOException {
+        Map<String, Object> response = new HashMap<>();
+
+        MultipartFile uploadFile = request.getFile("upload");
+
+        UploadFile uploaded = gcsFileStore.storeArticleImage(uploadFile);
+        //ArticleImage에 임시파일로 저장
+        ArticleImage articleImage = ArticleImage.createTemp(uploaded.getStoreFileUrl());
+        articleImageRepository.save(articleImage);
+
+        response.put("uploaded", true);
+        response.put("url", uploaded.getStoreFileUrl()); //  GCS URL
+
+        return response;
+    }
+
+    /** 게시글 좋아요 */
+    @PostMapping("/{boardType}/like/{articleId}")
+    public String like(@PathVariable String boardType,
+                       @PathVariable Long articleId,
+                       @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser) {
+        // 유효한 게시판 타입인지 검증
+        if (!isValidBoardType(boardType)) {
+            throw new IllegalArgumentException("Invalid board type: " + boardType);
+        }
+        Long member_id = userRepository.findByEmail(loginUser.getEmail()).orElse(null).getId();
+
+        articleService.saveLike(articleId, member_id);
+
+        return "redirect:/{boardType}/{articleId}";
+    }
+
+    /**
+     * 게시판 목록
+     */
+    @GetMapping({"/new", "/best", "/bodybuilding", "/powerlifting", "/crossfit"})
+    public String listArticles(Model model,
+                               HttpServletRequest request,
+                               @RequestParam(value = "page", defaultValue = "1") int page,
+                               @RequestParam(value = "searchType", required = false) String searchType,
+                               @RequestParam(value = "keyword", required = false) String keyword,
+                               @RequestParam(value = "result", required = false) String result) {
+
+        String boardType = extractBoardType(request.getRequestURI());
+
+        BoardType type = BoardType.fromString(boardType);
         int jpaPage = page - 1;
-        Page<ArticlesDto> articles = (keyword == null)
-                ? articleService.pageList(jpaPage)
-                : articleService.searchPageList(jpaPage, keyword, searchType);
+
+        Page<ArticlesDto> articles = articleService.findArticles(boardType, jpaPage, searchType, keyword);
 
         processArticles(articles);
-
         PageInfo pageInfo = extractPageInfo(articles);
 
         model.addAttribute("articles", articles);
         model.addAttribute("start", pageInfo.start);
         model.addAttribute("end", pageInfo.end);
+        model.addAttribute("currentPage", pageInfo.currentPage);
         model.addAttribute("maxPage", pageInfo.maxPage);
+        model.addAttribute("boardType", type.getType());
+        model.addAttribute("boardTitle", type.getTitle());
 
         if (keyword != null) {
             model.addAttribute("searchType", searchType);
             model.addAttribute("keyword", keyword);
         }
 
-        return "new";
+        return "articles";
     }
 
-    private void processArticles(Page<ArticlesDto> articles) {
-        for (ArticlesDto articleDto : articles) {
-            Document doc = Jsoup.parse(articleDto.getContent());
-            Element img = doc.selectFirst("img");
-            if (img != null) {
-                articleDto.setThumb(img.attr("src"));
-            }
+    /**
+     * 게시판별 상세 게시글
+     */
+    @GetMapping({"/new/{articleId}", "/best/{articleId}", "/bodybuilding/{articleId}", "/powerlifting/{articleId}", "/crossfit/{articleId}"})
+    public String articleDetail(@PathVariable Long articleId,
+                                Model model,
+                                HttpServletRequest request,
+                                @RequestParam(value = "page", required = false) Integer page,
+                                @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser) {
 
-            String dateTime = TimeAgoFormatter.format((articleDto.getCreatedDate()), LocalDateTime.now());
-            articleDto.setDateTime(dateTime);
-        }
+        String boardType = extractBoardType(request.getRequestURI());
+
+        // 게시글 데이터 처리
+        ArticleDto articleDto = processArticleData(articleId, loginUser, request, model);
+
+        // 댓글 데이터 처리
+        processCommentData(articleId, page, model);
+
+        // 네비게이션 데이터 처리
+        processNavigationData(boardType, articleId, articleDto, model);
+
+        return "article";
     }
 
-    private <T> PageInfo extractPageInfo(Page<T> page) {
-        int maxPage = 5;
-        int totalPages = page.getTotalPages();
-        int start = (page.getNumber() / maxPage) * maxPage + 1;
-        int end = (totalPages == 0) ? 1 : Math.min(start + maxPage - 1, totalPages);
-        int currentPage = page.getNumber() + 1;
-
-        return new PageInfo(start, end, maxPage, totalPages, currentPage);
-    }
-
-    private static class PageInfo {
-        int start;
-        int end;
-        int maxPage;
-        int totalPages;
-        int currentPage; // 현재 페이지 추가
-
-        PageInfo(int start, int end, int maxPage, int totalPages, int currentPage) {
-            this.start = start;
-            this.end = end;
-            this.maxPage = maxPage;
-            this.totalPages = totalPages;
-            this.currentPage = currentPage;
-        }
-    }
-
-    // 게시글 조회
-    @GetMapping("/articles/{articleId}")
-    public String article(@PathVariable Long articleId, Model model, HttpServletRequest request,
-                          @RequestParam(value = "page", required = false) Integer page,
-                          @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser) {
-
+    /**
+     * 게시글 데이터 처리
+     */
+    private ArticleDto processArticleData(Long articleId, SessionUser loginUser, HttpServletRequest request, Model model) {
         ArticleDto articleDto;
         boolean articleLike = false;
-        List<Long> likedCommentIds = null;
+        List<Long> likedCommentIds = Collections.emptyList();
 
         if (loginUser == null) {
             log.info("비회원 조회");
             String clientIp = extractClientIp(request);
-            log.info(">>>> Result : IP Address : " + clientIp);
-
             articleDto = articleService.noneMemberView(articleId, clientIp);
         } else {
             log.info("회원 조회");
             String email = loginUser.getEmail();
             Long userId = getUserIdByEmail(email);
-
             articleDto = articleService.memberView(articleId, email);
             articleLike = articleService.findLike(articleId, userId);
-            // 사용자가 좋아요한 댓글 ID 목록 조회
             likedCommentIds = commentService.findLikedCommentsByUser(userId);
         }
 
         setDateTime(articleDto);
 
-        // 댓글 페이징 처리
+        model.addAttribute("article", articleDto);
+        model.addAttribute("loginUser", loginUser);
+        model.addAttribute("like", articleLike);
+        model.addAttribute("likedCommentIds", likedCommentIds);
 
-//        int jpaPage = (page == null) ? 0 : Math.max(page - 1, 0);
+        return articleDto;
+    }
+
+    /**
+     * 댓글 데이터 처리
+     */
+    private void processCommentData(Long articleId, Integer page, Model model) {
         int jpaPage = commentService.calculatePageIndex(articleId, page);
-
-        // 실제 댓글 조회
         Page<CommentDto> commentPages = commentService.commentPageList(articleId, jpaPage);
 
-        // 페이지 사이즈 조회( 한 페이지당 보여줄 루트 댓글 개수)
-        int pageSize = commentPages.getSize();
-
-        // 루트 댓글 수만 별도로 가져오기
-        long rootCommentCount = commentService.countRootComments(articleId);
-
-        // 페이지네이션 표시 여부 결정 (페이지당 루트 댓글 기준)
-        boolean shouldShowPagination = rootCommentCount > pageSize;
-
-        log.info("commentPages.getContent : {}, commentPages.getTotalElements : {}", commentPages.getContent(), commentPages.getTotalElements());
-        // 댓글 DTO 후처리: 이미지 URL, dateTime 재귀 설정
-        for (CommentDto commentDto : commentPages) {
+        // 댓글 후처리 - Stream API 활용
+        commentPages.getContent().forEach(commentDto -> {
             setCommentImageUrls(commentDto);
             setDateTimeRecursively(commentDto);
-        }
-        // 페이지블록 계산 (1–5, 6–10)
-        PageInfo pageInfo = extractPageInfo(commentPages);
+        });
 
-        model.addAttribute("article", articleDto);
+        PageInfo pageInfo = extractPageInfo(commentPages);
+        long rootCommentCount = commentService.countRootComments(articleId);
+
         model.addAttribute("comments", commentPages);
         model.addAttribute("start", pageInfo.start);
         model.addAttribute("end", pageInfo.end);
         model.addAttribute("maxPage", pageInfo.maxPage);
         model.addAttribute("totalPages", pageInfo.totalPages);
         model.addAttribute("currentPage", pageInfo.currentPage);
-        model.addAttribute("shouldShowPagination", shouldShowPagination);
-        model.addAttribute("loginUser", loginUser);
-        model.addAttribute("like", articleLike);
-        model.addAttribute("likedCommentIds", likedCommentIds);
-
-        return "article";
+        model.addAttribute("shouldShowPagination", rootCommentCount > commentPages.getSize());
     }
+
+    /**
+     * 이전글, 다음글 처리
+     */
+    private void processNavigationData(String boardType, Long articleId, ArticleDto articleDto, Model model) {
+        ArticleDto prevArticle = null;
+        ArticleDto nextArticle = null;
+
+        switch (boardType) {
+            case "best":
+                prevArticle = articleService.findPrevPopularArticle(articleDto.getLikeAchievedAt());
+                nextArticle = articleService.findNextPopularArticle(articleDto.getLikeAchievedAt());
+                break;
+            case "bodybuilding":
+                prevArticle = articleService.findPrevBoardArticle(articleId, "보디빌딩");
+                nextArticle = articleService.findNextBoardArticle(articleId, "보디빌딩");
+                break;
+            case "powerlifting":
+                prevArticle = articleService.findPrevBoardArticle(articleId, "파워리프팅");
+                nextArticle = articleService.findNextBoardArticle(articleId, "파워리프팅");
+                break;
+            case "crossfit":
+                prevArticle = articleService.findPrevBoardArticle(articleId, "크로스핏");
+                nextArticle = articleService.findNextBoardArticle(articleId, "크로스핏");
+                break;
+            case "new":
+            default:
+                prevArticle = articleService.findPrevArticle(articleId);
+                nextArticle = articleService.findNextArticle(articleId);
+                break;
+        }
+
+        model.addAttribute("prevArticle", prevArticle);
+        model.addAttribute("nextArticle", nextArticle);
+        model.addAttribute("type", boardType);
+        model.addAttribute("basePath", "/" + boardType);
+    }
+
+    private String extractBoardType(String requestPath) {
+        if (requestPath.contains("/best")) return "best";
+        if (requestPath.contains("/bodybuilding")) return "bodybuilding";
+        if (requestPath.contains("/powerlifting")) return "powerlifting";
+        if (requestPath.contains("/crossfit")) return "crossfit";
+        return "new";
+    }
+
     // 컨트롤러 또는 서비스 레이어에서
     private void setCommentImageUrls(CommentDto commentDto) {
         // 이미지 URL 추출 (마크다운 형식: ![이미지](URL) 에서 URL 부분 추출)
@@ -272,77 +461,43 @@ public class ArticleController {
                 )).getId();
     }
 
-    /** 게시글 수정폼 조회 */
-    @GetMapping("/articles/{articleId}/edit")
-    public String editForm(@PathVariable Long articleId, Model model) {
-        Article article = articleRepository.findById(articleId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
+    private void processArticles(Page<ArticlesDto> articles) {
+        for (ArticlesDto articleDto : articles) {
+            Document doc = Jsoup.parse(articleDto.getContent());
+            Element img = doc.selectFirst("img");
+            if (img != null) {
+                articleDto.setThumb(img.attr("src"));
+            }
 
-        WriteArticleForm writeArticleForm = WriteArticleForm.builder()
-                .board(article.getBoard())
-                .title(article.getTitle())
-                .content(article.getContent())
-                .build();
-        model.addAttribute("article", writeArticleForm);
-        return "editArticleForm";
-    }
-
-    /** 게시글 수정 */
-    @PostMapping("/articles/{articleId}/edit")
-    public String edit(@PathVariable Long articleId, @Validated @ModelAttribute("article") WriteArticleForm form, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            log.info("errors={}", bindingResult);
-            return "editArticleForm";
-        }
-        articleService.editArticle(articleId, form);
-        return "redirect:/articles/{articleId}";
-    }
-
-    /** 게시글 삭제 */
-    @PostMapping("/articles/{articleId}/delete")
-    public String deleteArticle(@PathVariable Long articleId, RedirectAttributes redirectAttributes) {
-        try {
-            articleService.deleteArticle(articleId);
-            List<ArticleImage> relatedImages = articleImageRepository.findByArticleId(articleId);
-            redirectAttributes.addFlashAttribute("message", "게시글이 성공적으로 삭제되었습니다.");
-            return "redirect:/new"; // 게시글 목록 페이지로 리다이렉트
-        } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("error", "해당 게시글을 찾을 수 없습니다.");
-            return "redirect:/new";
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "게시글 삭제 중 오류가 발생했습니다.");
-            return "redirect:/new";
+            String dateTime = TimeAgoFormatter.format((articleDto.getCreatedDate()), LocalDateTime.now());
+            articleDto.setDateTime(dateTime);
         }
     }
 
-    /** ckeditor 이미지 업로드 */
-    @ResponseBody
-    @PostMapping("/articles/images")
-    public Map<String, Object> uploadArticleImage(MultipartHttpServletRequest request) throws IOException {
-        Map<String, Object> response = new HashMap<>();
+    private <T> PageInfo extractPageInfo(Page<T> page) {
+        int maxPage = 5;
+        int totalPages = page.getTotalPages();
+        int start = (page.getNumber() / maxPage) * maxPage + 1;
+        int end = (totalPages == 0) ? 1 : Math.min(start + maxPage - 1, totalPages);
+        int currentPage = page.getNumber() + 1;
 
-        MultipartFile uploadFile = request.getFile("upload");
-
-        UploadFile uploaded = gcsFileStore.storeArticleImage(uploadFile);
-        //ArticleImage에 임시파일로 저장
-        ArticleImage articleImage = ArticleImage.createTemp(uploaded.getStoreFileUrl());
-        articleImageRepository.save(articleImage);
-
-        response.put("uploaded", true);
-        response.put("url", uploaded.getStoreFileUrl()); // 이게 GCS URL
-
-        return response;
+        return new PageInfo(start, end, maxPage, totalPages, currentPage);
     }
 
-    /** 게시글 좋아요 */
-    @PostMapping("/like/{articleId}")
-    public String like(@PathVariable Long articleId, @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser) {
+    private static class PageInfo {
+        int start;
+        int end;
+        int maxPage;
+        int totalPages;
+        int currentPage; // 현재 페이지 추가
 
-        Long member_id = userRepository.findByEmail(loginUser.getEmail()).orElse(null).getId();
-
-        articleService.saveLike(articleId, member_id);
-
-        return "redirect:/articles/{articleId}";
+        PageInfo(int start, int end, int maxPage, int totalPages, int currentPage) {
+            this.start = start;
+            this.end = end;
+            this.maxPage = maxPage;
+            this.totalPages = totalPages;
+            this.currentPage = currentPage;
+        }
     }
 
     private void setDateTime(ArticleDto articleDto) {
@@ -350,6 +505,10 @@ public class ArticleController {
         LocalDateTime now = LocalDateTime.now();
         String dateTime = articleService.calDateTime(createdDate, now);
         articleDto.setDateTime(dateTime);
+    }
+
+    private boolean isValidBoardType(String boardType) {
+        return Arrays.asList("new", "best", "bodybuilding", "powerlifting", "crossfit").contains(boardType);
     }
 
     /**
