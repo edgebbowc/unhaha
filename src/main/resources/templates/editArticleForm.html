@@ -20,12 +20,13 @@
             <div class="subContainer">
                 <div>
                     <div class="boardContainer">
-                        <select th:field="*{board}">
+                        <select th:field="*{board}" disabled>
                             <option value="">게시판을 선택해 주세요</option>
-                            <option value="보디빌딩" th:selected="${article.board}=='보디빌딩'">보디빌딩</option>
-                            <option value="파워리프팅" th:selected="${article.board}=='파워리프팅'">파워리프팅</option>
-                            <option value="크로스핏" th:selected="${article.board}=='크로스핏'">크로스핏</option>
+                            <option value="보디빌딩">보디빌딩</option>
+                            <option value="파워리프팅">파워리프팅</option>
+                            <option value="크로스핏">크로스핏</option>
                         </select>
+                        <input type="hidden" th:field="*{board}">
                     </div>
                 </div>
                 <div class="guide red marginBottom10" th:errors="*{board}">게시판 오류</div>
