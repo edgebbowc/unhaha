@@ -1,6 +1,8 @@
 package commu.unhaha.domain;
 
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -27,6 +29,7 @@ public class Comment extends BaseTimeEntity {
     // 댓글이 달린 게시글
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "article_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Article article;
 
     // 대댓글(부모 댓글)
