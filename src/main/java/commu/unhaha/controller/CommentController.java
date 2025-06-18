@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -31,15 +32,24 @@ public class CommentController {
     private final GCSFileStore gcsFileStore;
     private final CommentImageRepository commentImageRepository;
 
+    private boolean isValidPrefix(String prefix) {
+        return Arrays.asList("new", "best", "bodybuilding").contains(prefix);
+    }
     /**
      * 댓글 작성
      */
-    @PostMapping("/articles/{articleId}/comments")
-    public String createComment(@PathVariable Long articleId,
+    @PostMapping("/{prefix}/{articleId}/comments")
+    public String createComment(@PathVariable String prefix,
+                                @PathVariable Long articleId,
                                 @RequestParam String content,
                                 @RequestParam(required = false) List<String> imageUrl,
                                 @RequestParam(required = false) Long parentId,
                                 @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser) {
+
+        // 유효한 prefix인지 검증
+        if (!isValidPrefix(prefix)) {
+            throw new IllegalArgumentException("잘못된 게시판 타입입니다: " + prefix);
+        }
 
         if (loginUser == null) {
             return "redirect:/login";
@@ -56,12 +66,12 @@ public class CommentController {
 
         // UriComponentsBuilder 사용
         String redirectUrl = UriComponentsBuilder
-                .fromPath("/articles/{articleId}")
+                .fromPath("/{prefix}/{articleId}")
                 .queryParam("page", targetPage)
                 .fragment("comment" + savedComment.getId())
-                .buildAndExpand(articleId)
+                .buildAndExpand(prefix, articleId)
                 .toUriString(); // toString() 대신 toUriString() 사용
-        log.info("댓글 작성 완료 - 리다이렉트: page={}, commentId={}", targetPage, savedComment.getId());
+        log.info("댓글 작성 완료 - 리다이렉트: prefix= {}, page= {}, commentId= {}", prefix, targetPage, savedComment.getId());
         return "redirect:" + redirectUrl;
     }
 
@@ -115,13 +125,19 @@ public class CommentController {
     /**
      * 댓글 수정
      */
-    @PostMapping("/articles/{articleId}/comments/{commentId}")
-    public String editComment(@PathVariable Long articleId,
+    @PostMapping("/{prefix}/{articleId}/comments/{commentId}")
+    public String editComment(@PathVariable String prefix,
+                              @PathVariable Long articleId,
                               @PathVariable Long commentId,
                               @RequestParam String content,
                               @RequestParam(required = false) List<String> imageUrl,
                               @RequestParam(value = "currentPage") Integer currentPage,
                               @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser) {
+        // 유효한 prefix인지 검증
+        if (!isValidPrefix(prefix)) {
+            throw new IllegalArgumentException("잘못된 게시판 타입입니다: " + prefix);
+        }
+
         if (loginUser == null) {
             return "redirect:/login";
         }
@@ -132,48 +148,60 @@ public class CommentController {
 
             // 리다이렉트 URL 생성
             String redirectUrl = UriComponentsBuilder
-                    .fromPath("/articles/{articleId}")
+                    .fromPath("/{prefix}/{articleId}")
                     .queryParam("page", currentPage)
                     .fragment("comment" + commentId)
-                    .buildAndExpand(articleId)
+                    .buildAndExpand(prefix, articleId)
                     .toUriString();
 
             return "redirect:" + redirectUrl;
 
         } catch (Exception e) {
             log.error("댓글 수정 중 오류 발생: commentId={}", commentId, e);
-            return "redirect:/articles/" + articleId;
+            return "redirect:/" + prefix + "/"+ articleId;
         }
     }
 
     /**
      * 댓글 삭제
      */
-    @DeleteMapping("/articles/{articleId}/comments/{commentId}")
-    public String deleteComment(@PathVariable Long commentId,
+    @DeleteMapping("/{prefix}/{articleId}/comments/{commentId}")
+    public String deleteComment(@PathVariable String prefix,
+                                @PathVariable Long commentId,
                                 @PathVariable Long articleId,
                                 @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser) {
+        // 유효한 prefix인지 검증
+        if (!isValidPrefix(prefix)) {
+            throw new IllegalArgumentException("잘못된 게시판 타입입니다: " + prefix);
+        }
+
         if (loginUser == null) {
             return "redirect:/login";
         }
 
         try {
             commentService.deleteComment(commentId);
-            return "redirect:/articles/" + articleId;
+            return "redirect:/" + prefix + "/" + articleId;
         } catch (Exception e) {
             log.error("댓글 삭제 중 오류 발생: commentId={}", commentId, e);
-            return "redirect:/articles/" + articleId;
+            return "redirect:/" + prefix + "/" + articleId;
         }
     }
 
     /**
      * 댓글 좋아요
      */
-    @PostMapping("/articles/{articleId}/comments/{commentId}/like")
-    public String toggleLike(@PathVariable Long commentId,
+    @PostMapping("/{prefix}/{articleId}/comments/{commentId}/like")
+    public String toggleLike(@PathVariable String prefix,
+                             @PathVariable Long commentId,
                              @PathVariable Long articleId,
                              @RequestParam(value = "currentPage") Integer currentPage,
                              @SessionAttribute(name = SessionConst.LOGIN_USER) SessionUser loginUser) {
+        // 유효한 prefix인지 검증
+        if (!isValidPrefix(prefix)) {
+            throw new IllegalArgumentException("잘못된 게시판 타입입니다: " + prefix);
+        }
+
         try {
             Long loginUserId = userRepository.findByEmail(loginUser.getEmail())
                     .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다.")).getId();
@@ -182,10 +210,10 @@ public class CommentController {
 
             // 현재 페이지로 리다이렉트
             String redirectUrl = UriComponentsBuilder
-                    .fromPath("/articles/{articleId}")
+                    .fromPath("/{prefix}/{articleId}")
                     .queryParam("page", currentPage)
                     .fragment("comment" + commentId) // 해당 댓글로 스크롤
-                    .buildAndExpand(articleId)
+                    .buildAndExpand(prefix, articleId)
                     .toUriString();
 
             log.info("댓글 좋아요 처리 완료 - 리다이렉트: page={}, commentId={}", currentPage, commentId);
@@ -193,7 +221,7 @@ public class CommentController {
 
         } catch (Exception e) {
             log.error("댓글 좋아요 처리 중 오류 발생: commentId={}", commentId, e);
-            return "redirect:/articles/" + articleId + "?page=" + currentPage;
+            return "redirect:" + prefix + "/" + articleId + "?page=" + currentPage;
         }
     }
 }
