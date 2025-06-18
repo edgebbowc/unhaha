@@ -25,6 +25,8 @@ public class ArticleDto {
 
     private LocalDateTime createdDate;
 
+    private LocalDateTime likeAchievedAt;
+
     private String dateTime;
 
     public ArticleDto(Article article) {
@@ -36,5 +38,6 @@ public class ArticleDto {
         this.viewCount = article.getViewCount();
         this.likeCount = article.getLikeCount();
         this.createdDate = article.getCreatedDate();
+        this.likeAchievedAt = article.getLikeAchievedAt();
     }
 }
