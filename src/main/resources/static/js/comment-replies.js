@@ -104,7 +104,7 @@ function handleReplyButtonClick(button) {
 function createReplyFormHTML(commentId) {
     return `
         <div class="contentContainer">
-            <form id="replyForm-${commentId}" action="/articles/${articleId}/comments" method="post" enctype="multipart/form-data">
+            <form id="replyForm-${commentId}" action="${basePath}/${articleId}/comments" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="parentId" value="${commentId}">
                 <div class="commentInput">
                     <div class="commentContent">
@@ -219,7 +219,7 @@ function handleEditButtonClick(button) {
 function createEditFormHTML(commentId, commentContent) {
     return `
         <div class="contentContainer">
-            <form id="editForm-${commentId}" action="/articles/${articleId}/comments/${commentId}" method="post" enctype="multipart/form-data">
+            <form id="editForm-${commentId}" action="${basePath}/${articleId}/comments/${commentId}" method="post" enctype="multipart/form-data">
             <input type="hidden" name="currentPage" value="${currentPage}">
                 <div class="commentInput">
                     <div class="commentContent">
