@@ -18,4 +18,6 @@ public interface ArticleImageRepository extends JpaRepository<ArticleImage, Long
 
     // 특정 게시글에 연결된 이미지들 조회
     List<ArticleImage> findByArticleId(Long articleId);
+
+    List<ArticleImage> findByUrlInAndStatus(List<String> urls, ImageStatus status);
 }
