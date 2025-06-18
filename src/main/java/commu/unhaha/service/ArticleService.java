@@ -1,10 +1,7 @@
 package commu.unhaha.service;
 
 import commu.unhaha.controller.SessionConst;
-import commu.unhaha.domain.Article;
-import commu.unhaha.domain.ArticleImage;
-import commu.unhaha.domain.User;
-import commu.unhaha.domain.UserLikeArticle;
+import commu.unhaha.domain.*;
 import commu.unhaha.dto.ArticleDto;
 import commu.unhaha.dto.ArticlesDto;
 import commu.unhaha.dto.SessionUser;
@@ -20,10 +17,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.SessionAttribute;
@@ -32,6 +26,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -50,7 +45,9 @@ public class ArticleService {
     private final ArticleImageRepository articleImageRepository;
     private final GCSFileStore gcsFileStore;
 
-    //Article 작성
+    /**
+     * Article 작성 메서드
+     */
     public Long createArticle(WriteArticleForm form, User user) {
         Article article = Article.builder()
                 .board(form.getBoard())
@@ -74,7 +71,10 @@ public class ArticleService {
 
         return article.getId();
     }
-    //Article 수정
+
+    /**
+     * Article 수정 메서드
+     */
     public void editArticle(Long articleId, WriteArticleForm form) {
         Article article = validateAndGetArticle(articleId);
 
@@ -94,11 +94,28 @@ public class ArticleService {
                 image.markAsTemp();
             }
         }
+        // 2. 새로 추가된 이미지 ACTIVE로 변경 (누락된 로직)
+        Set<String> newlyAddedUrls = new HashSet<>(newImageUrls);
+        newlyAddedUrls.removeAll(oldImageUrls); // 기존에 없던 새 URL만 추출
+
+        if (!newlyAddedUrls.isEmpty()) {
+            // TEMP 상태인 새 이미지들 조회
+            List<ArticleImage> tempImages = articleImageRepository
+                    .findByUrlInAndStatus(new ArrayList<>(newlyAddedUrls), ImageStatus.TEMP);
+
+            // ACTIVE 상태로 변경 및 게시글 연결
+            for (ArticleImage tempImage : tempImages) {
+                tempImage.attachToArticle(article); // TEMP → ACTIVE 변경 + 게시글 연결
+                log.debug("새 이미지를 게시글에 연결: {}", tempImage.getUrl());
+            }
+        }
 
         article.changeArticle(form.getBoard(), form.getTitle(), form.getContent());
     }
 
-    //Article 삭제
+    /**
+     * Article 삭제 메서드
+     */
     public void deleteArticle(Long articleId) {
         validateArticle(articleId);
         List<ArticleImage> relatedImages = articleImageRepository.findByArticleId(articleId);
@@ -116,32 +133,99 @@ public class ArticleService {
         articleRepository.deleteById(articleId);
     }
 
-    // 페이징
-    public Page<ArticlesDto> pageList(int page) {
-        Pageable pageable = PageRequest.of(page, 20, Sort.by(Sort.Direction.DESC, "id"));
-        Page<Article> articlePage = articleRepository.findAll(pageable);
-        Page<ArticlesDto> articleDtoPage = articlePage.map(article -> new ArticlesDto(article));
-        return articleDtoPage;
+    /**
+     * 보드타입 별 게시글 조회
+     */
+    public Page<ArticlesDto> findArticles(String boardType, int page, String searchType, String keyword) {
+        if ("best".equals(boardType)) {
+            return findPopularArticles(page, searchType, keyword);
+        } else if ("bodybuilding".equals(boardType)) {
+            return findBoardArticles("보디빌딩", page, searchType, keyword);
+        } else if ("powerlifting".equals(boardType)) {
+            return findBoardArticles("파워리프팅", page, searchType, keyword);
+        } else if ("crossfit".equals(boardType)) {
+            return findBoardArticles("크로스핏", page, searchType, keyword);
+        } else {
+            return findAllArticles(page, searchType, keyword);
+        }
     }
 
-    // 제목, 제목+내용 닉네임 검색 페이징
-    public Page<ArticlesDto> searchPageList(int page, String keyword, String searchType) {
+    /**
+     * 전체 게시글 조회 (검색 포함)
+     */
+    public Page<ArticlesDto> findAllArticles(int page, String searchType, String keyword) {
         Pageable pageable = PageRequest.of(page, 20, Sort.by(Sort.Direction.DESC, "id"));
-        switch (searchType) {
-            case "title" :
-                Page<Article> articlePageT = articleRepository.findByTitleContaining(keyword, pageable);
-                Page<ArticlesDto> articleDtoPageT = articlePageT.map(article -> new ArticlesDto(article));
-                return articleDtoPageT;
-            case "titleAndContent" :
-                Page<Article> articlePageTC = articleRepository.findByTitleContainingOrContentContaining(keyword, keyword, pageable);
-                Page<ArticlesDto> articleDtoPageTC = articlePageTC.map(article -> new ArticlesDto(article));
-                return articleDtoPageTC;
-            case "nickName" :
-                Page<Article> articlePageN = articleRepository.findByNicknamePaging(keyword, pageable);
-                Page<ArticlesDto> articleDtoPageN = articlePageN.map(article -> new ArticlesDto(article));
-                return articleDtoPageN;
-        }
-        return null;
+        return articleRepository.findAllArticles(searchType, keyword, pageable);
+    }
+
+    /**
+     * 인기 게시글 조회 (검색 포함)
+     */
+    public Page<ArticlesDto> findPopularArticles(int page, String searchType, String keyword) {
+        Pageable pageable = PageRequest.of(page, 20);
+        return articleRepository.findPopularArticles(searchType, keyword, pageable);
+    }
+
+    /**
+     * 특정 게시판 조회 (검색 포함)
+     */
+    public Page<ArticlesDto> findBoardArticles(String boardType, int page, String searchType, String keyword) {
+        Pageable pageable = PageRequest.of(page, 20, Sort.by(Sort.Direction.DESC, "id"));
+        return articleRepository.findBoardArticles(boardType, searchType, keyword, pageable);
+    }
+
+    /**
+     * 전체글에서 이전글 찾기
+     */
+    public ArticleDto findPrevArticle(Long currentId) {
+        Article article = articleRepository.findTopByIdGreaterThanOrderByIdAsc(currentId);
+        return article != null ? convertToDto(article) : null;
+    }
+    /**
+     * 전체글에서 다음글 찾기
+     */
+    public ArticleDto findNextArticle(Long currentId) {
+        Article article = articleRepository.findTopByIdLessThanOrderByIdDesc(currentId);
+        return article != null ? convertToDto(article) : null;
+    }
+
+    /**
+     * 인기글에서 이전글 찾기 (좋아요 달성시점 기준)
+     */
+    public ArticleDto findPrevPopularArticle(LocalDateTime likeAchievedAt) {
+        Article article = articleRepository.findTopByLikeAchievedAtGreaterThanOrderByLikeAchievedAtAsc(likeAchievedAt);
+        return article != null ? convertToDto(article) : null;
+    }
+
+    /**
+     * 인기글에서 다음글 찾기 (좋아요 달성시점 기준)
+     */
+    public ArticleDto findNextPopularArticle(LocalDateTime likeAchievedAt) {
+        Article article = articleRepository.findTopByLikeAchievedAtLessThanOrderByLikeAchievedAtDesc(likeAchievedAt);
+        return article != null ? convertToDto(article) : null;
+    }
+
+    /**
+     * boardName 게시글에서 이전글 찾기
+     */
+    public ArticleDto findPrevBoardArticle(Long currentId, String boardName) {
+        Article article = articleRepository.findTopByIdGreaterThanAndBoardOrderByIdAsc(currentId, boardName);
+        return article != null ? convertToDto(article) : null;
+    }
+
+    /**
+     * boardName 게시글에서 다음글 찾기
+     */
+    public ArticleDto findNextBoardArticle(Long currentId, String boardName) {
+        Article article = articleRepository.findTopByIdLessThanAndBoardOrderByIdDesc(currentId, boardName);
+        return article != null ? convertToDto(article) : null;
+    }
+
+    /**
+     * Article -> ArticleDto 변환 메서드
+     */
+    private ArticleDto convertToDto(Article article) {
+        return article != null ? new ArticleDto(article) : null;
     }
 
     public void addViewCount(Long articleId) {
