@@ -49,7 +49,7 @@
                     <div class="likeBtn">
                         <div class="commentLike">
                             <div class="commentLike">
-                                <form th:action="@{'/articles/' + ${article.id} + '/comments/' + ${comment.id} + '/like'}" method="post" th:onsubmit="|return handleCommentLike(event, ${comment.id}, ${comment.userId}, ${loginUser?.id ?: 0})|">
+                                <form th:action="@{${basePath} + '/' + ${article.id} + '/comments/' + ${comment.id} + '/like'}" method="post" th:onsubmit="|return handleCommentLike(event, ${comment.id}, ${comment.userId}, ${loginUser?.id ?: 0})|">
                                     <input type="hidden" name="currentPage" th:value="${currentPage}">
                                     <button id="commentLike" th:classappend="${likedCommentIds != null and likedCommentIds.contains(comment.id)} ? 'activated' : ''">
                                         <svg width="12" height="12" viewBox="0 0 512 512" fill="none"
@@ -94,7 +94,7 @@
                             </button>
                         </li>
                         <li class="commentDelete">
-                            <form th:action="@{'/articles/' + ${article.id} + '/comments/' + ${comment.id}}" th:method="delete">
+                            <form th:action="@{${basePath} + '/' + ${article.id} + '/comments/' + ${comment.id}}" th:method="delete">
                                 <button id="commentDelete" onclick="return confirm('정말 삭제하시겠습니까?')">
                                     삭제
                                 </button>
