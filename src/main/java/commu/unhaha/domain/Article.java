@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -30,6 +31,10 @@ public class Article extends BaseTimeEntity{
     private Integer viewCount;
 
     private Integer likeCount;
+
+    // 좋아요 1개 달성 시점 추가
+    @Column(name = "like_achieved_at")
+    private LocalDateTime likeAchievedAt;
 
     @Builder
     public Article(String board, String title, String content, User user, Integer viewCount, Integer likeCount) {
@@ -57,6 +62,11 @@ public class Article extends BaseTimeEntity{
 
     public void increaseLikeCount() {
         likeCount++;
+
+        // 좋아요가 1개가 되는 순간 시점 기록
+        if (this.likeCount == 1 && this.likeAchievedAt == null) {
+            this.likeAchievedAt = LocalDateTime.now();
+        }
     }
 
     public void decreaseLikeCount() {
