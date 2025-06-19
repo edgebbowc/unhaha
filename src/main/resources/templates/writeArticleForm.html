@@ -16,11 +16,11 @@
 <main>
     <article data-article-id="">
         <h1>글쓰기</h1>
-        <form th:action="@{/write/new}" method="POST" th:object="${article}" enctype="multipart/form-data">
+        <form th:action method="POST" th:object="${article}" enctype="multipart/form-data">
             <div class="subContainer">
                 <div>
                     <div class="boardContainer">
-                        <select th:field="*{board}">
+                        <select th:field="*{board}" onchange="redirectToBoard(this.value)">
                             <option value="">게시판을 선택해 주세요</option>
                             <option value="보디빌딩">보디빌딩</option>
                             <option value="파워리프팅">파워리프팅</option>
@@ -60,5 +60,50 @@
 <script src="https://cdn.ckeditor.com/ckeditor5/45.0.0/ckeditor5.umd.js" crossorigin></script>
 <script src="https://cdn.ckeditor.com/ckeditor5/45.0.0/translations/ko.umd.js" crossorigin></script>
 <script type="module" src="/ckeditor5/main.js"></script>
+<script>
+    // 페이지 로드시 현재 선택된 값을 저장
+    let currentBoard = '';
+
+    // 페이지 로드 후 초기값 설정
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectElement = document.querySelector('select[name="board"]');
+        currentBoard = selectElement.value;
+    });
+
+    function redirectToBoard(selectedBoard) {
+        // 빈 값 선택시 (게시판을 선택해주세요)
+        if (selectedBoard === '') {
+            currentBoard = '';
+            return;
+        }
+
+        // 현재와 같은 게시판 선택시
+        if (selectedBoard === currentBoard) {
+            return;
+        }
+
+        const confirmed = confirm("게시판을 변경하시면 작성 중이던 글이 유실될 수 있습니다. 변경하시겠습니까?");
+
+        if (!confirmed) {
+            // 취소시 이전 값으로 되돌리기
+            const selectElement = document.querySelector('select[name="board"]');
+            selectElement.value = currentBoard;
+            return;
+        }
+
+        // 확인시 페이지 이동
+        currentBoard = selectedBoard;
+        let boardType = getBoardTypeFromName(selectedBoard);
+        window.location.href = '/write/' + boardType;
+    }
+    function getBoardTypeFromName(boardName) {
+        switch (boardName) {
+            case '보디빌딩': return 'bodybuilding';
+            case '파워리프팅': return 'powerlifting';
+            case '크로스핏': return 'crossfit';
+            default: return 'new';
+        }
+    }
+</script>
 </body>
 </html>
