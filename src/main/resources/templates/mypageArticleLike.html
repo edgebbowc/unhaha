@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <div th:replace="~{fragment/config :: config}"></div>
+    <link rel="stylesheet" th:href="@{/css/user.css}">
+</head>
+<body>
+<div th:replace="~{fragment/header :: header}"></div>
+
+<main style="height: auto !important;">
+    <article id="mypage">
+        <section id="header">
+            <a href="/mypage" class="selected">회원 정보 변경</a>
+            <a href="/mypage/article">내가 쓴 글</a>
+            <a href="/mypage/comment">내가 쓴 댓글</a>
+            <a href="/mypage/article/like">좋아요 한 글</a>
+            <a href="/mypage/comment/like">좋아요 한 댓글</a>
+            <a href="/mypage/article/scrap">스크랩 한 글</a>
+            <a href="/mypage/blocked">차단한 사용자</a>
+        </section>
+
+        <section id="title">
+            <h1>
+                <div>좋아요 한 글</div>
+            </h1>
+        </section>
+
+        <section id="item">
+            <div class="items">
+                <div class="item" th:each="article : ${articles}">
+                    <div class="main">
+                        <a th:href="@{${article.boardPath} + '/' + ${article.id}}" th:text="${article.title}">게시글 제목</a>
+                    </div>
+                    <div class="info">
+                        <div class="datetime" th:text="${article.dateTime}">23.05.16</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </article>
+</main>
+</body>
+</html>
