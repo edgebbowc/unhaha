@@ -34,7 +34,7 @@ function handleCommentLike(event, commentId, commentUserId, currentUserId) {
     // 자신의 댓글인 경우
     if (commentUserId === currentUserId) {
         event.preventDefault(); // 폼 제출 방지
-        alert('자기 자신의 댓글은 좋아요할 수 없습니다');
+        alert('자기 자신의 댓글은 운하하 할 수 없습니다');
         return false;
     }
 
