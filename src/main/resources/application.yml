@@ -68,6 +68,17 @@ spring:
               - email
               - nickname
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tags-sorter: alpha
+    try-it-out-enabled: true
+  packages-to-scan: commu.unhaha.restapi  # 본인의 REST 컨트롤러 패키지
+  paths-to-match: /api/**  # API 경로 패턴
+
 logging:
   level:
     root: info
