@@ -19,7 +19,7 @@
                         <div class="text">
                             <span class="author-me" th:if="${loginUser?.id == comment.userId}"> 내 댓글 </span>
                             <span class="name" th:text="${comment.nickname}">닉네임</span>
-                            <span class="author" th:if="${article.user.id == comment.userId}"> 글쓴이 </span>
+                            <span class="author" th:if="${article.userId == comment.userId}"> 글쓴이 </span>
                         </div>
                     </div>
                     <div class="datetime" th:text="${comment.dateTime}">시간</div>
@@ -50,7 +50,7 @@
                         <div class="commentLike">
                             <div class="commentLike">
                                 <form th:action="@{${basePath} + '/' + ${article.id} + '/comments/' + ${comment.id} + '/like'}" method="post" th:onsubmit="|return handleCommentLike(event, ${comment.id}, ${comment.userId}, ${loginUser?.id ?: 0})|">
-                                    <input type="hidden" name="currentPage" th:value="${currentPage}">
+                                    <input type="hidden" name="currentCommentPage" th:value="${currentCommentPage}">
                                     <button id="commentLike" th:classappend="${likedCommentIds != null and likedCommentIds.contains(comment.id)} ? 'activated' : ''">
                                         <svg width="12" height="12" viewBox="0 0 512 512" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
