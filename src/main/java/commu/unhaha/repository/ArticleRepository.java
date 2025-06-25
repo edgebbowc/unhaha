@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface ArticleRepository extends JpaRepository<Article, Long>, ArticleRepositoryCustom {
 
@@ -27,4 +28,18 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, Article
     @Modifying
     @Query("UPDATE Article a SET a.viewCount = a.viewCount + 1 WHERE a.id = :articleId")
     void increaseViews(@Param("articleId") Long articleId);
+
+    @Query("SELECT a FROM Article a " +
+            "JOIN FETCH a.user " +
+            "WHERE a.user.email = :email " +
+            "ORDER BY a.createdDate DESC")
+    List<Article> findByUserEmailOrderByCreatedDateDesc(@Param("email") String email);
+
+    @Query("SELECT a FROM Article a " +
+            "JOIN FETCH a.user " +
+            "JOIN UserLikeArticle ula ON a.id = ula.article.id " +
+            "JOIN User u ON ula.user.id = u.id " +
+            "WHERE u.email = :email " +
+            "ORDER BY ula.createdDate DESC")
+    List<Article> findLikedArticlesByUserEmail(@Param("email") String email);
 }
