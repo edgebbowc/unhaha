@@ -14,15 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -35,12 +28,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static commu.unhaha.domain.BoardType.*;
 
 @Controller
 @RequiredArgsConstructor
@@ -58,7 +52,6 @@ public class ArticleController {
      */
     @GetMapping("/")
     public String home(Model model,
-                       @RequestParam(required = false) String result,
                        @RequestParam(value = "page", defaultValue = "1") int page,
                        @RequestParam(value = "searchType", required = false) String searchType,
                        @RequestParam(value = "keyword", required = false) String keyword) {
@@ -70,11 +63,10 @@ public class ArticleController {
         PageInfo pageInfo = extractPageInfo(articles);
 
         model.addAttribute("articles", articles);
-        model.addAttribute("start", pageInfo.start);
-        model.addAttribute("end", pageInfo.end);
-        model.addAttribute("maxPage", pageInfo.maxPage);
-        model.addAttribute("currentPage", pageInfo.currentPage);
-        model.addAttribute("result", result);
+        model.addAttribute("start", pageInfo.getStart());
+        model.addAttribute("end", pageInfo.getEnd());
+        model.addAttribute("maxPage", pageInfo.getMaxPage());
+        model.addAttribute("currentPage", pageInfo.getCurrentPage());
         if (keyword != null) {
             model.addAttribute("searchType", searchType);
             model.addAttribute("keyword", keyword);
@@ -150,6 +142,12 @@ public class ArticleController {
         Article article = articleRepository.findById(articleId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
 
+        // 게시판 타입 검증 추가
+        String expectedBoardPath = titleToPath(article.getBoard());
+        if (!expectedBoardPath.equals("/" + boardType)) {
+            // 올바른 URL로 리다이렉트
+            return "redirect:" + expectedBoardPath + "/" + articleId + "/edit";
+        }
         WriteArticleForm writeArticleForm = WriteArticleForm.builder()
                 .board(article.getBoard())
                 .title(article.getTitle())
@@ -162,7 +160,10 @@ public class ArticleController {
     /** 게시글 수정 */
     @PostMapping("/{boardType}/{articleId}/edit")
     public String edit(@PathVariable String boardType,
-                       @PathVariable Long articleId, @Validated @ModelAttribute("article") WriteArticleForm form, BindingResult bindingResult) {
+                       @PathVariable Long articleId,
+                       @Validated @ModelAttribute("article") WriteArticleForm form,
+                       @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser,
+                       BindingResult bindingResult) {
         // 유효한 게시판 타입인지 검증
         if (!isValidBoardType(boardType)) {
             throw new IllegalArgumentException("Invalid board type: " + boardType);
@@ -172,7 +173,7 @@ public class ArticleController {
             log.info("errors={}", bindingResult);
             return "editArticleForm";
         }
-        articleService.editArticle(articleId, form);
+        articleService.editArticle(articleId, form, loginUser.getEmail());
         return "redirect:/{boardType}/{articleId}";
     }
 
@@ -180,6 +181,7 @@ public class ArticleController {
     @PostMapping("/{boardType}/{articleId}/delete")
     public String deleteArticle(@PathVariable String boardType,
                                 @PathVariable Long articleId,
+                                @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser,
                                 RedirectAttributes redirectAttributes) {
         // 유효한 게시판 타입인지 검증
         if (!isValidBoardType(boardType)) {
@@ -187,7 +189,7 @@ public class ArticleController {
         }
 
         try {
-            articleService.deleteArticle(articleId);
+            articleService.deleteArticle(articleId, loginUser.getEmail());
             redirectAttributes.addFlashAttribute("message", "게시글이 성공적으로 삭제되었습니다.");
             return "redirect:/" + boardType; // 게시글 목록 페이지로 리다이렉트
         } catch (IllegalArgumentException e) {
@@ -247,7 +249,7 @@ public class ArticleController {
 
         String boardType = extractBoardType(request.getRequestURI());
 
-        BoardType type = BoardType.fromString(boardType);
+        BoardType type = fromString(boardType);
         int jpaPage = page - 1;
 
         Page<ArticlesDto> articles = articleService.findArticles(boardType, jpaPage, searchType, keyword);
@@ -256,10 +258,10 @@ public class ArticleController {
         PageInfo pageInfo = extractPageInfo(articles);
 
         model.addAttribute("articles", articles);
-        model.addAttribute("start", pageInfo.start);
-        model.addAttribute("end", pageInfo.end);
-        model.addAttribute("currentPage", pageInfo.currentPage);
-        model.addAttribute("maxPage", pageInfo.maxPage);
+        model.addAttribute("start", pageInfo.getStart());
+        model.addAttribute("end", pageInfo.getEnd());
+        model.addAttribute("currentPage", pageInfo.getCurrentPage());
+        model.addAttribute("maxPage", pageInfo.getMaxPage());
         model.addAttribute("boardType", type.getType());
         model.addAttribute("boardTitle", type.getTitle());
 
@@ -278,7 +280,8 @@ public class ArticleController {
     public String articleDetail(@PathVariable Long articleId,
                                 Model model,
                                 HttpServletRequest request,
-                                @RequestParam(value = "page", required = false) Integer page,
+                                @RequestParam(value = "page", required = false) Integer listPage, // 게시글 목록 페이지
+                                @RequestParam(value = "comment", required = false) Integer commentPage,  // 댓글 페이지
                                 @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser) {
 
         String boardType = extractBoardType(request.getRequestURI());
@@ -286,13 +289,33 @@ public class ArticleController {
         // 게시글 데이터 처리
         ArticleDto articleDto = processArticleData(articleId, loginUser, request, model);
 
+        // 게시판 타입 일치 여부 검증
+        if (!isValidBoardMatch(boardType, articleDto)) {
+            // 올바른 URL로 리다이렉트
+            String correctPath = articleDto.getBoardPath() + "/" + articleId;
+            if (listPage != null) {
+                correctPath += "?page=" + listPage;
+            }
+            return "redirect:" + correctPath;
+        }
+
         // 댓글 데이터 처리
-        processCommentData(articleId, page, model);
+        processCommentData(articleId, commentPage, model);
 
         // 네비게이션 데이터 처리
         processNavigationData(boardType, articleId, articleDto, model);
 
+        model.addAttribute("listPage", listPage != null ? listPage : 1);
         return "article";
+    }
+
+    private boolean isValidBoardMatch(String urlBoardType, ArticleDto articleDto) {
+        if (urlBoardType.equals("new")) return true;
+        String articleBoardPath = articleDto.getBoardPath();
+        String expectedPath = "/" + urlBoardType;
+
+        // URL의 게시판 타입과 실제 게시글의 게시판이 일치하는지 확인
+        return articleBoardPath.equals(expectedPath);
     }
 
     /**
@@ -343,11 +366,11 @@ public class ArticleController {
         long rootCommentCount = commentService.countRootComments(articleId);
 
         model.addAttribute("comments", commentPages);
-        model.addAttribute("start", pageInfo.start);
-        model.addAttribute("end", pageInfo.end);
-        model.addAttribute("maxPage", pageInfo.maxPage);
-        model.addAttribute("totalPages", pageInfo.totalPages);
-        model.addAttribute("currentPage", pageInfo.currentPage);
+        model.addAttribute("start", pageInfo.getStart());
+        model.addAttribute("end", pageInfo.getEnd());
+        model.addAttribute("maxPage", pageInfo.getMaxPage());
+        model.addAttribute("totalPages", pageInfo.getTotalPages());
+        model.addAttribute("currentCommentPage", pageInfo.getCurrentPage());
         model.addAttribute("shouldShowPagination", rootCommentCount > commentPages.getSize());
     }
 
@@ -482,22 +505,6 @@ public class ArticleController {
         int currentPage = page.getNumber() + 1;
 
         return new PageInfo(start, end, maxPage, totalPages, currentPage);
-    }
-
-    private static class PageInfo {
-        int start;
-        int end;
-        int maxPage;
-        int totalPages;
-        int currentPage; // 현재 페이지 추가
-
-        PageInfo(int start, int end, int maxPage, int totalPages, int currentPage) {
-            this.start = start;
-            this.end = end;
-            this.maxPage = maxPage;
-            this.totalPages = totalPages;
-            this.currentPage = currentPage;
-        }
     }
 
     private void setDateTime(ArticleDto articleDto) {
