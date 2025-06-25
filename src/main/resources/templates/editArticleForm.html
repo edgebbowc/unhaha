@@ -44,7 +44,9 @@
             <div class="content">
                 <div class="textareaContainer">
                     <textarea th:text="*{content}" th:field="*{content}" id="editor" maxlength="10000" style="display: none;"></textarea>
-                    <div class="wordCount">내용&nbsp;:&nbsp;<span id="count"></span>/10000</div>
+                    <div class="wordCount">내용&nbsp;:&nbsp;<span id="count">0</span>/10000</div>
+                    <!-- 기본 워드카운트 컨테이너 추가 (숨김 처리) -->
+                    <div id="editor-word-count" style="display: none;"></div>
                     <div class="guide red marginBottom10" th:errors="*{content}">내용 오류</div>
                 </div>
             </div>
