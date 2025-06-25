@@ -22,6 +22,15 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     long countByArticleIdAndParentIsNullAndCreatedDateBefore(Long articleId, LocalDateTime createdDate);
 
     /**
+     * 댓글 페이징 계산
+     */
+    @Query("SELECT COUNT(c) FROM Comment c WHERE c.article.id = :articleId " +
+            "AND c.parent IS NULL AND c.id < :commentId")
+    long countByArticleIdAndParentIsNullAndIdLessThan(
+            @Param("articleId") Long articleId,
+            @Param("commentId") Long commentId);
+
+    /**
      * 대댓글들만 fetch join으로 조회
      */
     @Query("SELECT c FROM Comment c " +
@@ -47,4 +56,19 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     )
     Optional<Comment> findParentWithRelations(@Param("parentId") Long parentId);
 
+    @Query("SELECT c FROM Comment c " +
+            "JOIN FETCH c.user " +
+            "JOIN FETCH c.article " +
+            "WHERE c.user.email = :email " +
+            "ORDER BY c.createdDate DESC")
+    List<Comment> findByUserEmailOrderByCreatedDateDesc(@Param("email") String email);
+
+    @Query("SELECT c FROM Comment c " +
+            "JOIN FETCH c.user " +
+            "JOIN FETCH c.article " +
+            "JOIN UserLikeComment ulc ON c.id = ulc.comment.id " +
+            "JOIN User u ON ulc.user.id = u.id " +
+            "WHERE u.email = :email " +
+            "ORDER BY ulc.createdDate DESC")
+    List<Comment> findLikedCommentsByUserEmail(@Param("email") String email);
 }
