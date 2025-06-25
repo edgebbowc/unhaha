@@ -1,15 +1,17 @@
 package commu.unhaha.controller;
 
 import commu.unhaha.domain.UploadFile;
-import commu.unhaha.dto.MypageForm;
-import commu.unhaha.dto.SessionUser;
+import commu.unhaha.dto.*;
 import commu.unhaha.file.GCSFileStore;
-import commu.unhaha.repository.UserRepository;
+import commu.unhaha.service.ArticleService;
+import commu.unhaha.service.CommentService;
 import commu.unhaha.service.UserService;
+import commu.unhaha.util.TimeAgoFormatter;
 import commu.unhaha.validation.NicknameValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,9 +22,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Controller
 @RequiredArgsConstructor
@@ -30,13 +35,18 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
-    private final UserRepository userRepository;
     private final NicknameValidator nicknameValidator;
     private final GCSFileStore gcsFileStore;
+    private final ArticleService articleService;
+    private final CommentService commentService;
 
     @GetMapping("/mypage")
     public String Profile(@SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser, Model model) {
 
+        // 로그인 상태 확인
+        if (loginUser == null) {
+            return "redirect:/login"; // 로그인 페이지로 리다이렉트
+        }
         model.addAttribute("user", loginUser);
 
         return "mypage";
@@ -53,15 +63,8 @@ public class UserController {
             model.addAttribute("msg", "3글자 이상 입력해주세요 특수문자 및 공백은 불가능합니다");
             return "mypage";
         }
-        // 원래 닉네임과 같고 원래 프로필 이미지와 같을 경우
-        if ((mypageForm.getNickname().equals(loginUser.getNickname())) && (mypageForm.getUserImage().isEmpty())) {
-            rttr.addFlashAttribute("msg", "회원정보를 변경하였습니다");
-            return "redirect:/mypage";
-        }
-        // 원래 닉네임과 같고 프로필 이미지만 변경할 경우
-        if ((mypageForm.getNickname().equals(loginUser.getNickname())) && (!mypageForm.getUserImage().isEmpty())) {
-            editProfileImage(mypageForm, loginUser);
-            setSession(mypageForm, loginUser, session);
+        // 원래 닉네임과 같을 경우
+        if ((mypageForm.getNickname().equals(loginUser.getNickname()))) {
             rttr.addFlashAttribute("msg", "회원정보를 변경하였습니다");
             return "redirect:/mypage";
         }
@@ -74,7 +77,7 @@ public class UserController {
             return "mypage";
         }
 
-        // 닉네임만 변경할 경우
+        // 프로필이미지 없는상태에서 닉네임 변경
         if (mypageForm.getUserImage().isEmpty()) {
             userService.editNickname(mypageForm.getEmail(), mypageForm.getNickname());
             mypageForm.setStoredImageName(loginUser.getStoredImageName());
@@ -83,8 +86,7 @@ public class UserController {
             return "redirect:/mypage";
         }
 
-        // 닉네임과 프로필 이미지 둘 다 변경
-        editProfileImage(mypageForm, loginUser);
+        // 프로필이미지 있는상태에서 닉네임 변경
         userService.editNickname(mypageForm.getEmail(), mypageForm.getNickname());
         setSession(mypageForm, loginUser, session);
         rttr.addFlashAttribute("msg", "회원정보를 변경하였습니다");
@@ -121,47 +123,136 @@ public class UserController {
 
     @GetMapping("/mypage/withdraw")
     public String withDraw(@SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser,
-                           RedirectAttributes rttr, HttpSession session) throws IOException {
-        String accessToken = loginUser.getAccessToken();
-        String deleteUrl = "https://nid.naver.com/oauth2.0/token?grant_type=delete&client_id="+ System.getenv("client-id") +"&client_secret=" + System.getenv("client-secret") + "&access_token=" + accessToken +"&service_provider=NAVER";
-        log.info("deleteUrl={}", deleteUrl);
+                           RedirectAttributes rttr, HttpSession session){
         try {
             userService.deleteUser(loginUser.getEmail());
-            String result = requestToServer(deleteUrl);
-            rttr.addAttribute("result", result);
+            // SecurityContext 먼저 정리
+            SecurityContextHolder.clearContext();
             session.invalidate();
-        } catch (IOException e) {
-            e.printStackTrace();
+            rttr.addFlashAttribute("result", "회원 탈퇴에 성공했습니다");
+        } catch (Exception e) {
+            log.error("회원탈퇴 처리 중 오류 발생", e);
+            rttr.addFlashAttribute("error", "회원 탈퇴에 실패했습니다");
         }
 
         return "redirect:/";
     }
 
-    private String requestToServer(String deleteUrl) throws IOException {
-        URL url = new URL(deleteUrl);
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        int responseCode = con.getResponseCode(); //헤더 필드 읽을때 connect()를 호출하지 않고 암시적으로 연결이 설정된다.
-        String result;
-        if (responseCode == 200) {
-            result = "회원 탈퇴에 성공했습니다";
-        } else {
-            result = "회원 탈퇴에 실패했습니다";
+    @GetMapping("/mypage/article")
+    public String myArticle(Model model,
+                            @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser) {
+        // 로그인 상태 확인
+        if (loginUser == null) {
+            return "redirect:/login"; // 로그인 페이지로 리다이렉트
         }
-        con.disconnect();
-        return result;
+        // 사용자가 작성한 게시글 목록 조회
+        List<ArticleDto> articles = articleService.findArticlesByUserEmail(loginUser.getEmail());
+        setArticleDatetime(articles);
 
+        // 모델에 게시글 목록 추가
+        model.addAttribute("articles", articles);
+
+        return "mypageArticle";
     }
-    /** 프로필 이미지 변경 */
-    private void editProfileImage(MypageForm mypageForm, SessionUser loginUser) throws IOException {
-        gcsFileStore.deleteFile(loginUser.getStoredImageName());
-        UploadFile uploadFile = gcsFileStore.storeProfileImage(mypageForm.getUserImage());
-        mypageForm.setStoredImageName(uploadFile.getStoreFileUrl());
-        userService.editProfileImage(mypageForm.getEmail(), uploadFile);
+
+    @GetMapping("/mypage/article/like")
+    public String myArticleLike(Model model,
+                            @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser) {
+        // 로그인 상태 확인
+        if (loginUser == null) {
+            return "redirect:/login"; // 로그인 페이지로 리다이렉트
+        }
+        // 사용자가 좋아요한 게시글 목록 조회
+        List<ArticleDto> likedArticles = articleService.findLikedArticlesByUserEmail(loginUser.getEmail());
+        setArticleDatetime(likedArticles);
+
+        // 모델에 게시글 목록 추가
+        model.addAttribute("articles", likedArticles);
+
+        return "mypageArticleLike";
+    }
+
+    @GetMapping("/mypage/comment")
+    public String myComment(Model model,
+                            @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser) {
+        // 로그인 상태 확인
+        if (loginUser == null) {
+            return "redirect:/login"; // 로그인 페이지로 리다이렉트
+        }
+        // 사용자가 작성한 댓글 목록 조회
+        List<CommentDto> comments = commentService.findCommentsByUserEmail(loginUser.getEmail());
+        for (CommentDto comment : comments) {
+            setCommentDatetime(comment);
+            setCommentImageUrls(comment);
+        }
+
+        // 모델에 게시글 목록 추가
+        model.addAttribute("comments", comments);
+
+        return "mypageComment";
+    }
+
+    @GetMapping("/mypage/comment/like")
+    public String myCommentLike(Model model,
+                            @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) SessionUser loginUser) {
+        // 로그인 상태 확인
+        if (loginUser == null) {
+            return "redirect:/login"; // 로그인 페이지로 리다이렉트
+        }
+
+        // 사용자가 좋아요한 댓글 목록 조회
+        List<CommentDto> likedComments = commentService.findLikedCommentsByUserEmail(loginUser.getEmail());
+        for (CommentDto comment : likedComments) {
+            setCommentDatetime(comment);
+            setCommentImageUrls(comment);
+        }
+
+        // 모델에 게시글 목록 추가
+        model.addAttribute("comments", likedComments);
+
+        return "mypageCommentLike";
     }
 
     private void setSession(MypageForm mypageForm, SessionUser loginUser, HttpSession session) {
         SessionUser sessionUser = new SessionUser(mypageForm, loginUser);
         session.setAttribute(SessionConst.LOGIN_USER, sessionUser);
+    }
+
+    private void setArticleDatetime(List<ArticleDto> articles) {
+        for (ArticleDto articleDto : articles) {
+            String dateTime = TimeAgoFormatter.format((articleDto.getCreatedDate()), LocalDateTime.now());
+            articleDto.setDateTime(dateTime);
+        }
+    }
+
+    private void setCommentDatetime(CommentDto commentDto) {
+            String dateTime = TimeAgoFormatter.format((commentDto.getCreatedDate()), LocalDateTime.now());
+            commentDto.setDateTime(dateTime);
+    }
+
+    private void setCommentImageUrls(CommentDto commentDto) {
+        // 이미지 URL 추출 (마크다운 형식: ![이미지](URL) 에서 URL 부분 추출)
+        List<String> imageUrls = new ArrayList<>();
+        String content = commentDto.getContent();
+
+        // 마크다운 이미지 패턴 매칭
+        Pattern pattern = Pattern.compile("!\\[이미지\\]\\((.*?)\\)");
+        Matcher matcher = pattern.matcher(content);
+
+        // 이미지 URL 추출 및 원본 내용에서 제거
+        StringBuffer cleanContent = new StringBuffer();
+        while (matcher.find()) {
+            imageUrls.add(matcher.group(1));
+            matcher.appendReplacement(cleanContent, ""); // 이미지 마크다운 제거
+        }
+        matcher.appendTail(cleanContent);
+
+        commentDto.setContent(cleanContent.toString().trim());
+        commentDto.setImageUrls(imageUrls);
+
+        for (CommentDto child : commentDto.getChildren()) {
+            setCommentImageUrls(child);
+        }
     }
 
 }
