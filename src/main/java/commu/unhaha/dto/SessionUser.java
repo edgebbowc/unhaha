@@ -19,14 +19,12 @@ public class SessionUser implements Serializable {
     private String storedImageName;
     private String email;
     private String nickname;
-    private String accessToken;
 
-    public SessionUser(User user, String accessToken) {
+    public SessionUser(User user) {
         this.id =  user.getId();
         this.email = user.getEmail();
         this.nickname = user.getNickname();
         this.storedImageName = user.getProfileImage().getStoreFileUrl();
-        this.accessToken = accessToken;
     }
 
     public SessionUser(MypageForm mypageForm, SessionUser sessionUser) {
@@ -34,6 +32,5 @@ public class SessionUser implements Serializable {
         this.email = mypageForm.getEmail();
         this.nickname = mypageForm.getNickname();
         this.storedImageName = mypageForm.getStoredImageName();
-        this.accessToken = sessionUser.getAccessToken();
     }
 }
