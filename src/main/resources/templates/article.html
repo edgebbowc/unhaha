@@ -24,10 +24,8 @@
     <article id="article" articleId="191452" boardId="266" userId="93031">
         <input type="hidden" name="title" th:value="${article.title}">
         <input type="hidden" name="ogContent" th:value="${article.content}">
-        <input type="hidden" name="ogImage" value="https://resources.chimhaha.net/assets/1672481307994-37shc7upssu.jpg">
-        <input type="hidden" name="url" value="https://chimhaha.net/exercise/191452">
         <div class="sub">
-            <div class="back"><a th:href="@{|${basePath}|}" th:text="'💪🏼' + ${article.board} + ' >'">게시판 이름</a></div>
+            <div class="back"><a th:href="@{|${article.boardPath}|}" th:text="'💪🏼' + ${article.board} + ' >'">게시판 이름</a></div>
         </div>
         <div class="item">
             <div class="info">
@@ -38,7 +36,7 @@
                     <div class="left">
                         <div class="userImage" style="background-image: url('/images/userImage.svg');"></div>
                         <div class="nickName">
-                            <th:block th:text="${article.user.nickname}">닉네임</th:block>
+                            <th:block th:text="${article.userNickname}">닉네임</th:block>
                         </div>
                         <div class="dot"></div>
                         <div class="datetime" th:text="${article.dateTime}">2시간전</div>
@@ -53,16 +51,16 @@
                         </th:block>
                     </div>
 
-                    <div class="right" th:if="${loginUser != null and article.user.email == loginUser.email}">
+                    <div class="right" th:if="${loginUser != null and article.userEmail == loginUser.email}">
                         <div class="buttons">
                             <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="ellipsis-v" class="svg-inline--fa fa-ellipsis-v fa-w-6" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 512">
                                 <path fill="#AAAAAA" d="M96 184c39.8 0 72 32.2 72 72s-32.2 72-72 72-72-32.2-72-72 32.2-72 72-72zM24 80c0 39.8 32.2 72 72 72s72-32.2 72-72S135.8 8 96 8 24 40.2 24 80zm0 352c0 39.8 32.2 72 72 72s72-32.2 72-72-32.2-72-72-72-72 32.2-72 72z"></path>
                             </svg>
                         </div>
                         <ul class="popUp">
-                            <form th:action="@{|${basePath}/${article.id}/edit|}" method="POST">
+                            <form th:action="@{|${article.boardPath}/${article.id}/edit|}" method="POST">
                                 <li class="edit">
-                                    <a th:href="@{|${basePath}/${article.id}/edit|}">
+                                    <a th:href="@{|${article.boardPath}/${article.id}/edit|}">
                                         <button type="button" name="submit" value="edit">
                                             <i class="fa-regular fa-edit"></i>&nbsp;수정
                                         </button>
@@ -93,12 +91,12 @@
                     <span>😂</span>
                 </button>
 
-                <button id="like" class="like" th:onclick="'alert(\'자신의 게시글에는 운하하 할 수 없습니다\');'" th:if="${loginUser} != null and ${#strings.equals(article.user.email, loginUser.email)}">
+                <button id="like" class="like" th:onclick="'alert(\'자신의 게시글에는 운하하 할 수 없습니다\');'" th:if="${loginUser} != null and ${#strings.equals(article.userEmail, loginUser.email)}">
                     <span>운하하</span>
                     <span>😂</span>
                 </button>
 
-                <form method="POST" th:action="@{{basePath}/like/{articleId}(basePath=${basePath}, articleId=${article.id})}" th:if="${loginUser} != null and ${not #strings.equals(article.user.email, loginUser.email)}">
+                <form method="POST" th:action="@{{basePath}/like/{articleId}(basePath=${basePath}, articleId=${article.id})}" th:if="${loginUser} != null and ${not #strings.equals(article.userEmail, loginUser.email)}">
                     <button id="like" class="like" th:if="${like}==false">
                         <span>운하하</span>
                         <span>😂</span>
@@ -152,16 +150,20 @@
             <!-- 댓글 목록 다음에 추가 -->
             <div class="bottom-btn-area" th:if="${shouldShowPagination}">
                 <section class="pagination">
-                    <a th:if="${start > 1}" th:href="@{|?page=${start - 1}|}">
+                    <a th:if="${start > 1}" th:href="@{|?page=${listPage}&comment=${start - 1}|}">
                         <div class="large secondary prev">이전</div>
                     </a>
                     <div class="number">
                         <a th:each="page: ${#numbers.sequence(start, end)}"
-                           th:classappend="${page == currentPage} ? 'selected' : 'notSelected'"th:text="${page}" th:href="@{|?page=${page}|}"></a>
-                    </div>
-                        <a th:if="${end < totalPages}" th:href="@{|?page=${end + 1}|}">
-                            <div class="large secondary next">다음</div>
+                           th:classappend="${page == currentCommentPage} ? 'selected' : 'notSelected'"
+                           th:text="${page}"
+                           th:href="@{|?page=${listPage}&comment=${page}|}">
                         </a>
+                    </div>
+                    <a th:if="${end < totalPages}"
+                       th:href="@{|?page=${listPage}&comment=${end + 1}|}">
+                        <div class="large secondary next">다음</div>
+                    </a>
                 </section>
             </div>
 
@@ -170,6 +172,7 @@
                 <div class="contentContainer">
                     <form id="commentUpload" th:action="@{${basePath} + '/' + ${article.id} + '/comments'}" method="post"
                           enctype="multipart/form-data">
+                        <input type="hidden" name="currentListPage" th:value="${listPage}"/>
                         <div class="commentInput">
                             <div class="commentContent">
                                 <textarea id="content" name="content" placeholder="댓글을 작성해주세요" maxlength="400"></textarea>
@@ -221,7 +224,7 @@
             <div class="listAndEdit">
                 <div class="left">
                     <div class="button">
-                        <a href="/new?page=1">
+                        <a th:href="@{${basePath}(page=${param.page})}">
                             목록
                         </a>
                     </div>
@@ -259,8 +262,9 @@
 </script>
 <script th:inline="javascript">
     const articleId = [[${article.id}]];
-    const currentPage = [[${currentPage}]];
+    const currentCommentPage = [[${currentCommentPage}]];
     const basePath = [[${basePath}]];
+    const listPage = [[${listPage}]];
     // 이미지 업로드 설정을 위한 옵션 객체
     const imageUploadConfig = {
         uploadUrl: '/comments/images',
