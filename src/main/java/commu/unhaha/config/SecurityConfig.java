@@ -13,7 +13,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @Configuration
 @RequiredArgsConstructor
-public class SecurityConfig{
+public class SecurityConfig {
 
     @Autowired
     CustomOAuth2UserService customOAuth2UserService;
@@ -23,8 +23,8 @@ public class SecurityConfig{
         http
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/**").permitAll()
-                .antMatchers("/api/**").hasRole(Role.USER.name())
+                    .antMatchers("/**").permitAll()
+                    .antMatchers("/api/**").hasRole("USER")
                 .anyRequest().authenticated()
                 .and()
                 .oauth2Login().loginPage("/oauth2/authorization/naver").and()
@@ -32,7 +32,5 @@ public class SecurityConfig{
                 .oauth2Login().userInfoEndpoint().userService(customOAuth2UserService);
 
         return http.build();
-
-
     }
 }
