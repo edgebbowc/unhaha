@@ -1,12 +1,16 @@
 package commu.unhaha.dto;
 
 
+import commu.unhaha.domain.BoardType;
 import commu.unhaha.domain.Comment;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import static commu.unhaha.domain.BoardType.*;
+
 
 @Data
 public class CommentDto {
@@ -15,6 +19,8 @@ public class CommentDto {
     private Long parentId;
 
     private Long articleId;
+
+    private String articleBoardPath;
 
     private Long userId;
 
@@ -43,6 +49,7 @@ public class CommentDto {
     public CommentDto(Comment comment) {
         this.id = comment.getId();
         this.articleId = comment.getArticle().getId();
+        this.articleBoardPath = titleToPath(comment.getArticle().getBoard());
         this.userId = comment.getUser().getId();
         this.content = comment.getContent();
         this.nickname = comment.getUser().getNickname();
