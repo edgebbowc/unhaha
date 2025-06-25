@@ -177,7 +177,7 @@ public class CommentServiceTest {
         when(commentRepository.findById(1L)).thenReturn(Optional.of(rootComment1));
 
         // when
-        commentService.updateComment(1L, "수정된 내용", null);
+        commentService.updateComment(1L, "수정된 내용", null, user.getEmail());
 
         // then
         assertThat(rootComment1.getContent()).isEqualTo("수정된 내용");
@@ -198,7 +198,7 @@ public class CommentServiceTest {
                 .thenReturn(Optional.of(CommentImage.createTemp("new-image.jpg")));
 
         // when
-        commentService.updateComment(1L, "새 내용", newImageUrls);
+        commentService.updateComment(1L, "새 내용", newImageUrls, user.getEmail());
 
         // then
         assertThat(rootComment1.getContent()).contains("새 내용");
@@ -220,7 +220,7 @@ public class CommentServiceTest {
         when(commentRepository.findById(1L)).thenReturn(Optional.of(rootComment1));
 
         // when
-        commentService.deleteComment(1L);
+        commentService.deleteComment(1L, user.getEmail());
 
         // then
         verify(commentRepository).delete(rootComment1);
@@ -235,7 +235,7 @@ public class CommentServiceTest {
                 .thenReturn(List.of("image1.jpg", "image2.jpg"));
 
         // when
-        commentService.deleteComment(1L);
+        commentService.deleteComment(1L, user.getEmail());
 
         // then
         verify(gcsFileStore, times(2)).deleteFile(anyString());
