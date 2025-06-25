@@ -75,8 +75,13 @@ public class ArticleService {
     /**
      * Article 수정 메서드
      */
-    public void editArticle(Long articleId, WriteArticleForm form) {
+    public void editArticle(Long articleId, WriteArticleForm form, String userEmail) {
         Article article = validateAndGetArticle(articleId);
+
+        // 소유자 검증 추가
+        if (!article.getUser().getEmail().equals(userEmail)) {
+            throw new SecurityException("본인이 작성한 게시글만 수정할 수 있습니다.");
+        }
 
         // 기존 이미지 정리
         Set<String> newImageUrls = extractImageUrls(form.getContent());
@@ -116,8 +121,14 @@ public class ArticleService {
     /**
      * Article 삭제 메서드
      */
-    public void deleteArticle(Long articleId) {
-        validateArticle(articleId);
+    public void deleteArticle(Long articleId, String userEmail) {
+        Article article = validateAndGetArticle(articleId);
+
+        // 소유자 검증
+        if (!article.getUser().getEmail().equals(userEmail)) {
+            throw new SecurityException("본인이 작성한 게시글만 삭제할 수 있습니다.");
+        }
+
         List<ArticleImage> relatedImages = articleImageRepository.findByArticleId(articleId);
 
         for (ArticleImage image : relatedImages) {
@@ -294,11 +305,14 @@ public class ArticleService {
 
     public boolean saveLike(Long articleId, Long userId) {
 
+        Article article = validateAndGetArticle(articleId);
+        if (article.getUser().getId().equals(userId)) {
+            throw new SecurityException("자신의 게시글에는 운하하 할 수 없습니다");
+        }
         /** 로그인한 유저가 해당 게시물을 좋아요 했는지 안 했는지 확인 **/
         if(!findLike(articleId, userId)){
             /* 좋아요 하지 않은 게시물이면 좋아요 추가, true 반환 */
             User user = userRepository.findById(userId).orElse(null);
-            Article article = validateAndGetArticle(articleId);
 
             /* 좋아요 엔티티 생성 */
             UserLikeArticle userLikeArticle = new UserLikeArticle(user, article);
@@ -308,7 +322,6 @@ public class ArticleService {
             return true;
         } else {
             /* 좋아요 한 게시물이면 좋아요 삭제 */
-            Article article = validateAndGetArticle(articleId);
             userLikeArticleRepository.deleteByArticleIdAndUserId(articleId, userId);
             article.decreaseLikeCount();
 
@@ -340,6 +353,25 @@ public class ArticleService {
         }
 
         return urls;
+    }
+    /**
+     * 사용자 이메일로 작성한 게시글 목록 조회
+     */
+    public List<ArticleDto> findArticlesByUserEmail(String email) {
+        List<Article> articles = articleRepository.findByUserEmailOrderByCreatedDateDesc(email);
+        return articles.stream()
+                .map(ArticleDto::new)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 사용자가 좋아요한 게시글 목록 조회
+     */
+    public List<ArticleDto> findLikedArticlesByUserEmail(String email) {
+        List<Article> likedArticles = articleRepository.findLikedArticlesByUserEmail(email);
+        return likedArticles.stream()
+                .map(ArticleDto::new)
+                .collect(Collectors.toList());
     }
 }
 
