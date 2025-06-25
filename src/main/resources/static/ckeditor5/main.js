@@ -207,7 +207,6 @@ const editorConfig = {
 			}
 		]
 	},
-
 };
 const MAX_SINGLE_SIZE = 2 * 1024 * 1024; // 2MB
 
@@ -266,9 +265,87 @@ function CustomUploadPlugin(editor) {
 	};
 }
 
+// ClassicEditor.create(document.querySelector('#editor'), editorConfig).then(editor => {
+// 	const wordCount = editor.plugins.get('WordCount');
+// 	document.querySelector('#editor-word-count').appendChild(wordCount.wordCountContainer);
+//
+// 	return editor;
+// });
 ClassicEditor.create(document.querySelector('#editor'), editorConfig).then(editor => {
+	// WordCount 플러그인 가져오기
 	const wordCount = editor.plugins.get('WordCount');
-	document.querySelector('#editor-word-count').appendChild(wordCount.wordCountContainer);
+
+	if (!wordCount) {
+		console.error('WordCount plugin not found!');
+		return;
+	}
+	// 초기 wordCount 계산 함수
+	function updateInitialWordCount() {
+		setTimeout(() => {
+			const content = editor.getData();
+			if (content) {
+				// HTML 태그 제거 후 순수 텍스트 추출
+				const tempDiv = document.createElement('div');
+				tempDiv.innerHTML = content;
+				const textContent = tempDiv.textContent || tempDiv.innerText || '';
+				const characterCount = textContent.length;
+
+				const countElement = document.getElementById('count');
+				if (countElement) {
+					countElement.textContent = characterCount;
+				}
+			}
+		}, 100); // 에디터 데이터 로딩 후 실행
+	}
+
+	// 에디터 준비 완료 후 초기 카운트 설정
+	editor.model.document.on('ready', () => {
+		updateInitialWordCount();
+	});
+
+	// 데이터 변경 시에도 초기 카운트 설정 (안전장치)
+	setTimeout(() => {
+		updateInitialWordCount();
+	}, 200);
+
+	// 이벤트 리스너 등록
+	wordCount.on('update', (evt, stats) => {
+		const countElement = document.getElementById('count');
+		if (countElement && stats) {
+			const maxCount = 10000;
+			const currentCount = stats.characters || 0;
+
+			if (currentCount > maxCount) {
+				alert('본문은 10000자를 초과할 수 없습니다.');
+
+				// 현재 에디터 내용 가져오기
+				let content = editor.getData();
+
+				// HTML 태그 제거 후 순수 텍스트만 추출
+				const tempDiv = document.createElement('div');
+				tempDiv.innerHTML = content;
+				let textContent = tempDiv.textContent || tempDiv.innerText || '';
+
+				// 초과된 글자 수 - 3 계산
+				const targetLength = maxCount - 3; // 9997자로 설정
+
+				// 텍스트를 목표 길이로 자르기
+				const truncatedText = textContent.substring(0, targetLength);
+
+				// 에디터에 잘린 텍스트 다시 설정
+				editor.setData(`<p>${truncatedText}</p>`);
+
+				// 글자 수 업데이트
+				countElement.textContent = targetLength;
+			} else {
+				countElement.textContent = currentCount;
+			}
+		} else {
+			console.error('Count element or stats not found');
+		}
+	});
 
 	return editor;
+}).catch(error => {
+	console.error('CKEditor initialization failed:', error);
 });
