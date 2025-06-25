@@ -106,6 +106,7 @@ function createReplyFormHTML(commentId) {
         <div class="contentContainer">
             <form id="replyForm-${commentId}" action="${basePath}/${articleId}/comments" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="parentId" value="${commentId}">
+                <input type="hidden" name="currentListPage" value="${listPage}"/>
                 <div class="commentInput">
                     <div class="commentContent">
                         <textarea id="replyContent-${commentId}" name="content" placeholder="댓글을 작성해주세요" maxlength="400"></textarea>
@@ -220,7 +221,8 @@ function createEditFormHTML(commentId, commentContent) {
     return `
         <div class="contentContainer">
             <form id="editForm-${commentId}" action="${basePath}/${articleId}/comments/${commentId}" method="post" enctype="multipart/form-data">
-            <input type="hidden" name="currentPage" value="${currentPage}">
+            <input type="hidden" name="currentCommentPage" value="${currentCommentPage}">
+            <input type="hidden" name="currentListPage" value="${listPage}">
                 <div class="commentInput">
                     <div class="commentContent">
                         <textarea id="editContent-${commentId}" name="content" maxlength="400">${commentContent}</textarea>
