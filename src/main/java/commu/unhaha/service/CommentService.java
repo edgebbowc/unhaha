@@ -38,7 +38,7 @@ public class CommentService {
                                  List<String> imageUrls, Long parentId) {
         // 1. 엔티티 조회
         Article article = articleRepository.findById(articleId)
-                .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
 
         Comment parent = null;
         /* N + 1 문제 발생
@@ -49,7 +49,7 @@ public class CommentService {
         if (parentId != null) {
             // Fetch Join을 사용한 부모 댓글 조회
             parent = commentRepository.findParentWithRelations(parentId)
-                    .orElseThrow(() -> new EntityNotFoundException("부모 댓글을 찾을 수 없습니다."));
+                    .orElseThrow(() -> new IllegalArgumentException("부모 댓글을 찾을 수 없습니다."));
         }
 
         // 2. 이미지가 있는 경우 콘텐츠에 마크다운 형식으로 추가
@@ -133,7 +133,7 @@ public class CommentService {
      */
     public Comment findById(Long commentId) {
         return commentRepository.findById(commentId)
-                .orElseThrow(() -> new EntityNotFoundException("댓글을 찾을 수 없습니다: " + commentId));
+                .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다: " + commentId));
     }
 
     /**
@@ -142,20 +142,25 @@ public class CommentService {
      * @param content
      * @param newImageUrls
      */
-    public void updateComment(Long commentId, String content, List<String> newImageUrls) {
+    public void updateComment(Long commentId, String content, List<String> newImageUrls, String userEmail) {
         // 1. 댓글 조회
         Comment comment = findById(commentId);
 
-        // 2. 새 이미지 URL 목록이 있으면 마크다운 형식으로 내용에 추가
+        // 2. 소유자 검증 추가
+        if (!comment.getUser().getEmail().equals(userEmail)) {
+            throw new SecurityException("본인이 작성한 댓글만 수정할 수 있습니다.");
+        }
+
+        // 3. 새 이미지 URL 목록이 있으면 마크다운 형식으로 내용에 추가
         String finalContent = content;
         if (newImageUrls != null && !newImageUrls.isEmpty()) {
             finalContent = addImagesToContent(content, newImageUrls);
         }
 
-        // 3. 현재 댓글에 연결된 모든 이미지 조회
+        // 4. 현재 댓글에 연결된 모든 이미지 조회
         List<CommentImage> existingImages = commentImageRepository.findByCommentId(comment.getId());
 
-        // 4. 이미지 처리
+        // 5. 이미지 처리
         if (newImageUrls != null && !newImageUrls.isEmpty()) {
             // 기존 이미지 URL 추출 (비교용)
             Set<String> existingImageUrls = existingImages.stream()
@@ -165,7 +170,7 @@ public class CommentService {
             // 새 이미지 URL을 Set으로 변환 (검색 최적화)
             Set<String> newImageUrlSet = new HashSet<>(newImageUrls);
 
-            // 4.1. 삭제할 이미지 처리: 기존 이미지 중 새 이미지 URL 목록에 없는 것들
+            // 5.1. 삭제할 이미지 처리: 기존 이미지 중 새 이미지 URL 목록에 없는 것들
             for (CommentImage existingImage : existingImages) {
                 if (!newImageUrlSet.contains(existingImage.getUrl())) {
                     existingImage.markAsTemp();
@@ -173,7 +178,7 @@ public class CommentService {
                 }
             }
 
-            // 4.2. 추가할 이미지 처리: 새 이미지 URL 중 기존에 없는 것들
+            // 5.2. 추가할 이미지 처리: 새 이미지 URL 중 기존에 없는 것들
             for (String newUrl : newImageUrls) {
                 if (!existingImageUrls.contains(newUrl)) {
                     // TEMP 상태인 이미지 조회
@@ -205,17 +210,22 @@ public class CommentService {
     /**
      * 댓글 삭제
      */
-    public void deleteComment(Long commentId) {
+    public void deleteComment(Long commentId, String userEmail ) {
         // 1. 댓글 조회
         Comment comment = findById(commentId);
 
-        // 1. 모든 이미지 URL 수집 (현재 댓글 + 모든 자식 댓글)
+        // 2. 소유자 검증 추가
+        if (!comment.getUser().getEmail().equals(userEmail)) {
+            throw new SecurityException("본인이 작성한 댓글만 수정할 수 있습니다.");
+        }
+
+        // 3. 모든 이미지 URL 수집 (현재 댓글 + 모든 자식 댓글)
         List<String> imageUrls = collectAllImageUrls(comment);
 
-        // 2. GCS에서 이미지 파일 삭제
+        // 4. GCS에서 이미지 파일 삭제
         deleteImagesFromGCS(imageUrls);
 
-        // 3. 댓글 엔티티 삭제 (자식 댓글과 이미지 DB 레코드는 cascade로 자동 삭제됨)
+        // 5. 댓글 엔티티 삭제 (자식 댓글과 이미지 DB 레코드는 cascade로 자동 삭제됨)
         commentRepository.delete(comment);
 
         log.info("댓글 ID {} 및 관련 자식 댓글, 이미지 {}개 삭제 완료", commentId, imageUrls.size());
@@ -453,8 +463,8 @@ public class CommentService {
 
         // 해당 댓글보다 이전에 작성된 루트 댓글 수만 COUNT로 조회
         long earlierCommentsCount = commentRepository
-                .countByArticleIdAndParentIsNullAndCreatedDateBefore(
-                        articleId, rootComment.getCreatedDate());
+                .countByArticleIdAndParentIsNullAndIdLessThan(
+                        articleId, rootComment.getId());
 
         // 페이지 번호 계산 (1-based)
         int pageNumber = (int) (earlierCommentsCount / pageSize) + 1;
@@ -482,41 +492,58 @@ public class CommentService {
 
     /**
      * 댓글 좋아요
-     *
-     * @param commentId
-     * @param userId
-     * @return
      */
-    public void saveLike(Long commentId, Long userId) {
+    public boolean saveLike(Long commentId, Long userId) {
+        Comment comment = findById(commentId);
+        if (comment.getUser().getId().equals(userId)) {
+            throw new SecurityException("자신의 댓글에는 운하하 할 수 없습니다");
+        }
 
         /** 로그인한 유저가 해당 게시물을 좋아요 했는지 안 했는지 확인 **/
         if (!findLike(commentId, userId)) {
             /* 좋아요 하지 않은 댓글이면 좋아요 추가, true 반환 */
-            User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("유저를 찾을 수 없습니다."));
-            Comment comment = findById(commentId);
+            User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
             /* UserLikeComment 엔티티 생성 */
             UserLikeComment userLikeComment = new UserLikeComment(user, comment);
             userLikeCommentRepository.save(userLikeComment);
             comment.increaseLikeCount();
+            return true;
         } else {
             /* 좋아요 한 댓글이면 좋아요 삭제 */
-            Comment comment = findById(commentId);
             userLikeCommentRepository.deleteByCommentIdAndUserId(commentId, userId);
             comment.decreaseLikeCount();
+            return false;
         }
     }
 
     /**
      * 사용자가 좋아요한 댓글 ID 목록 조회
-     *
-     * @param userId
-     * @return
      */
     public List<Long> findLikedCommentsByUser(Long userId) {
         return userLikeCommentRepository.findByUserId(userId)
                 .stream()
                 .map(like -> like.getComment().getId())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 사용자 이메일로 작성한 댓글 목록 조회
+     */
+    public List<CommentDto> findCommentsByUserEmail(String email) {
+        List<Comment> comments = commentRepository.findByUserEmailOrderByCreatedDateDesc(email);
+        return comments.stream()
+                .map(CommentDto::new)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 사용자가 좋아요한 댓글 목록 조회
+     */
+    public List<CommentDto> findLikedCommentsByUserEmail(String email) {
+        List<Comment> likedComments = commentRepository.findLikedCommentsByUserEmail(email);
+        return likedComments.stream()
+                .map(CommentDto::new)
                 .collect(Collectors.toList());
     }
 }
