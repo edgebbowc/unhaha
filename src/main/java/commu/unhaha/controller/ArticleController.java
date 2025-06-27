@@ -378,8 +378,8 @@ public class ArticleController {
      * 이전글, 다음글 처리
      */
     private void processNavigationData(String boardType, Long articleId, ArticleDto articleDto, Model model) {
-        ArticleDto prevArticle = null;
-        ArticleDto nextArticle = null;
+        ArticleDto prevArticle;
+        ArticleDto nextArticle;
 
         switch (boardType) {
             case "best":
@@ -510,29 +510,11 @@ public class ArticleController {
     private void setDateTime(ArticleDto articleDto) {
         LocalDateTime createdDate = articleDto.getCreatedDate();
         LocalDateTime now = LocalDateTime.now();
-        String dateTime = articleService.calDateTime(createdDate, now);
+        String dateTime = TimeAgoFormatter.format(createdDate, now);
         articleDto.setDateTime(dateTime);
     }
 
     private boolean isValidBoardType(String boardType) {
         return Arrays.asList("new", "best", "bodybuilding", "powerlifting", "crossfit").contains(boardType);
-    }
-
-    /**
-     * 테스트용 데이터 추가
-     */
-    @PostConstruct
-    public void init() {
-        User user = userRepository.save(new User("길동", "홍길동", "222@naver.com", Role.USER, new UploadFile("userImage", "userImage")));
-        User user2 = userRepository.save(new User("로니콜먼", "로니콜먼", "333@naver.com", Role.USER, new UploadFile("userImage", "userImage")));
-        for (int i = 0; i < 400; i++) {
-            articleRepository.save(new Article("보디빌딩", "오운완" + i, "오늘도 운동 완료", user, 0, 0));
-        }
-        commentService.createComment(user2, 400L, "Light Weight BABY!", null,null);
-        commentService.createComment(user2, 400L, "Easy Weight BABY!", null,1L);
-//        articleRepository.save(new Article("보디빌딩", "오운완", "오늘도 운동 완료", user));
-//        articleRepository.save(new Article("파워리프팅", "3대 500달성", "힘들다", user));
-//        articleRepository.save(new Article("파워리프팅", "3대 500달성", "힘들다", user));
-
     }
 }
