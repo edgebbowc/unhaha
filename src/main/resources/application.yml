@@ -20,10 +20,11 @@ spring:
         bucket: unhaha-imagestorage
 
   datasource:
-    url: jdbc:h2:tcp://localhost/~/unhaha
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+    url: jdbc:mysql://localhost:3306/unhaha?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8
+    username: root  # MySQL 사용자명
+    password: ${mysql-password}  # MySQL 비밀번호
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
   mvc:
     hiddenmethod:
       filter:
@@ -40,11 +41,16 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
         default_batch_fetch_size: 100
+  sql:
+    init:
+      mode: always  # 스크립트 기반 초기화 활성화
+      schema-locations: classpath:sql/schema.sql
 
   security:
     oauth2:
