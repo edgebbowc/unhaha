@@ -1,10 +1,8 @@
 package commu.unhaha.service;
 
-import commu.unhaha.controller.SessionConst;
 import commu.unhaha.domain.*;
 import commu.unhaha.dto.ArticleDto;
 import commu.unhaha.dto.ArticlesDto;
-import commu.unhaha.dto.SessionUser;
 import commu.unhaha.dto.WriteArticleForm;
 import commu.unhaha.file.GCSFileStore;
 import commu.unhaha.repository.ArticleImageRepository;
@@ -20,12 +18,7 @@ import org.jsoup.select.Elements;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.SessionAttribute;
-
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.Period;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -58,18 +51,18 @@ public class ArticleService {
                 .likeCount(0)
                 .build();
 
-        articleRepository.save(article);
+        Article savedArticle = articleRepository.save(article);
 
         // 이미지 연결
         Set<String> imageUrls = extractImageUrls(form.getContent());
         List<ArticleImage> images = articleImageRepository.findByUrlIn(imageUrls);
 
         for (ArticleImage image : images) {
-            image.attachToArticle(article);
+            image.attachToArticle(savedArticle);
         }
         articleImageRepository.saveAll(images);
 
-        return article.getId();
+        return savedArticle.getId();
     }
 
     /**
@@ -239,10 +232,16 @@ public class ArticleService {
         return article != null ? new ArticleDto(article) : null;
     }
 
+    /**
+     * 조회수 증가 메서드
+     */
     public void addViewCount(Long articleId) {
         articleRepository.increaseViews(articleId);
     }
 
+    /**
+     * 비회원 조회시 조회수 로직
+     */
     public ArticleDto noneMemberView(Long articleId, String clientAddress) {
         Article article = validateAndGetArticle(articleId);
 
@@ -253,6 +252,9 @@ public class ArticleService {
         return new ArticleDto(article);
     }
 
+    /**
+     * 회원 조회시 조회수 로직
+     */
     public ArticleDto memberView(Long articleId, String email) {
         Article article = validateAndGetArticle(articleId);
 
@@ -263,46 +265,18 @@ public class ArticleService {
         return new ArticleDto(article);
     }
 
-    public String calDateTime(LocalDateTime createdDate, LocalDateTime now) {
-        Period diff = Period.between(createdDate.toLocalDate(), now.toLocalDate());
-        Duration timeDiff = Duration.between(createdDate.toLocalTime(), now.toLocalTime());
-        String datetime;
-
-        if (diff.isZero()) {
-            if (timeDiff.getSeconds() < 60) {
-                String seconds = Long.toString(timeDiff.getSeconds());
-                datetime = seconds.concat("초전");
-                return datetime;
-            } else if (timeDiff.toMinutes() < 60) {
-                String minutes = Long.toString(timeDiff.toMinutes());
-                datetime = minutes.concat("분전");
-                return datetime;
-            } else {
-                String hours = Long.toString(timeDiff.toHours());
-                datetime = hours.concat("시간전");
-                return datetime;
-            }
-        }
-
-        // 1일~7일 -> 1일전
-        if (diff.getYears() == 0 && diff.getMonths() == 0 && (0 < diff.getDays() && diff.getDays() <= 7)) {
-            String days = Integer.toString(diff.getDays());
-            datetime = days.concat("일전");
-            return datetime;
-        }
-
-        //7일이상 지나면 -> 날짜 출력 ex) 05.20
-        datetime = createdDate.format(DateTimeFormatter.ofPattern("MM.dd"));
-        return datetime;
-    }
-
-    // 게시글 좋아요 확인
+    /**
+     * 게시글 좋아요 여부 확인
+     */
     public boolean findLike(Long article_id, Long user_id) {
 
         return userLikeArticleRepository.existsByArticleIdAndUserId(article_id, user_id);
 
     }
 
+    /**
+     * 게시글 좋아요 메서드(토글)
+     */
     public boolean saveLike(Long articleId, Long userId) {
 
         Article article = validateAndGetArticle(articleId);
@@ -329,17 +303,17 @@ public class ArticleService {
         }
     }
 
-    public void validateArticle(Long articleId) {
-        if (!articleRepository.existsById(articleId)) {
-            throw new IllegalArgumentException("해당 게시글이 존재하지 않습니다.");
-        }
-    }
-
+    /**
+     * 게시글 존재 여부 검사 메서드
+     */
     public Article validateAndGetArticle(Long articleId) {
         return articleRepository.findById(articleId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
     }
 
+    /**
+     * 게시글 내용의 이미지 url만 추출
+     */
     private Set<String> extractImageUrls(String content) {
         Set<String> urls = new HashSet<>();
         Document doc = Jsoup.parse(content); // HTML 파싱
