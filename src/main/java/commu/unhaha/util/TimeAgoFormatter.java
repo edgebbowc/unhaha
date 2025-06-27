@@ -15,29 +15,38 @@ public class TimeAgoFormatter {
      * "N초전", "N분전", "N시간전", "N일전" 또는 "MM.dd" 포맷으로 반환
      */
     public static String format(LocalDateTime createdDate, LocalDateTime now) {
-        Period diff = Period.between(createdDate.toLocalDate(), now.toLocalDate());
-        Duration timeDiff = Duration.between(createdDate.toLocalTime(), now.toLocalTime());
+        Duration totalDuration = Duration.between(createdDate, now);
+        long totalSeconds = totalDuration.getSeconds();
 
-        // same day → 초/분/시간 전
-        if (diff.isZero()) {
-            long seconds = timeDiff.getSeconds();
-            if (seconds < 60) {
-                return seconds + "초전";
-            }
-            long minutes = timeDiff.toMinutes();
-            if (minutes < 60) {
-                return minutes + "분전";
-            }
-            return timeDiff.toHours() + "시간전";
+        // 음수 처리 (미래 시간이거나 거의 동시인 경우)
+        if (totalSeconds <= 0) {
+            return "1초전";
         }
 
-        // 1~7일 전
-        int days = diff.getDays();
-        if (diff.getYears() == 0 && diff.getMonths() == 0 && days <= 7) {
+        // 60초 미만
+        if (totalSeconds < 60) {
+            return totalSeconds + "초전";
+        }
+
+        // 60분 미만
+        long minutes = totalSeconds / 60;
+        if (minutes < 60) {
+            return minutes + "분전";
+        }
+
+        // 24시간 미만
+        long hours = totalSeconds / 3600;
+        if (hours < 24) {
+            return hours + "시간전";
+        }
+
+        // 7일 미만
+        long days = totalSeconds / (3600 * 24);
+        if (days <= 7) {
             return days + "일전";
         }
 
-        // 그 이상 → MM.dd
+        // 7일 이상 - 날짜 출력
         return createdDate.format(DATE_FORMATTER);
     }
 }
