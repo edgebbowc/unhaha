@@ -6,6 +6,8 @@ import commu.unhaha.dto.WriteArticleForm;
 import commu.unhaha.file.GCSFileStore;
 import commu.unhaha.repository.ArticleImageRepository;
 import commu.unhaha.repository.ArticleRepository;
+import commu.unhaha.repository.UserLikeArticleRepository;
+import commu.unhaha.repository.UserRepository;
 import commu.unhaha.service.ArticleService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,10 +20,7 @@ import org.springframework.data.domain.*;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,6 +37,12 @@ class ArticleServiceTest {
     private ArticleImageRepository articleImageRepository;
 
     @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private UserLikeArticleRepository userLikeArticleRepository;
+
+    @Mock
     private GCSFileStore gcsFileStore;
 
     @InjectMocks
@@ -45,9 +50,11 @@ class ArticleServiceTest {
 
     private User user;
     private Article article;
+    private User otherUser;
 
     @BeforeEach
     void setUp() {
+
         user = User.builder()
                 .name("user")
                 .nickname("nickname")
@@ -56,6 +63,15 @@ class ArticleServiceTest {
                 .profileImage(new UploadFile("userImage", "userImage"))
                 .build();
         ReflectionTestUtils.setField(user, "id", 1L);
+
+        otherUser = User.builder()
+                .name("otherUser")
+                .nickname("otherUser")
+                .email("other@example.com")
+                .role(Role.USER)
+                .profileImage(new UploadFile("userImage", "userImage"))
+                .build();
+        ReflectionTestUtils.setField(otherUser, "id", 2L);
 
         article = Article.builder()
                 .board("board")
@@ -67,6 +83,58 @@ class ArticleServiceTest {
                 .build();
         ReflectionTestUtils.setField(article, "id", 1L);
     }
+    private ArticleImage createMockArticleImage(String url) {
+        ArticleImage image = mock(ArticleImage.class);
+        // attachToArticle stub 설정
+        doNothing().when(image).attachToArticle(any(Article.class));
+        return image;
+    }
+
+    @Test
+    @DisplayName("게시글 생성 - 이미지 포함")
+    void createArticle_shouldSaveArticleAndAttachImages() {
+        // given
+        WriteArticleForm form = WriteArticleForm.builder()
+                .board("보디빌딩")
+                .title("테스트 제목")
+                .content("테스트 내용 <img src=\"url1\"> <img src=\"url2\">")
+                .build();
+
+        Set<String> imageUrls = Set.of("url1", "url2");
+        List<ArticleImage> images = Arrays.asList(
+                createMockArticleImage("url1"),
+                createMockArticleImage("url2")
+        );
+
+        when(articleRepository.save(any(Article.class))).thenReturn(article);
+        when(articleImageRepository.findByUrlIn(imageUrls)).thenReturn(images);
+
+        // when
+        Long articleId = articleService.createArticle(form, user);
+
+        // then
+        assertThat(articleId).isEqualTo(1L);
+
+        // Article 저장 검증
+        ArgumentCaptor<Article> articleCaptor = ArgumentCaptor.forClass(Article.class);
+        verify(articleRepository).save(articleCaptor.capture());
+
+        Article capturedArticle = articleCaptor.getValue();
+        assertThat(capturedArticle.getBoard()).isEqualTo("보디빌딩");
+        assertThat(capturedArticle.getTitle()).isEqualTo("테스트 제목");
+        assertThat(capturedArticle.getContent()).isEqualTo("테스트 내용 <img src=\"url1\"> <img src=\"url2\">");
+        assertThat(capturedArticle.getUser()).isEqualTo(user);
+        assertThat(capturedArticle.getViewCount()).isEqualTo(0);
+        assertThat(capturedArticle.getLikeCount()).isEqualTo(0);
+
+        // 이미지 처리 검증
+        verify(articleImageRepository).findByUrlIn(imageUrls);
+        for (ArticleImage image : images) {
+            verify(image).attachToArticle(article);
+        }
+        verify(articleImageRepository).saveAll(images);
+    }
+
     @DisplayName("게시판 수정")
     @Test
     public void editArticle() throws Exception {
@@ -90,6 +158,7 @@ class ArticleServiceTest {
     void editArticle_WithNewImages_ShouldActivateNewImages() {
         // given
         Long articleId = 1L;
+        String userEmail = "email";
         WriteArticleForm form = WriteArticleForm.builder()
                 .board("보디빌딩")
                 .title("제목")
@@ -105,7 +174,7 @@ class ArticleServiceTest {
                 .thenReturn(List.of(tempImage));
 
         // when
-        articleService.editArticle(articleId, form);
+        articleService.editArticle(articleId, form, userEmail);
 
         // then
         assertThat(tempImage.getStatus()).isEqualTo(ImageStatus.ACTIVE);
@@ -116,13 +185,15 @@ class ArticleServiceTest {
     public void deleteArticle() throws Exception {
         // given
         Long articleId = 1L;
+        String userEmail = "email";
+
         List<ArticleImage> mockImages = List.of(
                 ArticleImage.createTemp("url1"),
                 ArticleImage.createTemp("url2")
         );
 
         // validateArticle() 정상 통과하게 모킹
-        when(articleRepository.existsById(articleId)).thenReturn(true);
+        when(articleRepository.findById(articleId)).thenReturn(Optional.ofNullable(article));
 
         // findByArticleId() 모킹
         when(articleImageRepository.findByArticleId(articleId)).thenReturn(mockImages);
@@ -131,7 +202,7 @@ class ArticleServiceTest {
         doNothing().when(gcsFileStore).deleteFile(anyString());
 
         // when
-        articleService.deleteArticle(articleId);
+        articleService.deleteArticle(articleId, userEmail);
 
         // then
         // gcsFileStore.deleteFile() 호출된 URL들 캡쳐
@@ -158,11 +229,56 @@ class ArticleServiceTest {
         assertThat(deletedId).isEqualTo(articleId);
     }
 
+    @Test
+    @DisplayName("게시글 좋아요 추가 - 성공")
+    void saveLike_addLike_success() {
+        // given
+        Long articleId = 1L;
+        Long userId = 2L; // 다른 사용자
+        assertThat(article.getLikeCount()).isEqualTo(0);
+        when(articleRepository.findById(articleId)).thenReturn(Optional.of(article));
+        when(userLikeArticleRepository.existsByArticleIdAndUserId(articleId, userId)).thenReturn(false);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(otherUser));
+
+        // when
+        boolean result = articleService.saveLike(articleId, userId);
+
+        // then
+        assertThat(result).isTrue();
+        assertThat(article.getLikeCount()).isEqualTo(1);
+        verify(userLikeArticleRepository).save(any(UserLikeArticle.class));
+    }
+
+    @Test
+    @DisplayName("게시글 좋아요 취소 - 성공")
+    void saveLike_removeLike_success() {
+        // given
+        Long articleId = 1L;
+        Long userId = 2L;
+
+        // 초기 likeCount를 1로 설정 (이미 좋아요한 상태)
+        ReflectionTestUtils.setField(article, "likeCount", 1);
+        assertThat(article.getLikeCount()).isEqualTo(1);
+
+        when(articleRepository.findById(articleId)).thenReturn(Optional.of(article));
+        when(userLikeArticleRepository.existsByArticleIdAndUserId(articleId, userId)).thenReturn(true);
+
+        // when
+        boolean result = articleService.saveLike(articleId, userId);
+
+        // then
+        assertThat(result).isFalse();
+
+        // likeCount가 1 감소했는지 확인
+        assertThat(article.getLikeCount()).isEqualTo(0);
+
+        verify(userLikeArticleRepository).deleteByArticleIdAndUserId(articleId, userId);
+    }
+
     @DisplayName("검색조건X 페이징")
     @Test
     public void findAllArticlesNotSearch() throws Exception {
         //given
-        User user = new User("name", "nickname", "email", Role.USER, new UploadFile("userimage", "userimage"));
         Article article1 = new Article("board", "title", "content", user, 0, 0);
         Article article2 = new Article("board", "title", "content", user, 0, 0);
         ReflectionTestUtils.setField(article1, "id", 1L);
@@ -191,8 +307,6 @@ class ArticleServiceTest {
     @Test
     public void findAllArticlesSearch() throws Exception {
         //given
-        User user = new User("name", "nickname", "email", Role.USER, new UploadFile("userimage", "userimage"));
-
         int page = 0;
         Pageable pageable = PageRequest.of(page, 20, Sort.by(Sort.Direction.DESC, "id"));
 
@@ -223,27 +337,4 @@ class ArticleServiceTest {
         assertThat(articlesDtosTitleAndContent.getTotalElements()).isEqualTo(1);
     }
 
-    @Test
-    void addViewCount() {
-    }
-
-    @Test
-    void noneMemberView() {
-    }
-
-    @Test
-    void memberView() {
-    }
-
-    @Test
-    void calDateTime() {
-    }
-
-    @Test
-    void findLike() {
-    }
-
-    @Test
-    void saveLike() {
-    }
 }
