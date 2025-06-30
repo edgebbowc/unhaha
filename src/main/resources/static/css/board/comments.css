@@ -1,4 +1,557 @@
-.commentInput .attached {
+/* 댓글 입력 영역 */
+
+.commentContainer .attached {
+    display: flex;
+    flex-direction: row;
+    gap: 0;
+}
+
+.commentContainer .attached a {
+    position: relative;
+    margin: 0 0 4px 4px;
+}
+
+.commentContainer .attached img {
+    width: 52px;
+    height: 52px;
+    margin: 0;
+    border-radius: 4px;
+}
+
+.commentImageButton svg {
+    fill: var(--alpha-70);
+}
+
+.commentContainer .attached .close {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    background-color: #000000B2;
+    border-radius: 50%;
+    fill: #FFF;
+}
+
+.commentAttaches {
+    display: flex;
+    flex-direction: column;
+}
+
+.commentAttaches .btn-area {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.commentEmoticonButton,
+ .commentImageButton {
+    padding: 12px 16px;
+    cursor: pointer;
+    background-color: var(--default-background-color);
+    border: 0;
+    border-radius: 50vh;
+}
+
+.commentEmoticonButton:hover,
+ .commentEmoticonButton:active,
+.commentImageButton:active,
+ .commentImageButton:hover {
+    background-color: var(--alpha-10);
+}
+
+.commentAttaches .attaches button.commentImageButton svg,
+.commentAttaches .attaches button.commentEmoticonButton img {
+    width: 16px;
+    height: 16px;
+}
+
+.commentAttaches .attaches {
+    display: flex;
+    gap: 8px;
+    justify-content: start;
+}
+
+.commentAttaches .emoticon {
+    display: none;
+    padding: 4px;
+}
+
+.commentAttaches .emoticon img {
+    width: 56px;
+    height: 56px;
+    cursor: pointer;
+}
+
+.commentImageFile {
+    display: none;
+}
+
+#addCommentClick.large.primary {
+    cursor: pointer;
+}
+
+/* 댓글 출력 영역 */
+
+/* .comments {
+    border-bottom: solid 1px var(--alpha-5);
+} */
+
+.comment .isReply {
+    width: calc(100% - 40px) !important; /* 1104 추가 */
+    margin-left: 40px !important; /* 1104 수정 */
+}
+
+.comments .best {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.comments .best>.comment {
+    background-color: var(--point-background-color-10);
+    border-radius: 4px;
+}
+
+.comments .commentWrapper {
+    display:flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 4px; /* 1104 수정 */
+    padding: 0 4px; /* 1104 수정 */
+}
+
+.comments .bestBadge {
+    padding: 3px 4px;
+    font-size: 0.625rem;
+    font-weight: 700;
+    color: #FFF;
+    text-align: center;
+    background: var(--point-background-color);
+    border-radius: 4px;
+}
+
+.comment .commentContent {
+    display: flex;
+    flex-direction: column;
+    font-family: var(--font-family-content);
+    font-size: 0.8125rem; /* 1104 수정 */
+    line-height: 1.2rem; /* 1104 수정 */
+    color: var(--default-font-color);
+    word-break: break-all;
+}
+
+.comment .commentContent a {
+    color: var(--point-background-color);
+    text-decoration: underline;
+}
+
+.comment .commentContent div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    max-width: 100%;
+    min-height: 14px;
+}
+
+.comment .commentContent img {
+    width: 100%;
+    height: auto;
+}
+
+.comment .commentContent img.emoticon {
+    width: 56px;
+    height: 56px;
+}
+
+.comment .main ul button {
+    height: 30px;
+    font-size: 0.8rem;
+    color: var(--default-anchor-color);
+    word-break: keep-all;
+    background-color: transparent;
+    border: 0;
+    border-radius: 6px;
+}
+
+
+.comment ul {
+    display: flex;
+    flex-direction: column;
+}
+
+
+.comment .info {
+    display: flex;
+    flex-direction: row;
+    flex-wrap:wrap;
+    gap: 4px; /* 1104 수정 */
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.comment .nickName {
+    position: relative;
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    color: var(--default-font-color);
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.comment .nickName .text {
+    display: flex;
+    flex-direction: row; /* 1104 추가 */
+    flex-wrap: wrap; /* 1104 추가 */
+    gap: 3px; /* 1104 수정 */
+    align-items: center;
+    justify-content: start;
+}
+
+.comment .nickName .author-me {
+    padding: 3px 4px;
+    font-size: 0.625rem;
+    color: #FFF;
+    background-color: var(--point-background-color);
+    border-radius: 4px;
+}
+
+.comment .nickName .author {
+    padding: 3px 4px;
+    font-size: 0.625rem;
+    color: var(--point-background-color);
+    background-color: var(--point-background-color-10);
+    border: 1px solid var(--point-background-color-20);
+    border-radius: 4px;
+}
+
+.comment .nickName .name {
+    display: flex; /* 1004 추가 */
+    flex-direction: row; /* 1004 추가 */
+    gap: 2px; /* 1004 추가 */
+    align-items: center; /* 1004 추가 */
+    font-size: 0.8125rem; /* 1104 수정 */
+}
+
+.comment .datetime {
+    display: flex;
+
+    /* color: var(--alpha-70);
+    font-size: 0.75rem; 1004 삭제 */
+}
+
+.comment .likeCount {
+    display: flex;
+    gap: 2px;
+    color: var(--point-background-color);
+}
+
+.comment .userImage {
+    box-sizing: border-box;
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+    min-height: 32px;
+    background-color: var(--default-background-color);
+    background-position: center;
+    background-size: cover;
+    border: 1px solid var(--alpha-5);
+    border-radius: 50%;
+}
+
+.comment {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.comment .main {
+    display: flex;
+    flex-direction: row;
+    gap: 0;
+    align-items: flex-start;
+    justify-content: flex-start;
+    width: 100%;
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--alpha-5); /* 1104 추가 */
+}
+
+/* 1104 추가 */
+.comments .best>.comment .main {
+    border-bottom:none;
+}
+
+.comment .main .btn-area {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.comment .main .btn-area button {
+    padding: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--default-font-color);
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    border-radius: 50vh;
+}
+
+.likeBtn .commentLike button.activated {
+    color: var(--point-color);
+    background: var(--point-background-color-10);
+}
+
+.likeBtn .commentLike button.activated svg {
+    fill: var(--point-color);
+}
+
+.likeBtn .commentLike svg,
+.findPage svg,
+.commentReply svg  {
+    margin-right: 2px;
+    fill: var(--default-font-color);
+}
+
+.comment .main .btn-area button.activated:active,
+.comment .main .btn-area button.activated:hover {
+    background-color: var(--point-background-color-20) !important;
+}
+
+.comment .main .btn-area button:active,
+.comment .main .btn-area button:hover {
+    background-color: var(--alpha-5);
+}
+
+
+.popUpBtn {
+    padding: 8px 3px 3px 8px; /* 1104 수정 */
+}
+
+.popUpBtn svg {
+    cursor: pointer;
+    border-radius: 50%;
+    fill: var(--alpha-70);
+}
+
+.popUpBtn svg:hover,
+ .popUpBtn svg:active {
+    background-color: var(--alpha-5);
+}
+
+.commentContainer {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    color: var(--default-font-color);
+}
+
+.commentContainer .contentContainer {
+    padding: 12px;
+    background-color: var(--alpha-5);
+    border-radius: 8px;
+}
+
+
+.commentContainer textarea {
+    flex: 1;
+    width: 100%;
+    height: 60px;
+    font-size: 0.875rem;
+    color: var(--default-font-color);
+    resize: none;
+    background-color: transparent;
+    border: 0;
+}
+
+.commentContainer textarea::placeholder {
+    color: var(--alpha-20); /* 1004 수정 */
+}
+
+.commentsTitle {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--default-font-color);
+}
+
+.commentContent .parentNickName {
+    display: flex;
+    flex-direction: row;
+    gap: 2px;
+    align-items: center;
+}
+
+.commentContent .parentNickName span {
+    padding: 1px 2px;
+    font-weight: 700;
+    background-color: var(--alpha-5);
+    border-radius: 2px;
+}
+
+.commentContent .parentNickName span.author {
+    color: var(--point-color);
+}
+
+@media only screen and (min-width: 1200px) {
+    .comment .commentContent img {
+        max-width: 277px;
+        max-height: 400px;
+    }
+    
+    .comment .datetime {
+        font-size: 0.75rem !important; /* 1104 수정 */
+        font-weight: 400; /* 1104 수정 */
+     }
+
+     /* 1104 추가 */
+    .comment .info {
+        gap: 8px;
+    }
+
+    .comment .nickName .name,
+ .comment .commentContent {
+        font-size: 0.875rem;
+    }
+    
+    .comment .commentContent {
+        line-height: 1.3rem;
+    }
+
+    .comments .commentWrapper {
+        gap: 8px;
+        padding: 0 8px;
+    }
+
+    .comment .nickName .text {
+        gap: 4px;
+    }
+}
+
+.userPopup a {
+    font-size: 14px;
+    color: var(--default-anchor-color);
+    text-decoration: none;
+}
+
+.commentContainer .button button {
+    width: 30px;
+    height: 30px;
+    color: var(--alpha-5);
+    border-radius: 50%;
+  }
+  
+  .commentContainer .buttons {
+    display: flex;
+    flex-direction: row;
+  }
+  
+  .commentContainer .contentContainer {
+    display: flex;
+    flex-direction: column;
+    margin-top: 3px;
+    background-color: var(--alpha-5);
+    border-radius: 8px;
+  }
+  
+  .commentContainer .commentInput {
+    display: flex;
+    flex-direction: row;
+  }
+  
+  .commentContainer .commentContent {
+    flex: 0.9;
+    min-width:100%;
+  }
+  
+  .commentContainer .nonMember input {
+    flex: 1;
+    width: 100%;
+    padding: 20px;
+    background-color: var(--alpha-5);
+    border: 0;
+    border-radius: 8px;
+  }
+  
+  .commentContainer .submit button {
+    height: 60px;
+  }
+  
+  .commentContainer .submit {
+    display: flex;
+    flex: 0.1;
+    align-items: start;
+    justify-content: center;
+    margin: 10px;
+    font-size: 1em;
+    font-weight: 700;
+    border: 0;
+    border-radius: 15px;
+  }
+  
+  /* .commentContainer textarea {
+    flex: 1;
+    width: 100%;
+    height: 60px;
+    font-size: 1em;
+    color: var(--default-font-color);
+    resize: none;
+    background-color: transparent;
+    border: 0;
+  } */
+  
+  .commentContainer {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 10px;
+    color: var(--default-font-color);
+  }
+
+  .commentsTitle {
+    font-size: 1.2em;
+    font-weight: 700;
+    color: var(--default-font-color);
+  }
+  
+  @media (max-width: 950px) {
+    .commentContainer .submit {
+      flex: 0.2;
+      font-size: 0.8em;
+    }
+  
+    .comment .info .left {
+      flex-direction: column;
+      align-items: start;
+    }
+  
+    .comment .nickName {
+      flex-wrap: wrap;
+      justify-content: start;
+    }
+  }
+
+  .commentInput .submit button {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 50px;
+    padding: 10px;
+    font-size: 1em;
+    color: var(--default-anchor-color);
+    background-color: var(--alpha-5);
+    border: 0;
+    border-radius: 8px;
+  }
+
+  .commentInput .attached {
     display: flex;
     flex-direction: row;
     gap: 0
@@ -36,7 +589,7 @@
     flex-direction: column
 }
 
-.commentAttaches .attaches button {
+/* .commentAttaches .attaches button {
     width: 30px;
     height: 30px;
     margin: 0 0 5px 5px;
@@ -46,13 +599,14 @@
     background-color: var(--alpha-5);
     border: 0;
     border-radius: 50%
-}
+} */
 
 .commentAttaches .attaches button i {
     color: var(--default-anchor-color)
 }
 
-.commentAttaches .attaches button:hover, .commentAttaches .attaches button:active {
+.commentAttaches .attaches button:hover,
+.commentAttaches .attaches button:active {
     background-color: var(--alpha-5)
 }
 
@@ -79,310 +633,4 @@
 
 .commentImageFile {
     display: none
-}
-
-.comments .best {
-    background-color: var(--point-background-color-20)
-}
-
-.comments .bestBadge {
-    display: inline-block;
-    min-width: 16px;
-    height: 16px;
-    padding: 0 2px;
-    margin-right: 3px;
-    font-size: 10px;
-    font-weight: 700;
-    line-height: 16px;
-    color: var(--point-color);
-    text-align: center;
-    background: var(--point-background-color);
-    border-radius: 3px
-}
-
-.comment .commentContent {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    color: var(--default-font-color);
-    word-break: break-word
-}
-
-.comment .commentContent a {
-    color: var(--point-background-color);
-    text-decoration: underline
-}
-
-.comment .commentContent div {
-    display: flex;
-    flex-wrap: wrap;
-    max-width: 100%;
-    min-height: 14px
-}
-
-.comment .commentContent img {
-    max-width: 225px;
-    max-height: 400px
-}
-
-.comment .commentContent img.emoticon {
-    width: 32px;
-    height: 32px
-}
-
-.comment .commentContent .parentNickName {
-    font-weight: 700
-}
-
-.comment .main .buttons {
-    display: flex;
-    gap: 3px;
-    justify-content: start
-}
-
-.comment .main .right {
-    display: flex;
-    flex-direction: row;
-    align-items: center
-}
-
-.comment .main .right button {
-    height: 30px;
-    font-size: .8em;
-    color: var(--default-anchor-color);
-    word-break: keep-all;
-    background-color: transparent;
-    border: 0;
-    border-radius: 6px
-}
-
-.comment .main > .info, .comment .main > .commentContent {
-    margin-bottom: 5px
-}
-
-.comment .info .left {
-    display: flex;
-    gap: 5px;
-    align-items: center;
-    justify-content: center
-}
-
-.comment .info .right svg {
-    width: 14px;
-    height: 14px
-}
-
-.comment .info .right ul {
-    display: flex;
-    flex-direction: column
-}
-
-.comment .info .right {
-    position: relative;
-    cursor: pointer
-}
-
-.comment .info {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 5px;
-    font-size: .9em;
-    white-space: nowrap
-}
-
-.comment .isReply {
-    margin-left: 40px
-}
-
-.comment .nickName {
-    position: relative;
-    display: flex;
-    flex-flow: wrap;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    color: var(--default-font-color);
-    white-space: nowrap;
-    cursor: pointer
-}
-
-.comment .nickName .text {
-    display: flex;
-    flex-flow: wrap;
-    gap: 3px;
-    align-items: center;
-    justify-content: start
-}
-
-.comment .nickName .author {
-    padding: 3px;
-    font-size: .7em;
-    color: var(--point-background-color);
-    border: 1px solid var(--point-background-color);
-    border-radius: 12px
-}
-
-.comment .nickName .userPopup {
-    font-weight: 400
-}
-
-.comment .counts {
-    display: flex;
-    align-items: center;
-    justify-content: center
-}
-
-.comment .permissionName, .comment .datetime {
-    display: flex;
-    color: var(--alpha-40)
-}
-
-.comment .likeCount, .comment .unlikeCount {
-    display: flex;
-    gap: 2px;
-    color: var(--point-background-color)
-}
-
-.comment .userImage {
-    flex: 0 0 32px;
-    width: 32px;
-    height: 32px;
-    margin-right: 3px;
-    background-color: var(--default-background-color);
-    background-position: center;
-    background-size: cover;
-    border-radius: 50%
-}
-
-.comment i {
-    width: 12px;
-    height: 12px;
-    background-repeat: no-repeat;
-    background-position: center
-}
-
-.comment {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    gap: 3px
-}
-
-.comment .main {
-    display: flex;
-    padding: 10px;
-    border-bottom: 1px solid var(--alpha-5)
-}
-
-.comment .commentWrapper {
-    width: calc(100% - 42px)
-}
-
-.comment:last-child {
-    border-bottom: 0
-}
-
-.comment .popUpBtn {
-    padding-left: 20px
-}
-
-.commentContainer .button button {
-    width: 30px;
-    height: 30px;
-    color: var(--alpha-5);
-    border-radius: 50%
-}
-
-.commentContainer .buttons {
-    display: flex;
-    flex-direction: row
-}
-
-.commentContainer .contentContainer {
-    display: flex;
-    flex-direction: column;
-    margin-top: 3px;
-    background-color: var(--alpha-5);
-    border-radius: 8px
-}
-
-.commentContainer .commentInput {
-    display: flex;
-    flex-direction: row
-}
-
-.commentContainer .commentContent {
-    flex: .9
-}
-
-.commentContainer .nonMember input {
-    flex: 1;
-    width: 100%;
-    padding: 20px;
-    background-color: var(--alpha-5);
-    border: 0;
-    border-radius: 8px
-}
-
-.commentContainer .submit button {
-    height: 60px
-}
-
-.commentContainer .submit {
-    display: flex;
-    flex: .1;
-    align-items: start;
-    justify-content: center;
-    margin: 10px;
-    font-size: 1em;
-    font-weight: 700;
-    border: 0;
-    border-radius: 15px
-}
-
-.commentContainer textarea {
-    flex: 1;
-    width: 100%;
-    height: 60px;
-    font-size: 1em;
-    color: var(--default-font-color);
-    resize: none;
-    background-color: transparent;
-    border: 0
-}
-
-.commentContainer {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    gap: 10px;
-    color: var(--default-font-color)
-}
-
-.commentsTitle {
-    font-size: 1.2em;
-    font-weight: 700;
-    color: var(--default-font-color)
-}
-
-@media (max-width: 950px) {
-    .commentContainer .submit {
-        flex: .2;
-        font-size: .8em
-    }
-
-    .comment .info .left {
-        flex-direction: column;
-        align-items: start
-    }
-
-    .comment .nickName {
-        flex-wrap: wrap;
-        justify-content: start
-    }
-}
-
-.pagination {
-    margin: 10px 0
 }

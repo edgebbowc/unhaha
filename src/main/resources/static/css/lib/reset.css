@@ -37,7 +37,7 @@ th, td {
 }
 
 form {
-    display: flex;
+    /*display: flex;*/
     align-items: center;
     justify-content: center
 }

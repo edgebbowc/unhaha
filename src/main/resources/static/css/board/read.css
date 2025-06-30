@@ -157,7 +157,8 @@
 }
 
 #article > .item > .info .etc .right .popUp.active {
-    display: flex
+    display: flex;
+    flex-direction: column;
 }
 
 #article > .item > .info .etc .right .popUp button {

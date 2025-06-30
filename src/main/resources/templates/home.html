@@ -13,8 +13,9 @@
 
 <div th:replace="~{fragment/header :: header}"></div>
 
-<section id="flash" th:classappend="${result == '회원 탈퇴에 성공했습니다'} ? 'trueBackground'" th:if="${result == '회원 탈퇴에 성공했습니다'}">
-    <div class="message" th:text="${result}"></div>
+<section id="flash" th:classappend="${result} ? 'trueBackground' : (${error} ? 'falseBackground' : '')"
+         th:if="${result} or ${error}">
+    <div class="message" th:text="${result} ?: ${error}"></div>
     <div class="bar"></div>
     <div class="close">
         <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="times" class="svg-inline--fa fa-times fa-w-11" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 352 512"><path fill="currentColor" d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"></path></svg>
@@ -26,54 +27,71 @@
     <article id="list">
         <section id="title">
             <h1>
-                <div>운하하</div>
+                <div>전체 인기글</div>
             </h1>
         </section>
         <section id="boardList" class="">
-            <a class="item" href="/best/178184?page=1">
+            <a class="item" th:each="article : ${articles}" th:href="@{/best/{articleId}(articleId=${article.id}, page=${currentPage})}">
                 <div class="image">
-                    <img src="/assets/empty.png" alt="사면관련 대전러버스(대전하나시티즌 서포터),손수호 변호사 반응"
-                         style="background-image: url('https://resources.chimhaha.net/thumb/1680076644741-mn9jh59xr4.jpg'), url('https://resources.chimhaha.net/article/1680076644741-mn9jh59xr4.jpg'), url('/assets/image.png');">
+                    <img th:if="${article.thumb}" th:src="${article.thumb}" style="width: 57.38px">
+                    <i class="fa-regular fa-file-lines" th:unless="${article.thumb}"></i>
                 </div>
                 <div class="info">
                     <div class="titleContainer">
-                        <span class="category">축구</span>
+                        <span class="category" th:text="${article.board}">카테고리</span>
                         <span class="title">
-                            <span class="text">사면관련 대전러버스(대전하나시티즌 서포터),손수호 변호사 반응</span>
-                            <span class="commentCount">5</span>
+                            <span class="text" th:text="${article.title}">제목</span>
+                            <span class="commentCount" th:if="${article.commentCount > 0}">
+                                <i class="fa-regular fa-comment-dots"></i>
+                                <span th:text="${article.commentCount}">0</span>
+                            </span>
                         </span>
                     </div>
                     <div class="etc">
-                        <div class="nickName">안전한자식주호민</div>
+                        <div class="nickName" th:text="${article.userNickName}">닉네임</div>
                         <div class="dot"></div>
-                        <div class="datetime">1시간전</div>
+                        <div class="datetime" th:text="${article.dateTime}">1시간전</div>
                         <div class="dot"></div>
-                        <div class="viewCount"><i class="fa-regular fa-eye"></i>407</div>
-                        <div class="dot"></div>
-                        <div class="likeCount"><i class="fa-regular fa-thumbs-up"></i>19</div>
+                        <div class="viewCount"><i class="fa-regular fa-eye"></i><th:block th:text="${article.viewCount}"></th:block></div>
+                        <th:block th:if="${article.likeCount} > 0">
+                            <div class="dot"></div>
+                            <div class="likeCount"><i class="fa-regular fa-thumbs-up"></i><th:block th:text="${article.likeCount}"></th:block></div>
+                        </th:block>
                     </div>
                 </div>
             </a>
         </section>
 
-        <section class="pagination">
-            <div class="prev"></div>
+        <section class="pagination" th:unless="${keyword}">
+            <div class="prev">
+                <a th:if="${start > 1}" th:href="@{|?page=${start - 1}|}">이전</a>
+            </div>
             <div class="number">
-                <a class="selected">1</a>
-                <a class="notSelected" href="?page=2">2</a>
-                <a class="notSelected" href="?page=3">3</a>
-                <a class="notSelected" href="?page=4">4</a>
-                <a class="notSelected" href="?page=5">5</a>
+                <a th:each="page: ${#numbers.sequence(start, end)}"
+                   th:classappend="${page == articles.number+1} ? 'selected' : 'notSelected'"th:text="${page}" th:href="@{|?page=${page}|}"></a>
             </div>
             <div class="next">
-                <a href="?page=6">다음</a>
+                <a th:if="${end < articles.totalPages}" th:href="@{|?page=${start + maxPage}|}">다음</a>
+            </div>
+        </section>
+
+        <section class="pagination" th:if="${keyword}">
+            <div class="prev">
+                <a th:if="${start > 1}" th:href="@{|?searchType=${searchType}&keyword=${keyword}&page=${start - 1}|}">이전</a>
+            </div>
+            <div class="number">
+                <a th:each="page: ${#numbers.sequence(start, end)}"
+                   th:classappend="${page == articles.number+1} ? 'selected' : 'notSelected'"th:text="${page}" th:href="@{|?searchType=${searchType}&keyword=${keyword}&page=${page}|}"></a>
+            </div>
+            <div class="next">
+                <a th:if="${end < articles.totalPages}" th:href="@{|?searchType=${searchType}&keyword=${keyword}&page=${start + maxPage}|}">다음</a>
             </div>
         </section>
 
         <div class="searchAndWrite">
             <div></div>
             <div>
-                <form action="/best">
+                <form action="/">
                     <div class="search">
                         <select name="searchType">
                             <option value="title">제목</option>
@@ -86,7 +104,7 @@
                 </form>
             </div>
             <div class="write">
-                <a sec:authorize="isAuthenticated()" href="/write/new">글쓰기</a>
+                <a sec:authorize="isAuthenticated()" th:href="@{/write/new}">글쓰기</a>
             </div>
         </div>
     </article>

@@ -1,17 +1,19 @@
 package commu.unhaha.domain;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Article extends BaseTimeEntity{
 
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "article_id")
     private Long id;
 
@@ -30,6 +32,11 @@ public class Article extends BaseTimeEntity{
 
     private Integer likeCount;
 
+    // 좋아요 1개 달성 시점 추가
+    @Column(name = "like_achieved_at")
+    private LocalDateTime likeAchievedAt;
+
+    @Builder
     public Article(String board, String title, String content, User user, Integer viewCount, Integer likeCount) {
         this.board = board;
         this.title = title;
@@ -41,6 +48,7 @@ public class Article extends BaseTimeEntity{
         this.likeCount = likeCount;
     }
 
+    //연관관계 편의 메소드
     private void changeUser(User user) {
         this.user = user;
         user.getArticles().add(this);
@@ -51,12 +59,14 @@ public class Article extends BaseTimeEntity{
         this.title = title;
         this.content = content;
     }
-    public void increaseViewCount() {
-        viewCount++;
-    }
 
     public void increaseLikeCount() {
         likeCount++;
+
+        // 좋아요가 1개가 되는 순간 시점 기록
+        if (this.likeCount == 1 && this.likeAchievedAt == null) {
+            this.likeAchievedAt = LocalDateTime.now();
+        }
     }
 
     public void decreaseLikeCount() {

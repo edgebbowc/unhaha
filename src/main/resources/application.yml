@@ -1,4 +1,9 @@
 spring:
+  servlet:
+    multipart:
+      max-file-size: 2MB #파일 하나의 최대 크기
+      max-request-size: 30MB # 한 번에 최대 업로드 가능 용량
+
   profiles:
     active: local
 
@@ -6,12 +11,26 @@ spring:
     port: 6379
     host: localhost
 
-  datasource:
-    url: jdbc:h2:tcp://localhost/~/unhaha
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+  cloud:
+    gcp:
+      storage:
+        credentials:
+          location: classpath:gcp-key.json
+        project-id: alert-outlet-456907-b9
+        bucket: unhaha-imagestorage
 
+  datasource:
+    url: jdbc:mysql://localhost:3306/unhaha?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8
+    username: root  # MySQL 사용자명
+    password: ${mysql-password}  # MySQL 비밀번호
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
+    pathmatch:
+      matching-strategy: ant_path_matcher
   devtools:
     livereload:
       enabled: true
@@ -22,11 +41,16 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
         default_batch_fetch_size: 100
+  sql:
+    init:
+      mode: always  # 스크립트 기반 초기화 활성화
+      schema-locations: classpath:sql/schema.sql
 
   security:
     oauth2:
@@ -49,12 +73,21 @@ spring:
               - name
               - email
               - nickname
-file:
-  dir: C:/Users/edgeb/Spring_Study/unhaha/src/main/resources/static/images/userImage/
-  article: C:/Users/edgeb/Spring_Study/unhaha/src/main/resources/static/images/article/
-  add: file:///Users/edgeb/Spring_Study/unhaha/src/main/resources/static/images/userImage/
-  fileArticle: file:///Users/edgeb/Spring_Study/unhaha/src/main/resources/static/images/article/
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tags-sorter: alpha
+    try-it-out-enabled: true
+  packages-to-scan: commu.unhaha.restapi  # 본인의 REST 컨트롤러 패키지
+  paths-to-match: /api/**  # API 경로 패턴
 
 logging:
   level:
+    root: info
     org.hibernate.SQL: debug
+    # 애플리케이션 패키지
+    commu.unhaha.service: debug

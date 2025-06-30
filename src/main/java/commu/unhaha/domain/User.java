@@ -1,5 +1,6 @@
 package commu.unhaha.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -10,11 +11,10 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class User extends BaseTimeEntity{
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
 
@@ -31,7 +31,7 @@ public class User extends BaseTimeEntity{
     @Column(nullable = false)
     private Role role;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true) // user 회원탈퇴시 게시판글도 삭제
     private List<Article> articles = new ArrayList<>();
 
     @Embedded
@@ -41,6 +41,7 @@ public class User extends BaseTimeEntity{
         return this.role.getKey();
     }
 
+    @Builder
     public User(String name, String nickname, String email, Role role, UploadFile profileImage) {
         this.name = name;
         this.nickname = nickname;
