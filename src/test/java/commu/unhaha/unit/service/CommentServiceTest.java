@@ -44,6 +44,7 @@ public class CommentServiceTest {
     private CommentService commentService;
 
     private User user;
+    private User user2;
     private Article article;
     private Comment rootComment1;
     private Comment rootComment2;
@@ -61,8 +62,18 @@ public class CommentServiceTest {
                 .profileImage(new UploadFile("userImage", "userImage"))
                 .build();
         ReflectionTestUtils.setField(user, "id", 1L);
+
+        user2 = User.builder()
+                .name("user2")
+                .nickname("nickname2")
+                .email("email2")
+                .role(Role.USER)
+                .profileImage(new UploadFile("userImage", "userImage"))
+                .build();
+        ReflectionTestUtils.setField(user2, "id", 2L);
+
         article = Article.builder()
-                .board("board")
+                .board("보디빌딩")
                 .title("title")
                 .content("content")
                 .user(user)
@@ -247,11 +258,11 @@ public class CommentServiceTest {
     void saveLikeTest() {
         // given
         when(commentRepository.findById(1L)).thenReturn(Optional.of(rootComment1));
-        when(userLikeCommentRepository.existsByCommentIdAndUserId(1L, 1L)).thenReturn(false);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userLikeCommentRepository.existsByCommentIdAndUserId(1L, 2L)).thenReturn(false);
+        when(userRepository.findById(2L)).thenReturn(Optional.of(user2));
 
         // when
-        commentService.saveLike(1L, 1L);
+        commentService.saveLike(1L, 2L);
 
         // then
         verify(userLikeCommentRepository).save(any());
@@ -264,10 +275,10 @@ public class CommentServiceTest {
         // given
         rootComment1.increaseLikeCount();
         when(commentRepository.findById(1L)).thenReturn(Optional.of(rootComment1));
-        when(userLikeCommentRepository.existsByCommentIdAndUserId(1L, 1L)).thenReturn(true);
+        when(userLikeCommentRepository.existsByCommentIdAndUserId(1L, 2L)).thenReturn(true);
 
         // when
-        commentService.saveLike(1L, 1L);
+        commentService.saveLike(1L, 2L);
 
         // then
         assertThat(rootComment1.getLikeCount()).isEqualTo(0);
@@ -282,7 +293,7 @@ public class CommentServiceTest {
 
         // when & then
         assertThatThrownBy(() -> commentService.createComment(user, 10L, "내용", null, 999L))
-                .isInstanceOf(EntityNotFoundException.class)
+                .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("부모 댓글");
     }
 
