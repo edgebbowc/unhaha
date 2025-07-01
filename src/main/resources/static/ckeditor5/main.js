@@ -53,7 +53,7 @@ const {
 } = window.CKEDITOR;
 
 const LICENSE_KEY =
-	'eyJhbGciOiJFUzI1NiJ9.eyJleHAiOjE3NzY0NzAzOTksImp0aSI6IjkyOTA1OTRhLTY3ZmYtNDY5Zi04YWQxLTY5MThiZWM2NjY5MyIsImxpY2Vuc2VkSG9zdHMiOlsiMTI3LjAuMC4xIiwibG9jYWxob3N0IiwiMTkyLjE2OC4qLioiLCIxMC4qLiouKiIsIjE3Mi4qLiouKiIsIioudGVzdCIsIioubG9jYWxob3N0IiwiKi5sb2NhbCJdLCJ1c2FnZUVuZHBvaW50IjoiaHR0cHM6Ly9wcm94eS1ldmVudC5ja2VkaXRvci5jb20iLCJkaXN0cmlidXRpb25DaGFubmVsIjpbImNsb3VkIiwiZHJ1cGFsIl0sImxpY2Vuc2VUeXBlIjoiZGV2ZWxvcG1lbnQiLCJmZWF0dXJlcyI6WyJEUlVQIl0sInZjIjoiYmVhODk4YjEifQ._RwTGYck3hLvdRTzURPiobt1JtEkzD4w96LeGDob5rcF00nRj8W0t23_6RR5ikNOa_O5iuI8Gm2wLwhU7T1Zuw';
+	'eyJhbGciOiJFUzI1NiJ9.eyJleHAiOjE3Nzk0OTQzOTksImp0aSI6IjJiNzBmM2ZmLTc5OGItNDhiNi05NzNkLWY4ZDZmMmY0YTZhMSIsInVzYWdlRW5kcG9pbnQiOiJodHRwczovL3Byb3h5LWV2ZW50LmNrZWRpdG9yLmNvbSIsImRpc3RyaWJ1dGlvbkNoYW5uZWwiOlsiY2xvdWQiLCJkcnVwYWwiXSwiZmVhdHVyZXMiOlsiRFJVUCIsIkUyUCIsIkUyVyJdLCJ2YyI6ImI0MmI4NmQ5In0.dePoYAhyqAwh_G3CxmqhEjs9CxdQabXaQcuwzFZTpcG-WqQrYX-LJC_4QebUHmQGDAjCmVKxeg2zCfEMgftXQQ';
 
 const editorConfig = {
 	toolbar: {
@@ -193,7 +193,7 @@ const editorConfig = {
 	},
 
 	language: 'ko',
-	licenseKey: 'GPL',
+	licenseKey: 'LICENSE_KEY',
 	link: {
 		addTargetToExternalLinks: true,
 	},
