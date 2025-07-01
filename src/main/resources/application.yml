@@ -20,7 +20,7 @@ spring:
         bucket: unhaha-imagestorage
 
   datasource:
-    url: jdbc:mysql://localhost:3306/unhaha?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8
+    url: jdbc:mysql://localhost:3306/unhaha?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
     username: root  # MySQL 사용자명
     password: ${mysql-password}  # MySQL 비밀번호
     driver-class-name: com.mysql.cj.jdbc.Driver
