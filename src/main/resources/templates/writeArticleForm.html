@@ -5,8 +5,9 @@
     <title>Title</title>
     <div th:replace="~{fragment/config :: config}"></div>
     <link rel="stylesheet" href="/css/board/editorClassic.css">
-    <link rel="stylesheet" href="/ckeditor5/style.css">
-    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/45.0.0/ckeditor5.css" crossorigin>
+<!--    <link rel="stylesheet" href="/ckeditor5/style.css">-->
+<!--    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/45.0.0/ckeditor5.css" crossorigin>-->
+    <link rel="stylesheet" href="/dist/ckeditor5.css">
 </head>
 
 <body>
@@ -59,18 +60,37 @@
         </form>
     </article>
 </main>
-<script src="https://cdn.ckeditor.com/ckeditor5/45.0.0/ckeditor5.umd.js" crossorigin></script>
-<script src="https://cdn.ckeditor.com/ckeditor5/45.0.0/translations/ko.umd.js" crossorigin></script>
-<script type="module" src="/ckeditor5/main.js"></script>
+<!--<script src="https://cdn.ckeditor.com/ckeditor5/45.0.0/ckeditor5.umd.js" crossorigin></script>-->
+<!--<script src="https://cdn.ckeditor.com/ckeditor5/45.0.0/translations/ko.umd.js" crossorigin></script>-->
+<!--<script type="module" src="/ckeditor5/main.js"></script>-->
+<script src="/dist/ckeditor-bundle.js"></script>
 <script>
-    // 페이지 로드시 현재 선택된 값을 저장
-    let currentBoard = '';
-
-    // 페이지 로드 후 초기값 설정
+    // CKEditor 초기화
     document.addEventListener('DOMContentLoaded', function() {
+        // CKEditor 초기화
+        if (typeof window.createCKEditor === 'function') {
+            window.createCKEditor('#editor')
+                .then(editor => {
+                    console.log('CKEditor5 초기화 성공', editor);
+                    window.editor = editor; // 전역 접근 가능
+                })
+                .catch(error => {
+                    console.error('CKEditor5 초기화 실패:', error);
+                });
+        }
+
+        // 게시판 선택 초기화
         const selectElement = document.querySelector('select[name="board"]');
         currentBoard = selectElement.value;
     });
+    // 페이지 로드시 현재 선택된 값을 저장
+    let currentBoard = '';
+
+    // // 페이지 로드 후 초기값 설정
+    // document.addEventListener('DOMContentLoaded', function() {
+    //     const selectElement = document.querySelector('select[name="board"]');
+    //     currentBoard = selectElement.value;
+    // });
 
     function redirectToBoard(selectedBoard) {
         // 빈 값 선택시 (게시판을 선택해주세요)
