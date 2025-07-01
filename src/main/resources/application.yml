@@ -8,9 +8,11 @@ spring:
     active: local
 
   redis:
-    url: ${UPSTASH_REDIS_REST_URL}
-    token: ${UPSTASH_REDIS_REST_TOKEN}
-  #    port: 6379
+    host: ${UPSTASH_REDIS_HOST}
+    password: ${UPSTASH_REDIS_PASSWORD}
+    port: 6379
+    ssl: true
+    timeout: 2000ms
   #    host: localhost
 
 
