@@ -8,8 +8,11 @@ spring:
     active: local
 
   redis:
-    port: 6379
-    host: localhost
+    url: ${UPSTASH_REDIS_REST_URL}
+    token: ${UPSTASH_REDIS_REST_TOKEN}
+  #    port: 6379
+  #    host: localhost
+
 
   cloud:
     gcp:
