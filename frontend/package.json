@@ -1,0 +1,16 @@
+{
+  "name": "unhaha-frontend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "ckeditor5": "^45.2.1"
+  },
+  "devDependencies": {
+    "vite": "^7.0.0"
+  }
+}
