@@ -72,7 +72,7 @@ spring:
             client-name: Naver
             client-authentication-method: POST
             authorization-grant-type: authorization_code
-            redirect-uri: http://localhost:8080/login/oauth2/code/naver # Callback URL
+            redirect-uri: https://circular-bertina-edgebbowc-cbdfc4f2.koyeb.app/login/oauth2/code/naver # Callback URL
             scope:
               - name
               - email
