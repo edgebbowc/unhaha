@@ -193,7 +193,7 @@ const editorConfig = {
 	},
 
 	language: 'ko',
-	licenseKey: LICENSE_KEY,
+	licenseKey: 'GPL',
 	link: {
 		addTargetToExternalLinks: true,
 	},
