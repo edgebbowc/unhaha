@@ -19,11 +19,15 @@ spring:
         project-id: alert-outlet-456907-b9
         bucket: unhaha-imagestorage
 
+#  datasource:
+#    url: jdbc:mysql://localhost:3306/unhaha?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+#    username: root  # MySQL 사용자명
+#    password: ${mysql-password}  # MySQL 비밀번호
+#    driver-class-name: com.mysql.cj.jdbc.Driver
   datasource:
-    url: jdbc:mysql://localhost:3306/unhaha?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
-    username: root  # MySQL 사용자명
-    password: ${mysql-password}  # MySQL 비밀번호
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${AIVEN_MYSQL_HOST}:${AIVEN_MYSQL_PORT}/${AIVEN_MYSQL_DB}?useSSL=true
+    username: ${AIVEN_MYSQL_USER}
+    password: ${AIVEN_MYSQL_PASSWORD}
 
   mvc:
     hiddenmethod:
