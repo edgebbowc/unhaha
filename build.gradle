@@ -73,7 +73,6 @@ dependencies {
 	// TestContainers 사용
 	testImplementation 'org.testcontainers:testcontainers:1.19.3'
 	testImplementation 'org.testcontainers:junit-jupiter:1.19.3'
-	testImplementation 'org.testcontainers:redis:1.19.3'
 	testImplementation 'com.h2database:h2'
 }
 
