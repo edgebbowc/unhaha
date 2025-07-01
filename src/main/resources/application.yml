@@ -67,8 +67,8 @@ spring:
             user-name-attribute: response
         registration:
           naver:
-            client-id: ${client-id} # Client ID
-            client-secret: ${client-secret} # Client Secret
+            client-id: ${NAVER_CLIENT_ID} # Client ID
+            client-secret: ${NAVER_CLIENT_SECRET} # Client Secret
             client-name: Naver
             client-authentication-method: POST
             authorization-grant-type: authorization_code
