@@ -30,9 +30,9 @@ spring:
 #    password: ${mysql-password}  # MySQL 비밀번호
 #    driver-class-name: com.mysql.cj.jdbc.Driver
   datasource:
-    url: jdbc:mysql://${AIVEN_MYSQL_HOST}:${AIVEN_MYSQL_PORT}/${AIVEN_MYSQL_DB}?useSSL=true
-    username: ${AIVEN_MYSQL_USER}
-    password: ${AIVEN_MYSQL_PASSWORD}
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DB}?useSSL=true
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
 
   mvc:
     hiddenmethod:
