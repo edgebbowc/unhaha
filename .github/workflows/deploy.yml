@@ -1,0 +1,196 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
+
+name: Spring Boot CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  RESOURCE_PATH: ./src/main/resources/application.yml
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Run tests with test profile
+        run: ./gradlew test -Dspring.profiles.active=test
+
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Run tests with test profile
+        run: ./gradlew test -Dspring.profiles.active=test
+
+      - name: Replace environment variables in application.yml
+        env:
+          # Database
+          MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+          MYSQL_PORT: ${{ secrets.MYSQL_PORT }}
+          MYSQL_DB: ${{ secrets.MYSQL_DB }}
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          # Redis
+          UPSTASH_REDIS_HOST: ${{ secrets.UPSTASH_REDIS_HOST }}
+          UPSTASH_REDIS_PASSWORD: ${{ secrets.UPSTASH_REDIS_PASSWORD }}
+          # OAuth
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+          NAVER_CALLBACK_URL: ${{ secrets.NAVER_CALLBACK_URL }}
+          # GCP
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          GCP_STORAGE_BUCKET: ${{ secrets.GCP_STORAGE_BUCKET }}
+          GCP_SA_KEY_BASE64: ${{ secrets.GCP_SA_KEY_BASE64 }}
+        run: |
+          envsubst < ${{ env.RESOURCE_PATH }} > ./src/main/resources/application-temp.yml
+          mv ./src/main/resources/application-temp.yml ${{ env.RESOURCE_PATH }}
+
+      - name: Verify configuration
+        run: |
+          echo "✅ 환경변수 치환 완료"
+          ls -la ./src/main/resources/application*.yml
+
+      - name: Build with Gradle
+        run: ./gradlew clean build -x test
+
+      - name: Rename JAR file
+        run: |
+          JAR_FILE=$(find ./build/libs -name "*.jar" ! -name "*-plain.jar" | head -n 1)
+          cp "$JAR_FILE" ./app.jar
+          echo "✅ JAR 파일 생성 완료: $(ls -lh app.jar)"
+
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
+
+      - name: Copy JAR to GCP VM
+        run: |
+          echo "📦 JAR 파일을 서버로 전송 중..."
+          scp -o StrictHostKeyChecking=no ./app.jar ${{ secrets.GCP_VM_USER }}@${{ secrets.GCP_VM_IP }}:/home/${{ secrets.GCP_VM_USER }}/app.jar
+          echo "✅ 파일 전송 완료"
+
+      - name: Deploy on GCP VM with prod profile
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_VM_USER }}@${{ secrets.GCP_VM_IP }} << 'EOF'
+            echo "🚀 배포 시작..."
+            
+            # 기존 프로세스 종료
+            echo "⏹️ 기존 애플리케이션 종료 중..."
+            sudo pkill -f "java -jar.*app.jar" || true
+            
+            # 프로세스 완전 종료 대기
+            sleep 5
+            
+            # 환경변수 설정
+            export GCP_SA_KEY_BASE64="${{ secrets.GCP_SA_KEY_BASE64 }}"
+            
+            # 애플리케이션 실행 (prod 프로필로)
+            echo "▶️ 애플리케이션 시작 중 (prod 프로필)..."
+            cd /home/${{ secrets.GCP_VM_USER }}
+            nohup java -jar -Dspring.profiles.active=prod app.jar > app.log 2>&1 &
+            
+            # 프로세스 시작 확인
+            sleep 10
+            if pgrep -f "java -jar.*app.jar" > /dev/null; then
+              echo "✅ 애플리케이션이 성공적으로 시작되었습니다."
+              echo "📋 실행 중인 프로세스: $(pgrep -f 'java -jar.*app.jar')"
+            else
+              echo "❌ 애플리케이션 시작에 실패했습니다."
+              echo "📄 최근 로그 (마지막 50줄):"
+              tail -n 50 app.log
+              exit 1
+            fi
+          EOF
+
+      - name: Health check
+        run: |
+          echo "🏥 Health check 시작..."
+          sleep 30
+          
+          for i in {1..5}; do
+            echo "📊 Health check 시도 ($i/5)..."
+            if curl -f http://${{ secrets.GCP_VM_IP }}:8080/actuator/health 2>/dev/null; then
+              echo "✅ Health check 성공!"
+              exit 0
+            fi
+            echo "⚠️ Health check 실패, 재시도 중..."
+            sleep 10
+          done
+          
+          echo "❌ Health check 최종 실패"
+          echo "📄 서버 로그 확인:"
+          ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_VM_USER }}@${{ secrets.GCP_VM_IP }} "tail -n 30 app.log"
+          exit 1
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: [build-and-deploy]
+    if: always()
+    
+    steps:
+      - name: Notify deployment result
+        run: |
+          if [ "${{ needs.build-and-deploy.result }}" == "success" ]; then
+            echo "🎉 배포가 성공적으로 완료되었습니다!"
+            echo "🌐 애플리케이션 URL: http://${{ secrets.GCP_VM_IP }}:8080"
+            echo "📊 Health Check: http://${{ secrets.GCP_VM_IP }}:8080/actuator/health"
+          else
+            echo "💥 배포가 실패했습니다."
+            echo "🔍 로그를 확인하여 문제를 해결해주세요."
+          fi
