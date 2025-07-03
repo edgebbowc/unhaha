@@ -4,9 +4,6 @@ spring:
       max-file-size: 2MB #파일 하나의 최대 크기
       max-request-size: 30MB # 한 번에 최대 업로드 가능 용량
 
-  profiles:
-    active: local
-
   redis:
     host: ${UPSTASH_REDIS_HOST}
     password: ${UPSTASH_REDIS_PASSWORD}
@@ -25,8 +22,8 @@ spring:
         bucket: ${GCP_STORAGE_BUCKET}
 
   datasource:
-    url: jdbc:mysql://localhost:3306/unhaha?useSSL=true&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
-    username: root
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DB}?useSSL=true
+    username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
 
   mvc:
@@ -37,11 +34,11 @@ spring:
       matching-strategy: ant_path_matcher
   devtools:
     livereload:
-      enabled: true
+      enabled: false
     restart:
       enabled: false
   thymeleaf:
-    cache: false
+    cache: true
 
   jpa:
     hibernate:
@@ -53,7 +50,7 @@ spring:
         default_batch_fetch_size: 100
   sql:
     init:
-      mode: always  # 스크립트 기반 초기화 활성화
+      mode: never  # 스크립트 기반 초기화 비활성화
       schema-locations: classpath:sql/schema.sql
 
   security:
@@ -78,24 +75,16 @@ spring:
               - email
               - nickname
               -
-# GCP 서비스 계정 키 (Base64)
+              # GCP 서비스 계정 키 (Base64)
 gcp:
   sa-key-base64: ${GCP_SA_KEY_BASE64:}
 
 springdoc:
-  api-docs:
-    path: /v3/api-docs
   swagger-ui:
-    path: /swagger-ui.html
-    operationsSorter: method
-    tags-sorter: alpha
-    try-it-out-enabled: true
-  packages-to-scan: commu.unhaha.restapi  # 본인의 REST 컨트롤러 패키지
-  paths-to-match: /api/**  # API 경로 패턴
+    enabled: false
 
 logging:
   level:
-    root: info
-    org.hibernate.SQL: debug
+    org.hibernate.SQL: warn
     # 애플리케이션 패키지
-    commu.unhaha.service: debug
+    commu.unhaha.service: info

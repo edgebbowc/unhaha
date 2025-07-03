@@ -55,7 +55,6 @@ public class CommentServiceTest {
     @BeforeEach
     void setUp() {
         user = User.builder()
-                .name("user")
                 .nickname("nickname")
                 .email("email")
                 .role(Role.USER)
@@ -64,7 +63,6 @@ public class CommentServiceTest {
         ReflectionTestUtils.setField(user, "id", 1L);
 
         user2 = User.builder()
-                .name("user2")
                 .nickname("nickname2")
                 .email("email2")
                 .role(Role.USER)

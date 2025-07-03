@@ -16,7 +16,6 @@ public class OAuthAttributes {
 
     private Map<String, Object> attributes;
     private String nameAttributeKey;
-    private String name;
     private UploadFile profileImage;
     private String email;
     private String nickname;
@@ -30,7 +29,6 @@ public class OAuthAttributes {
     private static OAuthAttributes ofNaver(String userNameAttributeName, Map<String, Object> attributes) {
         Map<String, Object> response = (Map<String, Object>) attributes.get("response");
         return OAuthAttributes.builder()
-                .name((String) response.get("name"))
                 .email((String) response.get("email"))
                 .nickname((String) response.get("nickname"))
                 .attributes(response)
@@ -46,7 +44,6 @@ public class OAuthAttributes {
     public User toEntity() {
 
         return User.builder()
-                .name(name)
                 .nickname(nickname)
                 .email(email)
                 .role(Role.USER)
