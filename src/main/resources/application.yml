@@ -80,7 +80,7 @@ spring:
               -
 # GCP 서비스 계정 키 (Base64)
 gcp:
-  sa-key-base64: ${GCP_SA_KEY_BASE64:}
+  sa-key-base64: ${GCP_SA_KEY_BASE64}
 
 springdoc:
   api-docs:
