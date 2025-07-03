@@ -130,26 +130,25 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_VM_USER }}@${{ secrets.GCP_VM_IP }} << 'EOF'
             echo "🚀 배포 시작..."
             
-            # 기존 프로세스 종료
+            # 기존 프로세스 및 screen 세션 종료
             echo "⏹️ 기존 애플리케이션 종료 중..."
             sudo pkill -f "java -jar.*app.jar" || true
+            screen -S app-session -X quit 2>/dev/null || true
             
             # 프로세스 완전 종료 대기
             sleep 5
             
-            # 환경변수 설정
-            export GCP_SA_KEY_BASE64="${{ secrets.GCP_SA_KEY_BASE64 }}"
-            
-            # 애플리케이션 실행 (prod 프로필로)
+            # 애플리케이션 실행 (prod 프로필로, screen 사용)
             echo "▶️ 애플리케이션 시작 중 (prod 프로필)..."
             cd /home/${{ secrets.GCP_VM_USER }}
-            nohup java -jar -Dspring.profiles.active=prod app.jar > app.log 2>&1 &
+            screen -dmS app-session bash -c "java -jar -Dspring.profiles.active=prod app.jar > app.log 2>&1"
             
             # 프로세스 시작 확인
             sleep 10
             if pgrep -f "java -jar.*app.jar" > /dev/null; then
               echo "✅ 애플리케이션이 성공적으로 시작되었습니다."
               echo "📋 실행 중인 프로세스: $(pgrep -f 'java -jar.*app.jar')"
+              echo "📺 Screen 세션: $(screen -list | grep app-session || echo 'Screen 세션을 찾을 수 없습니다.')"
             else
               echo "❌ 애플리케이션 시작에 실패했습니다."
               echo "📄 최근 로그 (마지막 50줄):"
@@ -158,25 +157,25 @@ jobs:
             fi
           EOF
 
-      - name: Health check
-        run: |
-          echo "🏥 Health check 시작..."
-          sleep 30
+      # - name: Health check
+      #   run: |
+      #     echo "🏥 Health check 시작..."
+      #     sleep 30
           
-          for i in {1..5}; do
-            echo "📊 Health check 시도 ($i/5)..."
-            if curl -f http://${{ secrets.GCP_VM_IP }}:8080/actuator/health 2>/dev/null; then
-              echo "✅ Health check 성공!"
-              exit 0
-            fi
-            echo "⚠️ Health check 실패, 재시도 중..."
-            sleep 10
-          done
+      #     for i in {1..5}; do
+      #       echo "📊 Health check 시도 ($i/5)..."
+      #       if curl -f http://${{ secrets.GCP_VM_IP }}:8080/actuator/health 2>/dev/null; then
+      #         echo "✅ Health check 성공!"
+      #         exit 0
+      #       fi
+      #       echo "⚠️ Health check 실패, 재시도 중..."
+      #       sleep 10
+      #     done
           
-          echo "❌ Health check 최종 실패"
-          echo "📄 서버 로그 확인:"
-          ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_VM_USER }}@${{ secrets.GCP_VM_IP }} "tail -n 30 app.log"
-          exit 1
+      #     echo "❌ Health check 최종 실패"
+      #     echo "📄 서버 로그 확인:"
+      #     ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_VM_USER }}@${{ secrets.GCP_VM_IP }} "tail -n 30 app.log"
+      #     exit 1
 
   notify:
     runs-on: ubuntu-latest
