@@ -18,7 +18,7 @@ import java.util.Base64;
 @ConditionalOnProperty(name = "gcp.enabled", havingValue = "true", matchIfMissing = true)
 public class GCSConfig {
 
-    @Value("${GCP_SA_KEY_BASE64:}")
+    @Value("${gcp.sa-key-base64:}")
     private String gcpKeyBase64;
 
     @Value("${spring.cloud.gcp.storage.project-id}")
