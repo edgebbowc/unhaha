@@ -21,7 +21,6 @@ CREATE TABLE user
     created_date       TIMESTAMP,
     last_modified_date TIMESTAMP,
     email              VARCHAR(255) NOT NULL UNIQUE,
-    name               VARCHAR(255) NOT NULL,
     nickname           VARCHAR(255) NOT NULL UNIQUE,
     store_file_url     VARCHAR(255),
     upload_file_name   VARCHAR(255),

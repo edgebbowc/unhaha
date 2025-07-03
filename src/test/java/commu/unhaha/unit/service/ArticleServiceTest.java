@@ -56,7 +56,6 @@ class ArticleServiceTest {
     void setUp() {
 
         user = User.builder()
-                .name("user")
                 .nickname("nickname")
                 .email("email")
                 .role(Role.USER)
@@ -65,7 +64,6 @@ class ArticleServiceTest {
         ReflectionTestUtils.setField(user, "id", 1L);
 
         otherUser = User.builder()
-                .name("otherUser")
                 .nickname("otherUser")
                 .email("other@example.com")
                 .role(Role.USER)
@@ -139,7 +137,7 @@ class ArticleServiceTest {
     @Test
     public void editArticle() throws Exception {
         //given
-        User user = new User("name", "nickname", "email", Role.USER, new UploadFile("userimage", "userimage"));
+        User user = new User( "nickname", "email", Role.USER, new UploadFile("userimage", "userimage"));
         Article article = new Article("board", "title", "content", user, 0, 0);
         given(articleRepository.findById(1L)).willReturn(Optional.of(article));
 
