@@ -129,32 +129,47 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_VM_USER }}@${{ secrets.GCP_VM_IP }} << 'EOF'
             echo "🚀 배포 시작..."
-            
-            # 기존 프로세스 및 screen 세션 종료
+
+            # 1단계: Dead screen 세션 정리
+            echo "🧹 Dead screen 세션 정리..."
+            screen -wipe 2>/dev/null || true
+
+            # 2단계: 기존 애플리케이션 강제 종료
             echo "⏹️ 기존 애플리케이션 종료 중..."
             sudo pkill -9 -f "java -jar.*app.jar" || true
-            screen -S app-session -X quit 2>/dev/null || true
 
-            # 포트 사용 프로세스 확인 및 종료
+            # 3단계: 모든 app-session screen 종료
+            echo "📺 기존 Screen 세션 정리..."
+            screen -ls | grep "app-session" | cut -d. -f1 | awk '{print $1}' | xargs -I {} screen -S {} -X quit 2>/dev/null || true
+            sleep 2
+            sudo pkill -9 -f "screen.*app-session" || true
+
+            # 4단계: 포트 사용 프로세스 확인 및 종료
             PORT_PID=$(sudo lsof -t -i:8080 2>/dev/null || true)
             if [ ! -z "$PORT_PID" ]; then
-            echo "8080 포트 사용 프로세스 발견: $PORT_PID"
+            echo "🔍 8080 포트 사용 프로세스 발견: $PORT_PID"
             sudo kill -9 $PORT_PID || true
             fi
 
-            # 3단계: 포트 해제 확인
+            # 5단계: 포트 해제 확인
+            echo "⏳ 포트 해제 확인 중..."
             sleep 15
             if sudo lsof -i:8080 2>/dev/null; then
             echo "❌ 포트 8080이 여전히 사용 중입니다."
+            sudo lsof -i:8080
             exit 1
             fi
             
-            # 애플리케이션 실행 (prod 프로필로, screen 사용)
+            # 6단계: 애플리케이션 실행 (prod 프로필로, screen 사용)
             echo "▶️ 애플리케이션 시작 중 (prod 프로필)..."
             cd /home/${{ secrets.GCP_VM_USER }}
-            screen -dmS app-session bash -c "java -jar -Dspring.profiles.active=prod app.jar > app.log 2>&1"
             
-            # 프로세스 시작 확인
+            # 고유한 세션명 생성 (타임스탬프 포함)
+            SESSION_NAME="app-session-$(date +%Y%m%d-%H%M%S)"
+            screen -dmS "$SESSION_NAME" bash -c "java -jar -Dspring.profiles.active=prod app.jar > app.log 2>&1"
+            
+            # 7단계: 프로세스 시작 확인
+            echo "⏳ 애플리케이션 시작 대기 (30초)..."
             sleep 30
             if pgrep -f "java -jar.*app.jar" > /dev/null; then
               echo "✅ 애플리케이션이 성공적으로 시작되었습니다."
