@@ -132,11 +132,22 @@ jobs:
             
             # 기존 프로세스 및 screen 세션 종료
             echo "⏹️ 기존 애플리케이션 종료 중..."
-            sudo pkill -f "java -jar.*app.jar" || true
+            sudo pkill -9 -f "java -jar.*app.jar" || true
             screen -S app-session -X quit 2>/dev/null || true
-            
-            # 프로세스 완전 종료 대기
-            sleep 5
+
+            # 포트 사용 프로세스 확인 및 종료
+            PORT_PID=$(sudo lsof -t -i:8080 2>/dev/null || true)
+            if [ ! -z "$PORT_PID" ]; then
+            echo "8080 포트 사용 프로세스 발견: $PORT_PID"
+            sudo kill -9 $PORT_PID || true
+            fi
+
+            # 3단계: 포트 해제 확인
+            sleep 15
+            if sudo lsof -i:8080 2>/dev/null; then
+            echo "❌ 포트 8080이 여전히 사용 중입니다."
+            exit 1
+            fi
             
             # 애플리케이션 실행 (prod 프로필로, screen 사용)
             echo "▶️ 애플리케이션 시작 중 (prod 프로필)..."
@@ -144,7 +155,7 @@ jobs:
             screen -dmS app-session bash -c "java -jar -Dspring.profiles.active=prod app.jar > app.log 2>&1"
             
             # 프로세스 시작 확인
-            sleep 15
+            sleep 30
             if pgrep -f "java -jar.*app.jar" > /dev/null; then
               echo "✅ 애플리케이션이 성공적으로 시작되었습니다."
               echo "📋 실행 중인 프로세스: $(pgrep -f 'java -jar.*app.jar')"
@@ -156,26 +167,6 @@ jobs:
               exit 1
             fi
           EOF
-
-      # - name: Health check
-      #   run: |
-      #     echo "🏥 Health check 시작..."
-      #     sleep 30
-          
-      #     for i in {1..5}; do
-      #       echo "📊 Health check 시도 ($i/5)..."
-      #       if curl -f http://${{ secrets.GCP_VM_IP }}:8080/actuator/health 2>/dev/null; then
-      #         echo "✅ Health check 성공!"
-      #         exit 0
-      #       fi
-      #       echo "⚠️ Health check 실패, 재시도 중..."
-      #       sleep 10
-      #     done
-          
-      #     echo "❌ Health check 최종 실패"
-      #     echo "📄 서버 로그 확인:"
-      #     ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_VM_USER }}@${{ secrets.GCP_VM_IP }} "tail -n 30 app.log"
-      #     exit 1
 
   notify:
     runs-on: ubuntu-latest
