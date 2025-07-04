@@ -1,3 +1,14 @@
+server:
+  port: 8080
+  # 프록시 헤더 처리 활성화
+  forward-headers-strategy: native
+  # 톰캣 관련 설정
+  tomcat:
+    remote-ip-header: x-forwarded-for
+    protocol-header: x-forwarded-proto
+    protocol-header-https-value: https
+    port-header: X-Forwarded-Port
+
 spring:
   servlet:
     multipart:
@@ -76,6 +87,7 @@ spring:
               - nickname
               -
               # GCP 서비스 계정 키 (Base64)
+
 gcp:
   sa-key-base64: ${GCP_SA_KEY_BASE64}
 
