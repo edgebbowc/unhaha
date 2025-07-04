@@ -3,7 +3,7 @@
 > **백엔드 개발자 포트폴리오 프로젝트**  
 > Spring Boot 기반의 피트니스 커뮤니티 웹 애플리케이션
  
-🌐 서비스 URL: http://unhaha.kro.kr
+🌐 서비스 URL: <a href="http://unhaha.kro.kr" target="_blank" rel="noopener noreferrer">http://unhaha.kro.kr ↗️</a>
 
 🚀 배포 아키텍처
 ![Mermaid Chart - Create complex, visual diagrams with text  A smarter way of creating diagrams -2025-07-04-064948](https://github.com/user-attachments/assets/7319bb49-6130-469d-88e5-51f6ce7c9a7a)
