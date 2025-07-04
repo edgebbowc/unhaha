@@ -2,6 +2,12 @@
 
 > **백엔드 개발자 포트폴리오 프로젝트**  
 > Spring Boot 기반의 피트니스 커뮤니티 웹 애플리케이션
+ 
+🌐 서비스 URL: http://unhaha.kro.kr
+
+🚀 배포 아키텍처
+![Mermaid Chart - Create complex, visual diagrams with text  A smarter way of creating diagrams -2025-07-04-064948](https://github.com/user-attachments/assets/7319bb49-6130-469d-88e5-51f6ce7c9a7a)
+
 
 ## 📋 목차
 
@@ -137,8 +143,7 @@
 - **Database Tool**: MySQL Workbench
 
 ## 📁 아키텍처
-### 🏗️ 전체 시스템 아키텍처
-![Editor _ Mermaid Chart-2025-06-30-134127](https://github.com/user-attachments/assets/0e39ecac-6148-4b19-96e5-83798d8c1f4a)
+
 ### 🏗️ 3-Layer Architecture
 ![Editor _ Mermaid Chart-2025-06-30-110132](https://github.com/user-attachments/assets/806590c0-d402-4122-b1ea-3ff66d818d85)
 ### 🔄 주요 데이터 플로우
