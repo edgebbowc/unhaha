@@ -13,7 +13,7 @@ server:
       cookie:
         secure: true      # HTTPS에서만 쿠키 전송
         http-only: true
-        same-site: strict
+        same-site: lax
 spring:
   servlet:
     multipart:
@@ -90,9 +90,8 @@ spring:
               - name
               - email
               - nickname
-              -
-              # GCP 서비스 계정 키 (Base64)
 
+# GCP 서비스 계정 키 (Base64)
 gcp:
   sa-key-base64: ${GCP_SA_KEY_BASE64}
 
