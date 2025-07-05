@@ -99,6 +99,7 @@ public class ArticleController {
             case "bodybuilding": return "보디빌딩";
             case "powerlifting": return "파워리프팅";
             case "crossfit": return "크로스핏";
+            case "humor": return "유머";
             case "new":
             default: return ""; // 빈 값 = "게시판을 선택해 주세요"
         }
@@ -239,7 +240,7 @@ public class ArticleController {
     /**
      * 게시판 목록
      */
-    @GetMapping({"/new", "/best", "/bodybuilding", "/powerlifting", "/crossfit"})
+    @GetMapping({"/new", "/best", "/bodybuilding", "/powerlifting", "/crossfit", "/humor"})
     public String listArticles(Model model,
                                HttpServletRequest request,
                                @RequestParam(value = "page", defaultValue = "1") int page,
@@ -276,7 +277,8 @@ public class ArticleController {
     /**
      * 게시판별 상세 게시글
      */
-    @GetMapping({"/new/{articleId}", "/best/{articleId}", "/bodybuilding/{articleId}", "/powerlifting/{articleId}", "/crossfit/{articleId}"})
+    @GetMapping({"/new/{articleId}", "/best/{articleId}", "/bodybuilding/{articleId}",
+            "/powerlifting/{articleId}", "/crossfit/{articleId}", "/humor/{articleId}"})
     public String articleDetail(@PathVariable Long articleId,
                                 Model model,
                                 HttpServletRequest request,
@@ -311,6 +313,7 @@ public class ArticleController {
 
     private boolean isValidBoardMatch(String urlBoardType, ArticleDto articleDto) {
         if (urlBoardType.equals("new")) return true;
+        else if(urlBoardType.equals("best")) return true;
         String articleBoardPath = articleDto.getBoardPath();
         String expectedPath = "/" + urlBoardType;
 
@@ -398,6 +401,10 @@ public class ArticleController {
                 prevArticle = articleService.findPrevBoardArticle(articleId, "크로스핏");
                 nextArticle = articleService.findNextBoardArticle(articleId, "크로스핏");
                 break;
+            case "humor":
+                prevArticle = articleService.findPrevBoardArticle(articleId, "유머");
+                nextArticle = articleService.findNextBoardArticle(articleId, "유머");
+                break;
             case "new":
             default:
                 prevArticle = articleService.findPrevArticle(articleId);
@@ -416,6 +423,7 @@ public class ArticleController {
         if (requestPath.contains("/bodybuilding")) return "bodybuilding";
         if (requestPath.contains("/powerlifting")) return "powerlifting";
         if (requestPath.contains("/crossfit")) return "crossfit";
+        if (requestPath.contains("/humor")) return "humor";
         return "new";
     }
 
@@ -515,6 +523,6 @@ public class ArticleController {
     }
 
     private boolean isValidBoardType(String boardType) {
-        return Arrays.asList("new", "best", "bodybuilding", "powerlifting", "crossfit").contains(boardType);
+        return Arrays.asList("new", "best", "bodybuilding", "powerlifting", "crossfit", "humor").contains(boardType);
     }
 }
