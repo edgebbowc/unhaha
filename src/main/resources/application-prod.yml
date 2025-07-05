@@ -8,7 +8,12 @@ server:
     protocol-header: x-forwarded-proto
     protocol-header-https-value: https
     port-header: X-Forwarded-Port
-
+  servlet:
+    session:
+      cookie:
+        secure: true      # HTTPS에서만 쿠키 전송
+        http-only: true
+        same-site: strict
 spring:
   servlet:
     multipart:
