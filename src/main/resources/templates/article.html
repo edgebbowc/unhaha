@@ -25,7 +25,7 @@
         <input type="hidden" name="title" th:value="${article.title}">
         <input type="hidden" name="ogContent" th:value="${article.content}">
         <div class="sub">
-            <div class="back"><a th:href="@{|${article.boardPath}|}" th:text="'💪🏼' + ${article.board} + ' >'">게시판 이름</a></div>
+            <div class="back"><a th:href="@{|${article.boardPath}|}" th:text="${article.board} + ' >'">게시판 이름</a></div>
         </div>
         <div class="item">
             <div class="info">
@@ -34,7 +34,7 @@
                 </div>
                 <div class="etc">
                     <div class="left">
-                        <div class="userImage" style="background-image: url('/images/userImage.svg');"></div>
+                        <div class="userImage" th:style="*{article.userStoreFileUrl != 'userImage'} ? 'background-image:url(' + @{{imageName}(imageName = *{article.userStoreFileUrl})} + ');' : ''"></div>
                         <div class="nickName">
                             <th:block th:text="${article.userNickname}">닉네임</th:block>
                         </div>

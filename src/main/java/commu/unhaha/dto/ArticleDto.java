@@ -25,6 +25,8 @@ public class ArticleDto {
 
     private String userNickname;
 
+    private String userStoreFileUrl;
+
     private String userEmail;
 
     private Integer viewCount;
@@ -46,6 +48,7 @@ public class ArticleDto {
         this.userId = article.getUser().getId();
         this.userNickname = article.getUser().getNickname();
         this.userEmail = article.getUser().getEmail();
+        this.userStoreFileUrl = article.getUser().getProfileImage().getStoreFileUrl();
         this.viewCount = article.getViewCount();
         this.likeCount = article.getLikeCount();
         this.createdDate = article.getCreatedDate();

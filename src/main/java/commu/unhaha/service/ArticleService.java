@@ -149,6 +149,8 @@ public class ArticleService {
             return findBoardArticles("파워리프팅", page, searchType, keyword);
         } else if ("crossfit".equals(boardType)) {
             return findBoardArticles("크로스핏", page, searchType, keyword);
+        } else if ("humor".equals(boardType)) {
+            return findBoardArticles("유머", page, searchType, keyword);
         } else {
             return findAllArticles(page, searchType, keyword);
         }

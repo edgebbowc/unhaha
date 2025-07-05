@@ -33,7 +33,7 @@ public class CommentController {
     private final CommentImageRepository commentImageRepository;
 
     private boolean isValidBoardType(String boardType) {
-        return Arrays.asList("new", "best", "bodybuilding", "powerlifting", "crossfit").contains(boardType);
+        return Arrays.asList("new", "best", "bodybuilding", "powerlifting", "crossfit", "humor").contains(boardType);
     }
     /**
      * 댓글 작성

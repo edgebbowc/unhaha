@@ -5,7 +5,8 @@ public enum BoardType {
     BEST("best", "인기글", "/best"),
     BODYBUILDING("bodybuilding", "보디빌딩", "/bodybuilding"),
     POWERLIFTING("powerlifting", "파워리프팅", "/powerlifting"),
-    CROSSFIT("crossfit", "크로스핏", "/crossfit");
+    CROSSFIT("crossfit", "크로스핏", "/crossfit"),
+    HUMOR("humor", "유머", "/humor");
 
     private final String type;
     private final String title;
