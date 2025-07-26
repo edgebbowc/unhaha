@@ -17,7 +17,7 @@ server:
 spring:
   servlet:
     multipart:
-      max-file-size: 2MB #파일 하나의 최대 크기
+      max-file-size: 5MB #파일 하나의 최대 크기
       max-request-size: 30MB # 한 번에 최대 업로드 가능 용량
 
   redis:
