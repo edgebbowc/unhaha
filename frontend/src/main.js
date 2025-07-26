@@ -202,7 +202,7 @@ const editorConfig = {
     },
 };
 
-const MAX_SINGLE_SIZE = 2 * 1024 * 1024; // 2MB
+const MAX_SINGLE_SIZE = 5 * 1024 * 1024; // 5MB
 
 class CustomUploadAdapter  {
     constructor(loader) {
@@ -213,7 +213,7 @@ class CustomUploadAdapter  {
         return this.loader.file.then(file => {
             // 단일 파일 제한
             if (file.size > MAX_SINGLE_SIZE) {
-                return Promise.reject('첨부파일은 최대 2MB까지 등록 가능합니다');
+                return Promise.reject('첨부파일은 최대 5MB까지 등록 가능합니다');
             }
 
             const data = new FormData();
