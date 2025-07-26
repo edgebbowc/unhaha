@@ -38218,7 +38218,7 @@ const f5 = {
     licenseKey: "GPL",
     link: {addTargetToExternalLinks: !0},
     mention: {feeds: [{marker: "@", feed: []}]}
-}, m5 = 2 * 1024 * 1024;
+}, m5 = 5 * 1024 * 1024;
 
 class g5 {
     constructor(e) {
@@ -38227,7 +38227,7 @@ class g5 {
 
     upload() {
         return this.loader.file.then(e => {
-            if (e.size > m5) return Promise.reject("첨부파일은 최대 2MB까지 등록 가능합니다");
+            if (e.size > m5) return Promise.reject("첨부파일은 최대 5MB까지 등록 가능합니다");
             const t = new FormData;
             return t.append("upload", e), fetch("/articles/images", {
                 method: "POST",
